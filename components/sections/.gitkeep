@@ -1,0 +1,187 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import {
+  DigitalLabItem,
+  getPublishedDigitalLabItems,
+} from "@/services/digitalLab";
+
+export default function DigitalLab() {
+  const [items, setItems] = useState<
+    DigitalLabItem[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDigitalLab() {
+      try {
+        const data =
+          await getPublishedDigitalLabItems();
+
+        setItems(data);
+      } catch (error) {
+        console.error(
+          "Failed to load Digital Lab:",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDigitalLab();
+  }, []);
+
+  /*
+   * Important:
+   * No published content means the section does
+   * not exist on the public portfolio.
+   */
+  if (!loading && items.length === 0) {
+    return null;
+  }
+
+  if (loading) {
+    return null;
+  }
+
+  return (
+    <section
+      id="digital-lab"
+      className="border-t border-neutral-900 bg-black px-6 py-24 text-white md:px-10 md:py-32 lg:px-16"
+    >
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-16 grid gap-8 md:grid-cols-[0.7fr_1.3fr] md:items-end lg:mb-24">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-neutral-600">
+              09 / Digital Lab
+            </p>
+          </div>
+
+          <div>
+            <h2 className="max-w-5xl text-4xl font-medium leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
+              Experiments with
+              <br />
+              <span className="text-neutral-500">
+                code, AI and interaction.
+              </span>
+            </h2>
+          </div>
+        </div>
+
+        {/* Experiments */}
+        <div className="border-t border-neutral-900">
+          {items.map((item, index) => (
+            <DigitalCard
+              key={item.id}
+              item={item}
+              index={index}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DigitalCard({
+  item,
+  index,
+}: {
+  item: DigitalLabItem;
+  index: number;
+}) {
+  const content = (
+    <article className="group grid gap-8 border-b border-neutral-900 py-10 md:grid-cols-[0.8fr_1.2fr] md:items-center md:py-14 lg:grid-cols-[120px_0.9fr_1.1fr] lg:gap-12">
+      {/* Number */}
+      <div className="hidden lg:block">
+        <span className="text-xs text-neutral-700">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+      </div>
+
+      {/* Image */}
+      <div>
+        {item.imageUrl ? (
+          <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950">
+            <img
+              src={item.imageUrl}
+              alt={item.title}
+              loading={index < 2 ? "eager" : "lazy"}
+              className="aspect-[16/10] w-full object-cover grayscale transition-all duration-700 ease-out group-hover:scale-[1.025] group-hover:grayscale-0"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-[16/10] items-center justify-center rounded-xl border border-neutral-800 bg-[#090909]">
+            <span className="text-xs uppercase tracking-[0.25em] text-neutral-700">
+              Digital Experiment
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Information */}
+      <div>
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-600">
+            {item.category}
+          </span>
+
+          <span className="text-[10px] text-neutral-700 lg:hidden">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        </div>
+
+        <h3 className="mt-4 text-2xl font-medium tracking-tight md:text-3xl">
+          {item.title}
+        </h3>
+
+        {item.description && (
+          <p className="mt-4 max-w-xl text-sm leading-6 text-neutral-500">
+            {item.description}
+          </p>
+        )}
+
+        {item.technologies.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {item.technologies.map(
+              (technology) => (
+                <span
+                  key={technology}
+                  className="rounded-full border border-neutral-800 px-3 py-1.5 text-[10px] text-neutral-600 transition-colors group-hover:text-neutral-400"
+                >
+                  {technology}
+                </span>
+              )
+            )}
+          </div>
+        )}
+
+        {item.projectUrl && (
+          <div className="mt-7">
+            <span className="text-xs text-neutral-400 transition-colors group-hover:text-white">
+              Explore experiment ↗
+            </span>
+          </div>
+        )}
+      </div>
+    </article>
+  );
+
+  if (item.projectUrl) {
+    return (
+      <a
+        href={item.projectUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="block"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return content;
+}

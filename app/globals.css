@@ -1,26 +1,508 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #050505;
+  --foreground: #f5f5f5;
+
+  --portfolio-background: #050505;
+  --portfolio-surface: #111111;
+  --portfolio-text: #f5f5f5;
+  --portfolio-muted: #8a8a8a;
+  --portfolio-border: #252525;
+  --portfolio-accent: #b6ff3b;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--portfolio-background);
+  --color-foreground: var(--portfolio-text);
+
+  --color-surface: var(--portfolio-surface);
+  --color-border: var(--portfolio-border);
+  --color-muted: var(--portfolio-muted);
+  --color-accent: var(--portfolio-accent);
+
+  --color-lime-300: var(--portfolio-accent);
+  --color-lime-400: var(--portfolio-accent);
+  --color-lime-500: var(--portfolio-accent);
+
+  --color-green-300: var(--portfolio-accent);
+  --color-green-400: var(--portfolio-accent);
+  --color-green-500: var(--portfolio-accent);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================================
+   GLOBAL FOUNDATION
+   ========================================================= */
+
+html {
+  background: var(--portfolio-background);
+  color: var(--portfolio-text);
+  scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--portfolio-background);
+  color: var(--portfolio-text);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Prevent decorative/transformed elements from creating
+   unexpected viewport overflow. */
+[data-portfolio-public] {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+/* =========================================================
+   SMOOTH ANIMATIONS AND TRANSITIONS
+   ========================================================= */
+
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) blur(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) blur(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px) blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) blur(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px) blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) blur(0);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes gradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* =========================================================
+   PUBLIC PORTFOLIO BASE
+   ========================================================= */
+
+[data-portfolio-public] {
+  background-color: var(--portfolio-background);
+  color: var(--portfolio-text);
+}
+
+/* =========================================================
+   BACKGROUND COLORS
+   ========================================================= */
+
+[data-portfolio-public] .bg-black {
+  background-color: var(--portfolio-background) !important;
+}
+
+[data-portfolio-public] .bg-neutral-950 {
+  background-color: var(--portfolio-background) !important;
+}
+
+[data-portfolio-public] .bg-neutral-900 {
+  background-color: var(--portfolio-surface) !important;
+}
+
+/* =========================================================
+   PORTFOLIO THEME — ARBITRARY PUBLIC BACKGROUNDS
+   ========================================================= */
+
+[data-portfolio-public] .bg-\[\#050505\] {
+  background-color: var(--portfolio-background) !important;
+}
+
+[data-portfolio-public] .bg-\[\#080808\],
+[data-portfolio-public] .bg-\[\#0a0a0a\],
+[data-portfolio-public] .bg-\[\#0b0b0b\] {
+  background-color: var(--portfolio-surface) !important;
+}
+
+/* =========================================================
+   PORTFOLIO THEME — ARBITRARY PUBLIC TEXT
+   ========================================================= */
+
+[data-portfolio-public] .text-\[\#f5f5f5\],
+[data-portfolio-public] .text-\[\#F5F5F5\],
+[data-portfolio-public] .text-\[\#ffffff\],
+[data-portfolio-public] .text-\[\#FFFFFF\] {
+  color: var(--portfolio-text) !important;
+}
+
+[data-portfolio-public] .text-\[\#8a8a8a\],
+[data-portfolio-public] .text-\[\#8A8A8A\],
+[data-portfolio-public] .text-\[\#737373\],
+[data-portfolio-public] .text-\[\#404040\] {
+  color: var(--portfolio-muted) !important;
+}
+
+/* =========================================================
+   PORTFOLIO THEME — ARBITRARY PUBLIC BORDERS
+   ========================================================= */
+
+[data-portfolio-public] .border-\[\#252525\],
+[data-portfolio-public] .border-\[\#404040\] {
+  border-color: var(--portfolio-border) !important;
+}
+
+/* =========================================================
+   TEXT COLORS
+   ========================================================= */
+
+[data-portfolio-public] .text-white {
+  color: var(--portfolio-text) !important;
+}
+
+[data-portfolio-public] .text-neutral-100,
+[data-portfolio-public] .text-neutral-200,
+[data-portfolio-public] .text-neutral-300 {
+  color: var(--portfolio-text) !important;
+}
+
+[data-portfolio-public] .text-neutral-400,
+[data-portfolio-public] .text-neutral-500,
+[data-portfolio-public] .text-neutral-600,
+[data-portfolio-public] .text-neutral-700 {
+  color: var(--portfolio-muted) !important;
+}
+
+/* =========================================================
+   BORDER COLORS
+   ========================================================= */
+
+[data-portfolio-public] .border-neutral-700,
+[data-portfolio-public] .border-neutral-800,
+[data-portfolio-public] .border-neutral-900 {
+  border-color: var(--portfolio-border) !important;
+}
+
+/* =========================================================
+   STANDARD LIME / GREEN CLASSES
+   ========================================================= */
+
+[data-portfolio-public] .text-lime-300,
+[data-portfolio-public] .text-lime-400,
+[data-portfolio-public] .text-lime-500,
+[data-portfolio-public] .text-green-300,
+[data-portfolio-public] .text-green-400,
+[data-portfolio-public] .text-green-500 {
+  color: var(--portfolio-accent) !important;
+}
+
+[data-portfolio-public] .bg-lime-300,
+[data-portfolio-public] .bg-lime-400,
+[data-portfolio-public] .bg-lime-500,
+[data-portfolio-public] .bg-green-300,
+[data-portfolio-public] .bg-green-400,
+[data-portfolio-public] .bg-green-500 {
+  background-color: var(--portfolio-accent) !important;
+}
+
+[data-portfolio-public] .border-lime-300,
+[data-portfolio-public] .border-lime-400,
+[data-portfolio-public] .border-lime-500,
+[data-portfolio-public] .border-green-300,
+[data-portfolio-public] .border-green-400,
+[data-portfolio-public] .border-green-500 {
+  border-color: var(--portfolio-accent) !important;
+}
+
+/* =========================================================
+   HARD-CODED ACCENT COLORS
+   ========================================================= */
+
+[data-portfolio-public] [class*="text-[#B6FF3B]"],
+[data-portfolio-public] [class*="text-[#b6ff3b]"] {
+  color: var(--portfolio-accent) !important;
+}
+
+[data-portfolio-public] [class*="bg-[#B6FF3B]"],
+[data-portfolio-public] [class*="bg-[#b6ff3b]"] {
+  background-color: var(--portfolio-accent) !important;
+}
+
+[data-portfolio-public] [class*="border-[#B6FF3B]"],
+[data-portfolio-public] [class*="border-[#b6ff3b]"] {
+  border-color: var(--portfolio-accent) !important;
+}
+
+/* =========================================================
+   OPACITY BACKGROUNDS
+   ========================================================= */
+
+[data-portfolio-public] [class*="bg-[#B6FF3B]/5"],
+[data-portfolio-public] [class*="bg-[#b6ff3b]/5"] {
+  background-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 5%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="bg-[#B6FF3B]/10"],
+[data-portfolio-public] [class*="bg-[#b6ff3b]/10"] {
+  background-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 10%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="bg-[#B6FF3B]/[0.025]"] {
+  background-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 2.5%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="bg-[#B6FF3B]/[0.03]"] {
+  background-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 3%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="bg-[#B6FF3B]/[0.035]"] {
+  background-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 3.5%,
+    transparent
+  ) !important;
+}
+
+/* =========================================================
+   OPACITY BORDERS
+   ========================================================= */
+
+[data-portfolio-public] [class*="border-[#B6FF3B]/20"] {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 20%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="border-[#B6FF3B]/25"] {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 25%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="border-[#B6FF3B]/30"] {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 30%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="border-[#B6FF3B]/40"] {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 40%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="border-[#B6FF3B]/50"] {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 50%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="border-[#B6FF3B]/60"] {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 60%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="border-[#B6FF3B]/[0.035]"] {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 3.5%,
+    transparent
+  ) !important;
+}
+
+/* =========================================================
+   HOVER TEXT
+   ========================================================= */
+
+[data-portfolio-public]
+  [class*="group-hover:text-[#B6FF3B]"]:is(:where(.group):hover *) {
+  color: var(--portfolio-accent) !important;
+}
+
+[data-portfolio-public] [class*="hover:text-[#B6FF3B]"]:hover {
+  color: var(--portfolio-accent) !important;
+}
+
+/* =========================================================
+   HOVER BORDERS
+   ========================================================= */
+
+[data-portfolio-public]
+  [class*="group-hover:border-[#B6FF3B]"]:is(:where(.group):hover *) {
+  border-color: var(--portfolio-accent) !important;
+}
+
+[data-portfolio-public] [class*="hover:border-[#B6FF3B]"]:hover {
+  border-color: var(--portfolio-accent) !important;
+}
+
+[data-portfolio-public] [class*="hover:border-[#B6FF3B]/50"]:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 50%,
+    transparent
+  ) !important;
+}
+
+[data-portfolio-public] [class*="hover:border-[#B6FF3B]/60"]:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-accent) 60%,
+    transparent
+  ) !important;
+}
+
+/* =========================================================
+   HOVER BACKGROUNDS
+   ========================================================= */
+
+[data-portfolio-public] [class*="hover:bg-[#B6FF3B]"]:hover {
+  background-color: var(--portfolio-accent) !important;
+}
+
+/* =========================================================
+   ACCENT SHADOWS
+   ========================================================= */
+
+[data-portfolio-public] [class*="rgba(182,255,59"] {
+  box-shadow:
+    0 0 25px
+    color-mix(
+      in srgb,
+      var(--portfolio-accent) 60%,
+      transparent
+    ) !important;
+}
+
+/* =========================================================
+   ANIMATION CONTROL
+   ========================================================= */
+
+html[data-animations="disabled"] [data-portfolio-public] *,
+html[data-animations="disabled"] [data-portfolio-public] *::before,
+html[data-animations="disabled"] [data-portfolio-public] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* =========================================================
+   SMOOTH SCROLL CONTROL
+   ========================================================= */
+
+html[data-smooth-scroll="enabled"] {
+  scroll-behavior: smooth;
+}
+
+html[data-smooth-scroll="disabled"] {
+  scroll-behavior: auto;
+}
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-portfolio-public] *,
+  [data-portfolio-public] *::before,
+  [data-portfolio-public] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

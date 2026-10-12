@@ -139,6 +139,7 @@ export default function LandingIntro({
    */
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
     if (reducedMotion) {
       setProgress(100);
@@ -166,49 +167,25 @@ export default function LandingIntro({
       return () => timers.forEach(clearTimeout);
     }
 
-    timers.push(
-      setTimeout(() => {
-        setStage("logo");
-      }, 350),
-    );
+    // Preserve the full cinematic intro on desktop. On mobile, use a shorter
+    // sequence so the user isn't left staring at the background for too long.
+    const timings = isMobile
+      ? { logo: 180, sweep: 500, loading: 750, complete: 2350, contract: 2700, travel: 2950, finish: 4100 }
+      : { logo: 350, sweep: 1050, loading: 1650, complete: 4750, contract: 5150, travel: 5550, finish: 6950 };
 
-    timers.push(
-      setTimeout(() => {
-        setStage("sweep");
-      }, 1050),
-    );
-
-    timers.push(
-      setTimeout(() => {
-        setStage("loading");
-      }, 1650),
-    );
-
-    timers.push(
-      setTimeout(() => {
-        setProgress(100);
-        setStage("complete");
-      }, 4750),
-    );
-
-    timers.push(
-      setTimeout(() => {
-        setStage("contract");
-      }, 5150),
-    );
-
-    timers.push(
-      setTimeout(() => {
-        navigationRef.current();
-        setStage("travel");
-      }, 5550),
-    );
-
-    timers.push(
-      setTimeout(() => {
-        completeRef.current();
-      }, 6950),
-    );
+    timers.push(setTimeout(() => setStage("logo"), timings.logo));
+    timers.push(setTimeout(() => setStage("sweep"), timings.sweep));
+    timers.push(setTimeout(() => setStage("loading"), timings.loading));
+    timers.push(setTimeout(() => {
+      setProgress(100);
+      setStage("complete");
+    }, timings.complete));
+    timers.push(setTimeout(() => setStage("contract"), timings.contract));
+    timers.push(setTimeout(() => {
+      navigationRef.current();
+      setStage("travel");
+    }, timings.travel));
+    timers.push(setTimeout(() => completeRef.current(), timings.finish));
 
     return () => timers.forEach(clearTimeout);
   }, [reducedMotion]);
@@ -224,11 +201,13 @@ export default function LandingIntro({
     setProgress(0);
 
     const start = performance.now();
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    const loadingDuration = isMobile ? 1400 : LOADING_DURATION;
     let frame = 0;
 
     const tick = (now: number) => {
       const raw = Math.min(
-        (now - start) / LOADING_DURATION,
+        (now - start) / loadingDuration,
         1,
       );
 
@@ -516,7 +495,7 @@ export default function LandingIntro({
         >
           <div
             key={message}
-            className="w-full text-center text-[8px] uppercase tracking-[0.40em] text-[var(--portfolio-text)] md:text-[9px]"
+            className="w-full text-center text-[8px] uppercase tracking-[0.16em] sm:tracking-[0.28em] md:text-[9px] md:tracking-[0.40em] text-[var(--portfolio-text)]"
             style={{
               animation:
                 "portfolioMessageIn 500ms cubic-bezier(0.16,1,0.3,1) both",
@@ -583,7 +562,7 @@ export default function LandingIntro({
          ========================================================= */}
 
       <div
-        className="pointer-events-none absolute left-1/2 top-[23%] -translate-x-1/2 whitespace-nowrap"
+        className="pointer-events-none absolute left-1/2 top-[23%] -translate-x-1/2 max-w-[90vw] whitespace-nowrap"
         style={{
           opacity:
             showComplete

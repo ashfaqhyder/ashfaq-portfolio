@@ -1,682 +1,1876 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  SiReact,
-  SiNextdotjs,
-  SiJavascript,
-  SiTypescript,
-  SiPython,
-  SiCplusplus,
-  SiC,
-  SiHtml5,
-  SiCss,
-  SiTailwindcss,
-  SiNodedotjs,
-  SiExpress,
-  SiFirebase,
-  SiMongodb,
-  SiMysql,
-  SiPostgresql,
-  SiTensorflow,
-  SiPytorch,
-  SiGooglecloud,
-  SiDocker,
-  SiGit,
-  SiGithub,
-  SiFigma,
-  SiStreamlit,
-  SiFastapi,
-  SiFlask,
-  SiPandas,
-  SiNumpy,
-  SiScikitlearn,
-} from "react-icons/si";
-import {
   ArrowUpRight,
-  BrainCircuit,
-  Cloud,
-  Code2,
-  Database,
-  Globe,
-  Layers3,
-  Server,
   Terminal,
 } from "lucide-react";
-
+import {
+  SiC,
+  SiCplusplus,
+  SiCss,
+  SiDocker,
+  SiExpress,
+  SiFastapi,
+  SiFigma,
+  SiFirebase,
+  SiFlask,
+  SiGit,
+  SiGithub,
+  SiGooglecloud,
+  SiHtml5,
+  SiJavascript,
+  SiMongodb,
+  SiMysql,
+  SiNextdotjs,
+  SiNodedotjs,
+  SiNumpy,
+  SiPandas,
+  SiPostgresql,
+  SiPython,
+  SiPytorch,
+  SiReact,
+  SiScikitlearn,
+  SiStreamlit,
+  SiTailwindcss,
+  SiTensorflow,
+  SiTypescript,
+} from "react-icons/si";
 import {
   getPublishedProjects,
   Project,
 } from "@/services/projects";
-import ScrollReveal from "@/components/motion/ScrollReveal";
-import HoverTilt from "@/components/motion/HoverTilt";
 
-type IconComponent = React.ComponentType<{
-  size?: number;
-  strokeWidth?: number;
-  className?: string;
-}>;
+const clamp = (
+  value: number,
+  min = 0,
+  max = 1
+) =>
+  Math.min(
+    Math.max(value, min),
+    max
+  );
 
-/* -------------------------------------------------------------------------- */
-/* Technology icon mapper                                                     */
-/* -------------------------------------------------------------------------- */
+const lerp = (
+  start: number,
+  end: number,
+  amount: number
+) =>
+  start +
+  (end - start) *
+    clamp(amount);
+
+const easeOutCubic = (
+  value: number
+) => {
+  const t = clamp(value);
+  return (
+    1 -
+    Math.pow(1 - t, 3)
+  );
+};
+
+const smoothstep = (
+  value: number
+) => {
+  const t = clamp(value);
+  return (
+    t *
+    t *
+    (3 - 2 * t)
+  );
+};
+
+type IconComponent =
+  React.ComponentType<{
+    size?: number;
+    strokeWidth?: number;
+    className?: string;
+  }>;
 
 function getTechnologyIcon(
   technology: string
 ): IconComponent {
-  const normalized = technology
+  const value = technology
     .toLowerCase()
     .trim()
-    .replace(/[._-]/g, " ");
+    .replace(
+      /[._-]/g,
+      " "
+    );
 
-  /* Specific technologies first */
-
-  if (
-    normalized.includes("github") ||
-    normalized.includes("git hub")
-  ) {
+  if (value.includes("github"))
     return SiGithub;
-  }
 
   if (
-    normalized === "git" ||
-    normalized.includes("git scm")
-  ) {
+    value === "git" ||
+    value.includes("git scm")
+  )
     return SiGit;
-  }
 
   if (
-    normalized === "next js" ||
-    normalized === "nextjs" ||
-    normalized.includes("next js")
-  ) {
+    value.includes("next js") ||
+    value.includes("nextjs")
+  )
     return SiNextdotjs;
-  }
 
-  if (normalized.includes("react")) {
+  if (value.includes("react"))
     return SiReact;
-  }
 
   if (
-    normalized === "typescript" ||
-    normalized === "ts"
-  ) {
+    value === "typescript" ||
+    value === "ts"
+  )
     return SiTypescript;
-  }
 
   if (
-    normalized === "javascript" ||
-    normalized === "js"
-  ) {
+    value === "javascript" ||
+    value === "js"
+  )
     return SiJavascript;
-  }
 
-  if (
-    normalized === "python" ||
-    normalized === "py"
-  ) {
+  if (value === "python")
     return SiPython;
-  }
-
-  if (normalized === "java") {
-    return Terminal;
-  }
 
   if (
-    normalized.includes("c++") ||
-    normalized.includes("cplusplus")
-  ) {
+    value === "c++" ||
+    value.includes("cplusplus")
+  )
     return SiCplusplus;
-  }
 
   if (
-    normalized === "c" ||
-    normalized === "c language"
-  ) {
+    value === "c" ||
+    value === "c language"
+  )
     return SiC;
-  }
 
-  if (normalized.includes("html")) {
+  if (value.includes("html"))
     return SiHtml5;
-  }
 
-  if (normalized.includes("css")) {
+  if (value.includes("css"))
     return SiCss;
-  }
 
-  if (normalized.includes("tailwind")) {
+  if (value.includes("tailwind"))
     return SiTailwindcss;
-  }
 
-  if (
-    normalized.includes("node") ||
-    normalized.includes("node js")
-  ) {
+  if (value.includes("node"))
     return SiNodedotjs;
-  }
 
-  if (normalized.includes("express")) {
+  if (value.includes("express"))
     return SiExpress;
-  }
 
-  if (normalized.includes("firebase")) {
+  if (value.includes("firebase"))
     return SiFirebase;
-  }
 
-  if (
-    normalized.includes("mongodb") ||
-    normalized.includes("mongo")
-  ) {
+  if (value.includes("mongodb"))
     return SiMongodb;
-  }
 
-  if (normalized.includes("mysql")) {
+  if (value.includes("mysql"))
     return SiMysql;
-  }
 
-  if (
-    normalized.includes("postgres") ||
-    normalized.includes("postgresql")
-  ) {
+  if (value.includes("postgres"))
     return SiPostgresql;
-  }
 
-  if (
-    normalized.includes("tensorflow") ||
-    normalized.includes("keras")
-  ) {
+  if (value.includes("tensorflow"))
     return SiTensorflow;
-  }
 
-  if (
-    normalized.includes("pytorch") ||
-    normalized.includes("torch")
-  ) {
+  if (value.includes("pytorch"))
     return SiPytorch;
-  }
 
-  if (
-    normalized.includes("openai") ||
-    normalized.includes("chatgpt") ||
-    normalized.includes("artificial intelligence") ||
-    normalized === "ai" ||
-    normalized === "ml" ||
-    normalized.includes("machine learning") ||
-    normalized.includes("llm")
-  ) {
-    return BrainCircuit;
-  }
-
-  if (
-    normalized.includes("google cloud") ||
-    normalized.includes("gcp")
-  ) {
+  if (value.includes("google cloud"))
     return SiGooglecloud;
-  }
 
-  if (normalized.includes("docker")) {
+  if (value.includes("docker"))
     return SiDocker;
-  }
 
-  if (normalized.includes("figma")) {
+  if (value.includes("figma"))
     return SiFigma;
-  }
 
-  if (normalized.includes("streamlit")) {
+  if (value.includes("streamlit"))
     return SiStreamlit;
-  }
 
-  if (normalized.includes("fastapi")) {
+  if (value.includes("fastapi"))
     return SiFastapi;
-  }
 
-  if (normalized.includes("flask")) {
+  if (value.includes("flask"))
     return SiFlask;
-  }
 
-  if (normalized.includes("pandas")) {
+  if (value.includes("pandas"))
     return SiPandas;
-  }
 
-  if (normalized.includes("numpy")) {
+  if (value.includes("numpy"))
     return SiNumpy;
-  }
 
-  if (
-    normalized.includes("scikit") ||
-    normalized.includes("sklearn")
-  ) {
+  if (value.includes("scikit"))
     return SiScikitlearn;
-  }
 
-  /* Generic fallbacks */
-
-  if (
-    normalized.includes("database") ||
-    normalized === "sql"
-  ) {
-    return Database;
-  }
-
-  if (
-    normalized.includes("cloud") ||
-    normalized.includes("aws") ||
-    normalized.includes("azure")
-  ) {
-    return Cloud;
-  }
-
-  if (
-    normalized.includes("api") ||
-    normalized.includes("backend") ||
-    normalized.includes("server")
-  ) {
-    return Server;
-  }
-
-  if (
-    normalized.includes("web") ||
-    normalized.includes("frontend")
-  ) {
-    return Globe;
-  }
-
-  if (
-    normalized.includes("code") ||
-    normalized.includes("programming")
-  ) {
-    return Code2;
-  }
-
-  return Layers3;
+  return Terminal;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Technology icons                                                           */
-/* -------------------------------------------------------------------------- */
+function SequentialText({
+  text,
+  progress,
+  className = "",
+}: {
+  text: string;
+  progress: number;
+  className?: string;
+}) {
+  const characters = Array.from(text);
 
-function TechnologyIcons({
+  const meaningfulCharacters =
+    characters.filter(
+      (character) =>
+        character !== " " &&
+        character !== "\n"
+    ).length;
+
+  let characterIndex = 0;
+
+  return (
+    <span
+      className={className}
+      style={{
+        display: "inline",
+      }}
+    >
+      {characters.map(
+        (
+          character,
+          index
+        ) => {
+          if (
+            character === "\n"
+          ) {
+            return (
+              <br
+                key={`break-${index}`}
+              />
+            );
+          }
+
+          if (
+            character === " "
+          ) {
+            return (
+              <span
+                key={`space-${index}`}
+                aria-hidden="true"
+                style={{
+                  display:
+                    "inline-block",
+                  width:
+                    "0.28em",
+                }}
+              >
+                {" "}
+              </span>
+            );
+          }
+
+          const currentIndex =
+            characterIndex++;
+
+          const start =
+            currentIndex /
+            Math.max(
+              meaningfulCharacters,
+              1
+            );
+
+          const end =
+            (currentIndex + 1) /
+            Math.max(
+              meaningfulCharacters,
+              1
+            );
+
+          const letterProgress =
+            clamp(
+              (progress - start) /
+                Math.max(
+                  end - start,
+                  0.0001
+                )
+            );
+
+          const eased =
+            smoothstep(
+              letterProgress
+            );
+
+          return (
+            <span
+              key={`${character}-${index}`}
+              style={{
+                display:
+                  "inline-block",
+                color:
+                  eased >= 0.98
+                    ? "var(--portfolio-text)"
+                    : "var(--portfolio-accent)",
+                opacity: lerp(
+                  0.3,
+                  1,
+                  eased
+                ),
+                transform: `
+                  translate3d(
+                    0,
+                    ${lerp(
+                      10,
+                      0,
+                      eased
+                    )}px,
+                    0
+                  )
+                `,
+                filter: `blur(${lerp(
+                  2,
+                  0,
+                  eased
+                )}px)`,
+                willChange:
+                  "transform, opacity, color, filter",
+              }}
+            >
+              {character}
+            </span>
+          );
+        }
+      )}
+    </span>
+  );
+}
+
+function SequentialParagraph({
+  text,
+  progress,
+  exitProgress,
+}: {
+  text: string;
+  progress: number;
+  exitProgress: number;
+}) {
+  const characters = Array.from(text);
+
+  const meaningfulCharacters =
+    characters.filter(
+      (character) =>
+        character !== " " &&
+        character !== "\n"
+    ).length;
+
+  let characterIndex = 0;
+
+  return (
+    <>
+      {characters.map(
+        (
+          character,
+          index
+        ) => {
+          if (
+            character === "\n"
+          ) {
+            return (
+              <br
+                key={`break-${index}`}
+              />
+            );
+          }
+
+          if (
+            character === " "
+          ) {
+            return (
+              <span
+                key={`space-${index}`}
+                aria-hidden="true"
+                style={{
+                  display:
+                    "inline-block",
+                  width:
+                    "0.27em",
+                }}
+              >
+                {" "}
+              </span>
+            );
+          }
+
+          const currentIndex =
+            characterIndex++;
+
+          const start =
+            currentIndex /
+            Math.max(
+              meaningfulCharacters,
+              1
+            );
+
+          const end =
+            (currentIndex + 1) /
+            Math.max(
+              meaningfulCharacters,
+              1
+            );
+
+          const letterProgress =
+            clamp(
+              (progress - start) /
+                Math.max(
+                  end - start,
+                  0.0001
+                )
+            );
+
+          const eased =
+            smoothstep(
+              letterProgress
+            );
+
+          const finalOpacity =
+            eased *
+            (1 - exitProgress);
+
+          const finalY =
+            lerp(
+              7,
+              0,
+              eased
+            ) -
+            lerp(
+              0,
+              8,
+              exitProgress
+            );
+
+          return (
+            <span
+              key={`${character}-${index}`}
+              style={{
+                display:
+                  "inline-block",
+                color:
+                  eased >= 0.98
+                    ? "var(--portfolio-muted)"
+                    : "var(--portfolio-accent)",
+                opacity:
+                  finalOpacity,
+                transform: `
+                  translate3d(
+                    0,
+                    ${finalY}px,
+                    0
+                  )
+                `,
+                filter: `blur(${lerp(
+                  1.5,
+                  0,
+                  eased
+                ) + lerp(
+                  0,
+                  1.5,
+                  exitProgress
+                )}px)`,
+                willChange:
+                  "transform, opacity, color, filter",
+              }}
+            >
+              {character}
+            </span>
+          );
+        }
+      )}
+    </>
+  );
+}
+
+function ToolRail({
   technologies,
 }: {
   technologies: string[];
 }) {
-  if (!technologies?.length) {
+  const [hovered, setHovered] =
+    useState<string | null>(null);
+
+  if (
+    !technologies ||
+    technologies.length === 0
+  ) {
     return null;
   }
 
   return (
     <div
-      className="flex items-center gap-2"
-      aria-label={`Technologies: ${technologies.join(
-        ", "
-      )}`}
+      className="
+        absolute
+        bottom-0
+        left-0
+        right-0
+        z-20
+        flex
+        items-center
+        gap-2
+        overflow-visible
+        px-4
+        py-3
+        sm:px-5
+      "
+      style={{
+        background:
+          "color-mix(in srgb, var(--portfolio-background) 82%, transparent)",
+        borderTop:
+          "1px solid color-mix(in srgb, var(--portfolio-text) 12%, transparent)",
+        backdropFilter:
+          "blur(14px)",
+      }}
+      onMouseLeave={() =>
+        setHovered(null)
+      }
     >
-      {technologies.map((technology) => {
-        const Icon = getTechnologyIcon(technology);
+      {technologies.map(
+        (technology) => {
+          const Icon =
+            getTechnologyIcon(
+              technology
+            );
 
-        return (
-          <span
-            key={technology}
-            title={technology}
-            aria-label={technology}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-800 bg-[#0d0d0d] text-neutral-400 transition-all duration-300 group-hover:border-neutral-700 group-hover:text-white"
-          >
-            <Icon
-              size={16}
-              strokeWidth={1.7}
-              className="shrink-0"
-            />
-          </span>
-        );
-      })}
+          const isHovered =
+            hovered ===
+            technology;
+
+          return (
+            <div
+              key={technology}
+              className="
+                relative
+                flex
+                h-8
+                min-w-8
+                items-center
+                justify-center
+              "
+              onMouseEnter={() =>
+                setHovered(
+                  technology
+                )
+              }
+              onFocus={() =>
+                setHovered(
+                  technology
+                )
+              }
+              onBlur={() =>
+                setHovered(null)
+              }
+            >
+              <button
+                type="button"
+                aria-label={
+                  technology
+                }
+                className="
+                  flex
+                  h-8
+                  w-8
+                  items-center
+                  justify-center
+                  outline-none
+                  transition-all
+                  duration-300
+                "
+                style={{
+                  color:
+                    isHovered
+                      ? "var(--portfolio-accent)"
+                      : "var(--portfolio-text)",
+                  transform:
+                    isHovered
+                      ? "translateY(-2px)"
+                      : "translateY(0)",
+                }}
+              >
+                <Icon
+                  size={15}
+                  strokeWidth={
+                    1.5
+                  }
+                />
+              </button>
+
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  bottom-[calc(100%+10px)]
+                  left-1/2
+                  z-30
+                  -translate-x-1/2
+                  whitespace-nowrap
+                  font-mono
+                  text-[8px]
+                  uppercase
+                  tracking-[0.14em]
+                  transition-all
+                  duration-300
+                "
+                style={{
+                  color:
+                    "var(--portfolio-text)",
+                  background:
+                    "var(--portfolio-background)",
+                  border:
+                    "1px solid var(--portfolio-border)",
+                  padding:
+                    "7px 9px",
+                  opacity:
+                    isHovered
+                      ? 1
+                      : 0,
+                  transform: `
+                    translateX(-50%)
+                    translateY(
+                      ${isHovered ? 0 : 5}px
+                    )
+                  `,
+                }}
+              >
+                {technology}
+              </div>
+            </div>
+          );
+        }
+      )}
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Premium fallback visual when a project has no image                       */
-/* -------------------------------------------------------------------------- */
-
-function NoImageVisual() {
+function ProjectVisual({
+  project,
+}: {
+  project: Project;
+}) {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#080808]">
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute left-[18%] top-[24%] h-px w-[64%] bg-neutral-800" />
-        <div className="absolute left-[30%] top-[42%] h-px w-[45%] bg-neutral-800" />
-        <div className="absolute left-[14%] top-[64%] h-px w-[70%] bg-neutral-900" />
+    <Link
+      href={`/projects/${project.slug}`}
+      aria-label={`View ${project.title}`}
+      className="
+        group
+        relative
+        block
+        overflow-hidden
+      "
+    >
+      <div
+        className="
+          relative
+          aspect-[16/10]
+          w-full
+          overflow-hidden
+        "
+        style={{
+          background:
+            "var(--portfolio-surface)",
+          border:
+            "1px solid var(--portfolio-border)",
+        }}
+      >
+        {project.imageUrl ? (
+          <img
+            src={
+              project.imageUrl
+            }
+            alt={
+              project.title
+            }
+            className="
+              h-full
+              w-full
+              object-cover
+              transition-transform
+              duration-1000
+              ease-out
+              group-hover:scale-[1.035]
+            "
+          />
+        ) : (
+          <div
+            className="
+              flex
+              h-full
+              w-full
+              items-center
+              justify-center
+            "
+            style={{
+              background:
+                "var(--portfolio-surface)",
+            }}
+          >
+            <Terminal
+              size={34}
+              strokeWidth={1}
+              style={{
+                color:
+                  "var(--portfolio-muted)",
+              }}
+            />
+          </div>
+        )}
 
-        <div className="absolute left-[28%] top-[20%] h-[60%] w-px bg-neutral-900" />
-        <div className="absolute left-[50%] top-[12%] h-[76%] w-px bg-neutral-800" />
-        <div className="absolute left-[72%] top-[20%] h-[60%] w-px bg-neutral-900" />
-      </div>
-
-      <div className="relative z-10 text-center">
-        <Terminal
-          size={30}
-          strokeWidth={1}
-          className="mx-auto mb-4 text-neutral-700"
+        <div
+          className="
+            absolute
+            inset-0
+            transition-opacity
+            duration-700
+            group-hover:opacity-0
+          "
+          style={{
+            background:
+              "color-mix(in srgb, var(--portfolio-background) 12%, transparent)",
+          }}
         />
 
-        <p className="text-[9px] uppercase tracking-[0.4em] text-neutral-700">
-          Ashfaq Hyder
-        </p>
+        <div
+          className="
+            absolute
+            left-5
+            top-5
+            z-10
+            font-mono
+            text-[8px]
+            uppercase
+            tracking-[0.18em]
+          "
+          style={{
+            color:
+              "var(--portfolio-text)",
+            background:
+              "color-mix(in srgb, var(--portfolio-background) 72%, transparent)",
+            border:
+              "1px solid var(--portfolio-border)",
+            padding:
+              "7px 10px",
+            backdropFilter:
+              "blur(10px)",
+          }}
+        >
+          {project.category}
+        </div>
+
+        {project.featured && (
+          <div
+            className="
+              absolute
+              right-5
+              top-5
+              z-10
+              font-mono
+              text-[8px]
+              uppercase
+              tracking-[0.18em]
+            "
+            style={{
+              color:
+                "var(--portfolio-accent)",
+              background:
+                "color-mix(in srgb, var(--portfolio-background) 72%, transparent)",
+              border:
+                "1px solid var(--portfolio-border)",
+              padding:
+                "7px 10px",
+              backdropFilter:
+                "blur(10px)",
+            }}
+          >
+            Featured
+          </div>
+        )}
+
+        <ToolRail
+          technologies={
+            project.technologies ??
+            []
+          }
+        />
       </div>
-    </div>
+    </Link>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Projects                                                                   */
-/* -------------------------------------------------------------------------- */
-
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const sectionRef =
+    useRef<HTMLElement | null>(
+      null
+    );
+
+  const [projects, setProjects] =
+    useState<Project[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [scrollProgress, setScrollProgress] =
+    useState(0);
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadProjects() {
       try {
-        setLoading(true);
-        setError("");
+        const data =
+          await getPublishedProjects();
 
-        const data = await getPublishedProjects();
-        setProjects(data);
-      } catch (err) {
+        if (!mounted) return;
+
+        const featured =
+          data
+            .filter(
+              (project) =>
+                project.published ===
+                  true &&
+                project.featured ===
+                  true
+            )
+            .sort(
+              (a, b) =>
+                a.displayOrder -
+                b.displayOrder
+            );
+
+        setProjects(
+          featured
+        );
+      } catch (error) {
         console.error(
           "Failed to load projects:",
-          err
+          error
         );
-        setError("Unable to load projects.");
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadProjects();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  useEffect(() => {
+    let frame = 0;
+    let target = 0;
+    let current = 0;
+    let previous =
+      performance.now();
+
+    const readScroll = () => {
+      const section =
+        sectionRef.current;
+
+      if (!section) return;
+
+      const rect =
+        section.getBoundingClientRect();
+
+      const scrollable =
+        Math.max(
+          section.offsetHeight -
+            window.innerHeight,
+          1
+        );
+
+      target = clamp(
+        -rect.top /
+          scrollable
+      );
+    };
+
+    const animate = (
+      time: number
+    ) => {
+      const delta = Math.min(
+        time - previous,
+        32
+      );
+
+      previous = time;
+
+      const smoothing =
+        1 -
+        Math.pow(
+          0.001,
+          delta / 16.67
+        );
+
+      current +=
+        (target - current) *
+        smoothing;
+
+      if (
+        Math.abs(
+          target - current
+        ) < 0.00005
+      ) {
+        current = target;
+      }
+
+      setScrollProgress(
+        current
+      );
+
+      frame =
+        requestAnimationFrame(
+          animate
+        );
+    };
+
+    readScroll();
+
+    frame =
+      requestAnimationFrame(
+        animate
+      );
+
+    window.addEventListener(
+      "scroll",
+      readScroll,
+      {
+        passive: true,
+      }
+    );
+
+    window.addEventListener(
+      "resize",
+      readScroll
+    );
+
+    return () => {
+      cancelAnimationFrame(
+        frame
+      );
+
+      window.removeEventListener(
+        "scroll",
+        readScroll
+      );
+
+      window.removeEventListener(
+        "resize",
+        readScroll
+      );
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <section
+        id="projects"
+        className="w-full"
+        style={{
+          minHeight:
+            "100svh",
+          background:
+            "var(--portfolio-background)",
+        }}
+      />
+    );
+  }
+
+  if (!projects.length) {
+    return null;
+  }
+
+  const totalStages =
+    projects.length + 2;
+
+  const stagePosition =
+    scrollProgress *
+    totalStages;
+
+  const activeStage =
+    Math.min(
+      totalStages - 1,
+      Math.floor(
+        stagePosition
+      )
+    );
+
+  const stageProgress =
+    stagePosition -
+    activeStage;
+
+  const isHeadingStage =
+    activeStage === 0;
+
+  const isViewAllStage =
+    activeStage ===
+    totalStages - 1;
+
+  const projectIndex =
+    activeStage > 0 &&
+    !isViewAllStage
+      ? activeStage - 1
+      : -1;
+
+  const project =
+    projectIndex >= 0
+      ? projects[
+          projectIndex
+        ]
+      : null;
+
+  const ENTER_END = 0.22;
+  const EXIT_START = 0.70;
+
+  const enterProgress =
+    easeOutCubic(
+      clamp(
+        stageProgress /
+          ENTER_END
+      )
+    );
+
+  const exitProgress =
+    easeOutCubic(
+      clamp(
+        (stageProgress -
+          EXIT_START) /
+          (1 - EXIT_START)
+      )
+    );
+
+  const contentEnter =
+    easeOutCubic(
+      clamp(
+        (stageProgress -
+          0.04) /
+          0.28
+      )
+    );
+
+  const descriptionEnter =
+    easeOutCubic(
+      clamp(
+        (stageProgress -
+          0.18) /
+          0.30
+      )
+    );
+
+  const metadataEnter =
+    easeOutCubic(
+      clamp(
+        (stageProgress -
+          0.35) /
+          0.25
+      )
+    );
+
+  const headingProgress =
+    isHeadingStage
+      ? easeOutCubic(
+          clamp(
+            stageProgress /
+              0.8
+          )
+        )
+      : 1;
+
+  const alternate =
+    projectIndex % 2 === 1;
+
+  const projectOpacity =
+    isHeadingStage ||
+    isViewAllStage
+      ? 0
+      : 1 - exitProgress;
+
+  const projectTranslateY =
+    lerp(
+      55,
+      0,
+      enterProgress
+    ) -
+    lerp(
+      0,
+      45,
+      exitProgress
+    );
+
+  const projectScale =
+    lerp(
+      0.975,
+      1,
+      enterProgress
+    ) -
+    lerp(
+      0,
+      0.018,
+      exitProgress
+    );
+
+  const projectBlur =
+    lerp(
+      5,
+      0,
+      enterProgress
+    ) +
+    lerp(
+      0,
+      4,
+      exitProgress
+    );
+
+  const categoryOpacity =
+    contentEnter *
+    (1 - exitProgress);
+
+  const categoryY =
+    lerp(
+      18,
+      0,
+      contentEnter
+    ) -
+    lerp(
+      0,
+      18,
+      exitProgress
+    );
+
+  const titleOpacity =
+    contentEnter *
+    (1 - exitProgress);
+
+  const titleY =
+    lerp(
+      28,
+      0,
+      contentEnter
+    ) -
+    lerp(
+      0,
+      28,
+      exitProgress
+    );
+
+  const descriptionOpacity =
+    descriptionEnter *
+    (1 - exitProgress);
+
+  const descriptionY =
+    lerp(
+      22,
+      0,
+      descriptionEnter
+    ) -
+    lerp(
+      0,
+      22,
+      exitProgress
+    );
+
+  const metadataOpacity =
+    metadataEnter *
+    (1 - exitProgress);
+
+  const metadataY =
+    lerp(
+      18,
+      0,
+      metadataEnter
+    ) -
+    lerp(
+      0,
+      18,
+      exitProgress
+    );
+
+  const visualEnter =
+    easeOutCubic(
+      clamp(
+        (stageProgress -
+          0.02) /
+          0.30
+      )
+    );
+
+  const visualExit =
+    easeOutCubic(
+      clamp(
+        (stageProgress -
+          0.68) /
+          0.32
+      )
+    );
+
+  const visualOpacity =
+    visualEnter *
+    (1 - visualExit);
+
+  const visualX =
+    lerp(
+      alternate
+        ? -55
+        : 55,
+      0,
+      visualEnter
+    ) +
+    lerp(
+      0,
+      alternate
+        ? 35
+        : -35,
+      visualExit
+    );
+
+  const visualY =
+    lerp(
+      24,
+      0,
+      visualEnter
+    ) -
+    lerp(
+      0,
+      20,
+      visualExit
+    );
+
+  const visualScale =
+    lerp(
+      0.965,
+      1,
+      visualEnter
+    ) -
+    lerp(
+      0,
+      0.015,
+      visualExit
+    );
+
+  const visualBlur =
+    lerp(
+      3,
+      0,
+      visualEnter
+    ) +
+    lerp(
+      0,
+      3,
+      visualExit
+    );
 
   return (
     <section
+      ref={sectionRef}
       id="projects"
-      className="relative bg-[#050505] px-6 py-24 text-white md:px-10 lg:px-16 lg:py-32"
+      className="relative w-full"
+      style={{
+        height: `${
+          totalStages * 100
+        }svh`,
+        background:
+          "var(--portfolio-background)",
+        color:
+          "var(--portfolio-text)",
+      }}
     >
-      <div className="mx-auto max-w-7xl">
-        {/* ---------------------------------------------------------------- */}
-        {/* Section Header                                                   */}
-        {/* ---------------------------------------------------------------- */}
-
-        <div className="mb-16 flex flex-col justify-between gap-8 md:flex-row md:items-end">
-          <ScrollReveal direction="left">
-            <div>
-              <p className="mb-4 text-xs uppercase tracking-[0.3em] text-neutral-500 group">
-                Selected Work
-                <span className="inline-block w-8 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 ml-2 group-hover:w-12 transition-all duration-300"></span>
-              </p>
-
-              <h2 className="max-w-3xl text-4xl font-medium tracking-tight md:text-6xl lg:text-7xl">
-                Projects that turn
-                <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                  ideas into systems.
-                </span>
-              </h2>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal direction="right" delay={0.2}>
-            <p className="max-w-sm text-sm leading-6 text-neutral-500 md:text-right">
-              A selection of work across development,
-              artificial intelligence, machine learning,
-              security, design and interactive experiences.
+      <div
+        className="
+          sticky
+          top-0
+          h-[100svh]
+          overflow-hidden
+        "
+      >
+        <div
+          className="
+            relative
+            mx-auto
+            flex
+            h-full
+            w-full
+            max-w-[1600px]
+            flex-col
+            px-6
+            py-8
+            sm:px-10
+            md:px-14
+            md:py-12
+            lg:px-20
+          "
+        >
+          <header
+            className="
+              relative
+              z-30
+              shrink-0
+              pt-[4vh]
+            "
+          >
+            <p
+              className="
+                font-mono
+                text-[9px]
+                uppercase
+                tracking-[0.24em]
+              "
+              style={{
+                color:
+                  "var(--portfolio-muted)",
+              }}
+            >
+              / SELECTED WORK
             </p>
-          </ScrollReveal>
-        </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Loading                                                          */}
-        {/* ---------------------------------------------------------------- */}
-
-        {loading && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="h-[420px] animate-pulse rounded-2xl border border-neutral-900 bg-neutral-950"
+            <h2
+              className="
+                mt-4
+                max-w-[900px]
+                font-[Syne,sans-serif]
+                text-[clamp(2.5rem,5vw,5.5rem)]
+                font-medium
+                leading-[0.88]
+                tracking-[-0.07em]
+              "
+            >
+              <SequentialText
+                text="Projects "
+                progress={
+                  headingProgress
+                }
               />
-            ))}
-          </div>
-        )}
+            </h2>
+          </header>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Error                                                            */}
-        {/* ---------------------------------------------------------------- */}
-
-        {!loading && error && (
-          <div className="rounded-2xl border border-neutral-900 bg-neutral-950 p-10">
-            <p className="text-sm text-neutral-500">
-              {error}
-            </p>
-          </div>
-        )}
-
-        {/* ---------------------------------------------------------------- */}
-        {/* Empty                                                            */}
-        {/* ---------------------------------------------------------------- */}
-
-        {!loading &&
-          !error &&
-          projects.length === 0 && (
-            <div className="rounded-2xl border border-neutral-900 bg-neutral-950 p-10">
-              <p className="text-sm text-neutral-500">
-                No published projects yet.
-              </p>
-            </div>
-          )}
-
-        {/* ---------------------------------------------------------------- */}
-        {/* Projects                                                         */}
-        {/* ---------------------------------------------------------------- */}
-
-        {!loading &&
-          !error &&
-          projects.length > 0 && (
-            <div className="grid gap-6 md:grid-cols-2">
-              {projects.map((project, index) => (
-                <ScrollReveal
-                  key={
-                    project.id ?? project.slug
-                  }
-                  direction={index % 2 === 0 ? "left" : "right"}
-                  delay={index * 0.1}
+          <div
+            className="
+              relative
+              mt-[5vh]
+              min-h-0
+              flex-1
+              overflow-hidden
+            "
+          >
+            {project && (
+              <article
+                key={
+                  project.id ??
+                  project.slug
+                }
+                className="
+                  absolute
+                  inset-0
+                  flex
+                  items-center
+                "
+                style={{
+                  opacity:
+                    projectOpacity,
+                  transform: `
+                    translate3d(
+                      0,
+                      ${projectTranslateY}px,
+                      0
+                    )
+                    scale(${projectScale})
+                  `,
+                  filter: `blur(${projectBlur}px)`,
+                  pointerEvents:
+                    exitProgress >
+                    0.5
+                      ? "none"
+                      : "auto",
+                  willChange:
+                    "transform, opacity, filter",
+                }}
+              >
+                <div
+                  className="
+                    grid
+                    w-full
+                    items-center
+                    gap-10
+                    lg:grid-cols-2
+                    lg:gap-16
+                  "
                 >
-                  <HoverTilt intensity={0.02}>
-                    <article
-                      className={`group relative overflow-hidden rounded-2xl border border-neutral-900 bg-[#0a0a0a] transition-all duration-300 ${
-                        index === 0
-                          ? "md:col-span-2"
-                          : ""
-                      } hover:border-neutral-700 hover:shadow-lg hover:shadow-blue-500/10`}
-                    >
-                  {/* ------------------------------------------------------ */}
-                  {/* Project Visual                                          */}
-                  {/* ------------------------------------------------------ */}
-
-                  <Link
-                    href={`/projects/${project.slug}`}
-                    className="block"
-                    aria-label={`View ${project.title}`}
+                  <div
+                    className={`
+                      min-w-0
+                      ${
+                        alternate
+                          ? "lg:order-2"
+                          : "lg:order-1"
+                      }
+                    `}
                   >
                     <div
-                      className={`relative overflow-hidden bg-neutral-950 ${
-                        index === 0
-                          ? "aspect-[16/8]"
-                          : "aspect-[16/10]"
-                      }`}
+                      style={{
+                        opacity:
+                          categoryOpacity,
+                        transform: `
+                          translate3d(
+                            0,
+                            ${categoryY}px,
+                            0
+                          )
+                        `,
+                      }}
                     >
-                      {project.imageUrl ? (
-                        <>
-                          <img
-                            src={project.imageUrl}
-                            alt={project.title}
-                            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                            loading={
-                              index === 0
-                                ? "eager"
-                                : "lazy"
-                            }
-                          />
-
-                          <div className="absolute inset-0 bg-black/10 transition-opacity duration-500 group-hover:opacity-0" />
-                        </>
-                      ) : (
-                        <NoImageVisual />
-                      )}
-
-                      {/* Project Number */}
-                      <div className="absolute left-5 top-5">
-                        <span className="rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-white/60 backdrop-blur-md">
-                          {String(index + 1).padStart(
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-4
+                        "
+                      >
+                        <span
+                          className="
+                            font-mono
+                            text-[10px]
+                            uppercase
+                            tracking-[0.2em]
+                          "
+                          style={{
+                            color:
+                              "var(--portfolio-accent)",
+                          }}
+                        >
+                          {String(
+                            projectIndex +
+                              1
+                          ).padStart(
                             2,
                             "0"
                           )}
                         </span>
-                      </div>
 
-                      {/* Featured */}
-                      {project.featured && (
-                        <div className="absolute right-5 top-5">
-                          <span className="rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-white/60 backdrop-blur-md">
-                            Featured
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Hover Arrow */}
-                      <div
-                        className="absolute bottom-5 right-5 flex h-12 w-12 translate-y-3 items-center justify-center rounded-full border border-white/10 bg-black/40 opacity-0 backdrop-blur-md transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100"
-                        style={{
-                          color:
-                            "var(--portfolio-accent)",
-                        }}
-                      >
-                        <ArrowUpRight
-                          size={20}
-                          strokeWidth={1.5}
+                        <span
+                          className="h-px w-8"
+                          style={{
+                            background:
+                              "var(--portfolio-border)",
+                          }}
                         />
+
+                        <span
+                          className="
+                            font-mono
+                            text-[9px]
+                            uppercase
+                            tracking-[0.18em]
+                          "
+                          style={{
+                            color:
+                              "var(--portfolio-muted)",
+                          }}
+                        >
+                          {
+                            project.category
+                          }
+                        </span>
                       </div>
                     </div>
-                  </Link>
 
-                  {/* ------------------------------------------------------ */}
-                  {/* Project Content                                          */}
-                  {/* ------------------------------------------------------ */}
-
-                  <div className="p-6 md:p-8">
-                    <div className="mb-4 flex items-center justify-between gap-4">
-                      <span className="text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-                        {project.category}
-                      </span>
-
-                      <span className="text-[10px] text-neutral-700">
-                        {String(
-                          project.displayOrder
-                        ).padStart(2, "0")}
-                      </span>
-                    </div>
-
-                    {/* Project Title */}
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      className="inline-block"
+                    <h3
+                      className="
+                        mt-5
+                        max-w-[650px]
+                        font-[Syne,sans-serif]
+                        text-[clamp(2.2rem,4.2vw,4.8rem)]
+                        font-medium
+                        leading-[0.9]
+                        tracking-[-0.065em]
+                      "
+                      style={{
+                        opacity:
+                          titleOpacity,
+                        transform: `
+                          translate3d(
+                            0,
+                            ${titleY}px,
+                            0
+                          )
+                        `,
+                      }}
                     >
-                      <h3 className="text-2xl font-medium tracking-tight transition-colors duration-300 group-hover:text-[var(--portfolio-accent)] md:text-3xl">
-                        {project.title}
-                      </h3>
-                    </Link>
-
-                    {/* Project Description */}
-                    <p className="mt-4 max-w-2xl text-sm leading-6 text-neutral-500">
-                      {project.description}
-                    </p>
-
-                    {/* ---------------------------------------------------- */}
-                    {/* Technologies + Actions                               */}
-                    {/* ---------------------------------------------------- */}
-
-                    <div className="mt-7 flex flex-wrap items-center justify-between gap-5">
-                      {/* Technology Icons Only */}
-                      <TechnologyIcons
-                        technologies={
-                          project.technologies ?? []
+                      <SequentialText
+                        text={
+                          project.title
+                        }
+                        progress={
+                          contentEnter
                         }
                       />
+                    </h3>
 
-                      <div className="flex flex-wrap items-center gap-3">
-                        {/* View Project */}
-                        <Link
-                          href={`/projects/${project.slug}`}
-                          className="rounded-full border border-neutral-800 px-5 py-2.5 text-xs uppercase tracking-wider text-white transition-all duration-300 hover:border-white hover:bg-white hover:text-black"
+                    <div
+                      className="
+                        mt-7
+                        max-w-[650px]
+                      "
+                      style={{
+                        opacity:
+                          descriptionOpacity,
+                        transform: `
+                          translate3d(
+                            0,
+                            ${descriptionY}px,
+                            0
+                          )
+                        `,
+                      }}
+                    >
+                      <p
+                        className="
+                          font-[Manrope,sans-serif]
+                          text-[clamp(.9rem,1.05vw,1.05rem)]
+                          leading-[1.8]
+                        "
+                      >
+                        <SequentialParagraph
+                          text={
+                            project.description
+                          }
+                          progress={
+                            descriptionEnter
+                          }
+                          exitProgress={
+                            exitProgress
+                          }
+                        />
+                      </p>
+                    </div>
+
+                    <div
+                      className="
+                        mt-8
+                        flex
+                        flex-wrap
+                        gap-3
+                      "
+                      style={{
+                        opacity:
+                          metadataOpacity,
+                        transform: `
+                          translate3d(
+                            0,
+                            ${metadataY}px,
+                            0
+                          )
+                        `,
+                      }}
+                    >
+
+                      {project.githubUrl && (
+                        <a
+                          href={
+                            project.githubUrl
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
+                            group
+                            inline-flex
+                            items-center
+                            gap-3
+                            border
+                            px-5
+                            py-3
+                            font-mono
+                            text-[9px]
+                            uppercase
+                            tracking-[0.16em]
+                            transition-all
+                            duration-300
+                          "
+                          style={{
+                            borderColor:
+                              "var(--portfolio-border)",
+                            color:
+                              "var(--portfolio-muted)",
+                          }}
                         >
-                          View Project
-                        </Link>
+                          <SiGithub
+                            size={14}
+                          />
 
-                        {/* GitHub — intentionally kept on card */}
-                        {project.githubUrl && (
-                          <a
-                            href={
-                              project.githubUrl
+                          GitHub
+
+                          <ArrowUpRight
+                            size={13}
+                            strokeWidth={
+                              1.5
                             }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`View ${project.title} on GitHub`}
-                            className="flex items-center gap-2 rounded-full border border-neutral-800 px-5 py-2.5 text-xs uppercase tracking-wider text-neutral-500 transition-all duration-300 hover:border-neutral-600 hover:text-white"
-                          >
-                            <SiGithub
-                              size={14}
-                              className="shrink-0"
-                            />
-
-                            <span>GitHub</span>
-
-                            <ArrowUpRight
-                              size={13}
-                              strokeWidth={1.5}
-                            />
-                          </a>
-                        )}
-                      </div>
+                            className="
+                              transition-transform
+                              duration-300
+                              group-hover:-translate-y-0.5
+                              group-hover:translate-x-0.5
+                            "
+                          />
+                        </a>
+                      )}
                     </div>
                   </div>
-                    </article>
-                  </HoverTilt>
-                </ScrollReveal>
-              ))}
+
+                  <div
+                    className={`
+                      min-w-0
+                      ${
+                        alternate
+                          ? "lg:order-1"
+                          : "lg:order-2"
+                      }
+                    `}
+                    style={{
+                      opacity:
+                        visualOpacity,
+                      transform: `
+                        translate3d(
+                          ${visualX}px,
+                          ${visualY}px,
+                          0
+                        )
+                        scale(${visualScale})
+                      `,
+                      filter: `blur(${visualBlur}px)`,
+                      willChange:
+                        "transform, opacity, filter",
+                    }}
+                  >
+                    <ProjectVisual
+                      project={project}
+                    />
+                  </div>
+                </div>
+              </article>
+            )}
+
+            {isViewAllStage && (
+              <div
+                className="
+                  absolute
+                  inset-0
+                  flex
+                  items-center
+                  justify-center
+                "
+                style={{
+                  opacity:
+                    easeOutCubic(
+                      clamp(
+                        stageProgress /
+                          0.45
+                      )
+                    ),
+                  transform: `
+                    translate3d(
+                      0,
+                      ${lerp(
+                        35,
+                        0,
+                        easeOutCubic(
+                          clamp(
+                            stageProgress /
+                              0.45
+                          )
+                        )
+                      )}px,
+                      0
+                    )
+                  `,
+                }}
+              >
+                <div className="text-center">
+                  <p
+                    className="
+                      font-mono
+                      text-[9px]
+                      uppercase
+                      tracking-[0.25em]
+                    "
+                    style={{
+                      color:
+                        "var(--portfolio-muted)",
+                    }}
+                  >
+                    THE COMPLETE ARCHIVE
+                  </p>
+
+                  <h3
+                    className="
+                      mt-5
+                      font-[Syne,sans-serif]
+                      text-[clamp(2.4rem,5vw,5rem)]
+                      font-medium
+                      leading-[0.9]
+                      tracking-[-0.065em]
+                    "
+                  >
+                    All the work.
+                  </h3>
+
+                  <p
+                    className="
+                      mx-auto
+                      mt-5
+                      max-w-md
+                      text-sm
+                      leading-7
+                    "
+                    style={{
+                      color:
+                        "var(--portfolio-muted)",
+                    }}
+                  >
+                    Explore every
+                    published project,
+                    including work
+                    outside the featured
+                    selection.
+                  </p>
+
+                  <Link
+                    href="/projects"
+                    className="
+                      group
+                      mt-8
+                      inline-flex
+                      items-center
+                      gap-4
+                      border
+                      px-7
+                      py-4
+                      font-mono
+                      text-[9px]
+                      uppercase
+                      tracking-[0.18em]
+                      transition-all
+                      duration-300
+                    "
+                    style={{
+                      borderColor:
+                        "var(--portfolio-text)",
+                      color:
+                        "var(--portfolio-text)",
+                    }}
+                  >
+                    View All Projects
+
+                    <ArrowUpRight
+                      size={15}
+                      strokeWidth={
+                        1.5
+                      }
+                      className="
+                        transition-transform
+                        duration-300
+                        group-hover:-translate-y-0.5
+                        group-hover:translate-x-0.5
+                      "
+                      style={{
+                        color:
+                          "var(--portfolio-accent)",
+                      }}
+                    />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div
+            className="
+              absolute
+              bottom-8
+              left-6
+              right-6
+              z-40
+              flex
+              items-center
+              justify-between
+              sm:left-10
+              sm:right-10
+              md:left-14
+              md:right-14
+              lg:left-20
+              lg:right-20
+            "
+          >
+            <div
+              className="
+                hidden
+                h-px
+                w-24
+                overflow-hidden
+                sm:block
+              "
+              style={{
+                background:
+                  "var(--portfolio-border)",
+              }}
+            >
+              <div
+                className="h-full"
+                style={{
+                  width: `${
+                    ((activeStage +
+                      1) /
+                      totalStages) *
+                    100
+                  }%`,
+                  background:
+                    "var(--portfolio-accent)",
+                }}
+              />
             </div>
-          )}
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Bottom Line                                                      */}
-        {/* ---------------------------------------------------------------- */}
+            <div
+              className="
+                ml-auto
+                font-mono
+                text-[8px]
+                uppercase
+                tracking-[0.18em]
+              "
+              style={{
+                color:
+                  "var(--portfolio-muted)",
+              }}
+            >
+              {isViewAllStage
+                ? "ALL"
+                : activeStage ===
+                    0
+                  ? "00"
+                  : String(
+                      projectIndex +
+                        1
+                    ).padStart(
+                      2,
+                      "0"
+                    )}
 
-        {!loading &&
-          projects.length > 0 && (
-            <div className="mt-16 flex flex-col items-start justify-between gap-3 border-t border-neutral-900 pt-6 sm:flex-row sm:items-center">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-neutral-600">
-                {projects.length}{" "}
-                {projects.length === 1
-                  ? "Project"
-                  : "Projects"}
-              </span>
+              {" / "}
 
-              <span className="text-[10px] uppercase tracking-[0.25em] text-neutral-600">
-                CODE × DESIGN × INTELLIGENCE
-              </span>
+              {String(
+                projects.length
+              ).padStart(
+                2,
+                "0"
+              )}
             </div>
-          )}
+          </div>
+        </div>
       </div>
     </section>
   );

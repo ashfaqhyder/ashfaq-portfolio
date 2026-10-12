@@ -1,5 +1,5 @@
 "use client";
-
+import DitheredLogo from "@/components/DitheredLogo";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
@@ -98,27 +98,35 @@ export default function Footer() {
     <footer className="border-t border-neutral-900 bg-[#050505] px-6 py-10 text-white md:px-10 lg:px-16 lg:py-12">
       <div className="mx-auto max-w-7xl">
         {/* Main footer */}
-        <div className="grid gap-10 md:grid-cols-[1fr_auto] md:items-end">
+        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          {/* Center logo */}
+          <div className="flex shrink-0 justify-center">
+            <DitheredLogo
+              imageSrc="/hyder-icon-logo.png"
+              particleColor="currentColor"
+              className="h-16 w-16"
+            />
+          </div>
+
           {/* Identity */}
-          <div>
+          <div className="min-w-0">
             <p className="text-lg font-medium tracking-tight">
               ASHFAQ HYDER
             </p>
 
-            <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-neutral-700">
+            <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-neutral-700">
               Creative Developer &amp; AI/ML Enthusiast
             </p>
 
-            <p className="mt-5 max-w-sm text-xs leading-6 text-neutral-700">
-              Building at the intersection of code,
-              design and intelligence.
+            <p className="mt-3 text-xs leading-5 text-neutral-700">
+              Building at the intersection of code, design and intelligence.
             </p>
           </div>
 
           {/* Navigation */}
           <nav
             aria-label="Footer navigation"
-            className="flex flex-wrap gap-x-6 gap-y-3 md:justify-end"
+            className="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3 md:justify-end"
           >
             <FooterLink
               href="#about"
@@ -141,11 +149,6 @@ export default function Footer() {
             />
 
             <FooterLink
-              href="#capabilities"
-              label="Capabilities"
-            />
-
-            <FooterLink
               href="#contact"
               label="Contact"
             />
@@ -153,7 +156,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom row */}
-        <div className="mt-10 flex flex-col gap-6 border-t border-neutral-900 pt-6 md:flex-row md:items-center md:justify-between">
+        <div className="mt-8 flex flex-col gap-6 border-t border-neutral-900 pt-5 md:flex-row md:items-center md:justify-between">
           <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-800">
             © {new Date().getFullYear()} Ashfaq Hyder
           </p>

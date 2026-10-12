@@ -1,883 +1,793 @@
 "use client";
-
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import {
+  DoubleSide,
+  LinearFilter,
+  Mesh,
+  SRGBColorSpace,
+  Texture,
+  TextureLoader,
+} from "three";
+import {
+  Suspense,
+  type MutableRefObject,
+  type WheelEvent as ReactWheelEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-
 import {
   getPublishedPhotography,
   Photography as PhotographyItem,
 } from "@/services/photography";
-
-interface PhotoLayout {
-  left: number;
-  top: number;
-  width: number;
-  rotation: number;
-  depth: number;
+/* -------------------------------------------------------------------------- */
+/* Utilities                                                                  */
+/* -------------------------------------------------------------------------- */
+function clamp(value: number, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
 }
-
-const PHOTO_LAYOUTS: PhotoLayout[] = [
-  { left: 9, top: 7, width: 22, rotation: -5, depth: 3 },
-  { left: 31, top: 3, width: 27, rotation: 3, depth: 5 },
-  { left: 60, top: 9, width: 20, rotation: 6, depth: 4 },
-  { left: 78, top: 5, width: 19, rotation: -4, depth: 2 },
-  { left: 17, top: 31, width: 25, rotation: 4, depth: 7 },
-  { left: 40, top: 28, width: 24, rotation: -3, depth: 10 },
-  { left: 64, top: 33, width: 27, rotation: 5, depth: 8 },
-  { left: 3, top: 58, width: 22, rotation: 4, depth: 4 },
-  { left: 25, top: 62, width: 20, rotation: -6, depth: 6 },
-  { left: 47, top: 58, width: 25, rotation: 3, depth: 9 },
-  { left: 73, top: 60, width: 21, rotation: -4, depth: 5 },
-];
-
-export default function Photography() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-
-  const [photos, setPhotos] = useState<PhotographyItem[]>([]);
-  const [selectedPhoto, setSelectedPhoto] =
-    useState<PhotographyItem | null>(null);
-  const [selectedIndex, setSelectedIndex] =
-    useState<number | null>(null);
-
-  const [isVisible, setIsVisible] = useState(false);
-  const [isDetailVisible, setIsDetailVisible] =
-    useState(false);
-
-  const [detailDirection, setDetailDirection] =
-    useState<"next" | "previous" | null>(null);
-
-  const [pointer, setPointer] = useState({
-    x: 0,
-    y: 0,
-  });
-
+function easeOut(value: number) {
+  const t = clamp(value);
+  return 1 - Math.pow(1 - t, 3);
+}
+function easeInOut(value: number) {
+  const t = clamp(value);
+  return t < 0.5
+    ? 4 * t * t * t
+    : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+function range(value: number, start: number, end: number) {
+  return clamp(
+    (value - start) / Math.max(end - start, 0.0001),
+  );
+}
+function wrap(value: number, length: number) {
+  if (length <= 0) return 0;
+  return ((value % length) + length) % length;
+}
+function wrappedOffset(value: number, length: number) {
+  if (length <= 0) return 0;
+  const wrapped = wrap(value, length);
+  return wrapped > length / 2 ? wrapped - length : wrapped;
+}
+function imageAspect(texture: Texture) {
+  const image = texture.image as
+    | {
+        naturalWidth?: number;
+        naturalHeight?: number;
+        width?: number;
+        height?: number;
+      }
+    | undefined;
+  const width = image?.naturalWidth ?? image?.width ?? 1;
+  const height = image?.naturalHeight ?? image?.height ?? 1;
+  return width / Math.max(height, 1);
+}
+/* -------------------------------------------------------------------------- */
+/* Exact Skills-style heading transition                                     */
+/* -------------------------------------------------------------------------- */
+function PhotographyHeading({ progress }: { progress: number }) {
+  const text = "Photography.";
+  return (
+    <h2
+      className="font-[Syne,sans-serif] text-[clamp(2.8rem,4.8vw,5.2rem)] font-medium leading-[.9] tracking-[-.06em]"
+      aria-label={text}
+    >
+      {Array.from(text).map((character, index) => {
+        const count = text.length;
+        const start = index / count;
+        const end = (index + 1) / count;
+        const local = clamp(
+          (progress - start) / Math.max(end - start, 0.0001),
+        );
+        const reveal = easeOut(local);
+        return (
+          <span
+            key={`${character}-${index}`}
+            style={{
+              display: "inline-block",
+              color:
+                reveal > 0.5
+                  ? "var(--portfolio-text)"
+                  : "var(--portfolio-accent)",
+              opacity: 0.08 + reveal * 0.92,
+              transform: `translate3d(0, ${(1 - reveal) * 10}px, 0)`,
+              filter: `blur(${(1 - reveal) * 1.6}px)`,
+              willChange: "transform, color, opacity, filter",
+              transition:
+                "color 600ms cubic-bezier(.16,1,.3,1), opacity 450ms cubic-bezier(.16,1,.3,1)",
+            }}
+          >
+            {character === " " ? "\u00A0" : character}
+          </span>
+        );
+      })}
+    </h2>
+  );
+}
+/* -------------------------------------------------------------------------- */
+/* Flat photograph spiral                                                     */
+/*                                                                            */
+/* IMPORTANT: the images themselves are NOT bent by a vertex shader.          */
+/* The spiral is produced only by position, depth, rotation and scale.       */
+/* -------------------------------------------------------------------------- */
+interface SpiralItem {
+  src: string;
+  title: string;
+  alt: string;
+  index: number;
+}
+interface SpiralSceneProps {
+  items: SpiralItem[];
+  targetProgress: MutableRefObject<number>;
+  onSelect: (index: number) => void;
+}
+const vertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position =
+      projectionMatrix *
+      modelViewMatrix *
+      vec4(position, 1.0);
+  }
+`;
+const fragmentShader = `
+  uniform sampler2D uTexture;
+  uniform float uImageAspect;
+  uniform float uPlaneAspect;
+  varying vec2 vUv;
+  vec2 coverUv(vec2 uv) {
+    vec2 scale = vec2(1.0);
+    if (uImageAspect > uPlaneAspect) {
+      scale.x = uPlaneAspect / uImageAspect;
+    } else {
+      scale.y = uImageAspect / uPlaneAspect;
+    }
+    return (uv - 0.5) * scale + 0.5;
+  }
+  void main() {
+    gl_FragColor =
+      texture2D(uTexture, coverUv(vUv));
+  }
+`;
+function SpiralScene({
+  items,
+  targetProgress,
+  onSelect,
+}: SpiralSceneProps) {
+  const sceneItems = useMemo(
+    () =>
+      Array.from(
+        { length: Math.max(items.length * 3, 24) },
+        (_, index) => items[index % items.length],
+      ),
+    [items],
+  );
+  const textures = useLoader(
+    TextureLoader,
+    sceneItems.map((item) => item.src),
+  );
+  const { gl, viewport } = useThree();
+  const progress = useRef(0);
+  const meshes = useRef<(Mesh | null)[]>([]);
+  const materials = useRef<any[]>([]);
+  const uniforms = useMemo(
+    () =>
+      textures.map((texture) => ({
+        uTexture: { value: texture },
+        uImageAspect: {
+          value: imageAspect(texture),
+        },
+        uPlaneAspect: { value: 3 / 2 },
+      })),
+    [textures],
+  );
   useEffect(() => {
+    textures.forEach((texture) => {
+      texture.colorSpace = SRGBColorSpace;
+      texture.minFilter = LinearFilter;
+      texture.magFilter = LinearFilter;
+      texture.anisotropy = Math.min(
+        8,
+        gl.capabilities.getMaxAnisotropy(),
+      );
+      texture.needsUpdate = true;
+    });
+  }, [gl, textures]);
+  useFrame((_state, delta) => {
+    const frameScale = Math.min(delta * 60, 3);
+    const smoothing = 0.075;
+    const ease =
+      1 - Math.pow(1 - smoothing, frameScale);
+    progress.current +=
+      (targetProgress.current - progress.current) * ease;
+    const factor = Math.max(viewport.factor, 1);
+    const planeWidth = Math.min(
+      235 / factor,
+      viewport.width * 0.245,
+    );
+    const planeHeight = planeWidth / (3 / 2);
+    const radius = Math.min(
+      190 / factor,
+      viewport.width * 0.27,
+    );
+    // Larger vertical separation so the spiral travels from near the
+    // extreme top of the viewport to near the extreme bottom.
+    const gap = Math.min(
+      118 / factor,
+      viewport.height * 0.13,
+    );
+    const count = sceneItems.length;
+    meshes.current.forEach((mesh, index) => {
+      const material = materials.current[index];
+      if (!mesh || !material) return;
+      const position = wrappedOffset(
+        index - progress.current,
+        count,
+      );
+      const angle = position * 0.72;
+      const depth =
+        (Math.cos(angle) + 1) / 2;
+      const scale =
+        0.76 + depth * 0.24;
+      /*
+       * Flat image planes.
+       * No image deformation, no bend uniform,
+       * no vignette, no tint, no glow.
+       */
+      mesh.position.set(
+        Math.sin(angle) * radius,
+        -position * gap,
+        Math.cos(angle) * 2.2,
+      );
+      mesh.rotation.set(
+        0,
+        Math.sin(angle) * -0.62,
+        0,
+      );
+      mesh.scale.set(
+        planeWidth * scale,
+        planeHeight * scale,
+        1,
+      );
+      material.uniforms.uPlaneAspect.value =
+        3 / 2;
+    });
+  });
+  return (
+    <>
+      {sceneItems.map((item, index) => (
+        <mesh
+          key={`${item.src}-${index}`}
+          ref={(node) => {
+            meshes.current[index] = node;
+          }}
+          frustumCulled={false}
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelect(item.index);
+          }}
+        >
+          <planeGeometry args={[1, 1]} />
+          <shaderMaterial
+            ref={(node) => {
+              materials.current[index] = node;
+            }}
+            uniforms={uniforms[index]}
+            vertexShader={vertexShader}
+            fragmentShader={fragmentShader}
+            side={DoubleSide}
+            depthTest
+            depthWrite
+          />
+        </mesh>
+      ))}
+    </>
+  );
+}
+/* -------------------------------------------------------------------------- */
+/* Main section                                                               */
+/* -------------------------------------------------------------------------- */
+export default function Photography() {
+  const sectionRef =
+    useRef<HTMLElement | null>(null);
+  const spiralViewportRef =
+    useRef<HTMLDivElement | null>(null);
+  const targetProgress = useRef(0);
+  const [photos, setPhotos] =
+    useState<PhotographyItem[]>([]);
+  const [activeIndex, setActiveIndex] =
+    useState<number | null>(null);
+  const [closingFocus, setClosingFocus] =
+    useState(false);
+  const [sectionProgress, setSectionProgress] =
+    useState(0);
+  const [webglAvailable, setWebglAvailable] =
+    useState<boolean | null>(null);
+
+  // Detect WebGL before mounting R3F. Some browsers/devices disable GPU
+  // contexts entirely; mounting Canvas in that case throws a console error.
+  useEffect(() => {
+    let supported = false;
+    let probe: WebGLRenderingContext | WebGL2RenderingContext | null = null;
+    try {
+      const canvas = document.createElement("canvas");
+      probe =
+        canvas.getContext("webgl2", { failIfMajorPerformanceCaveat: false }) as WebGL2RenderingContext | null;
+      if (!probe) {
+        probe = canvas.getContext("webgl", { failIfMajorPerformanceCaveat: false }) as WebGLRenderingContext | null;
+      }
+      supported = Boolean(probe);
+      const loseContext = probe?.getExtension("WEBGL_lose_context");
+      loseContext?.loseContext();
+    } catch {
+      supported = false;
+    }
+    setWebglAvailable(supported);
+  }, []);
+  /* ------------------------------ CMS ----------------------------------- */
+  useEffect(() => {
+    let active = true;
     async function loadPhotography() {
       try {
-        const data = await getPublishedPhotography();
-        setPhotos(data);
+        const data =
+          await getPublishedPhotography();
+        if (!active) return;
+        setPhotos(
+          [...data].sort(
+            (a, b) =>
+              (a.displayOrder ?? 0) -
+              (b.displayOrder ?? 0),
+          ),
+        );
       } catch (error) {
         console.error(
           "Failed to load photography:",
-          error
+          error,
         );
       }
     }
-
     loadPhotography();
-  }, []);
-
-  const orderedPhotos = useMemo(() => {
-    return [...photos].sort(
-      (a, b) =>
-        (a.displayOrder ?? 0) -
-        (b.displayOrder ?? 0)
-    );
-  }, [photos]);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-
-    if (!section) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      {
-        threshold: 0.12,
-      }
-    );
-
-    observer.observe(section);
-
     return () => {
-      observer.disconnect();
+      active = false;
     };
   }, []);
-
+  /* ----------------------- Skills-style scroll --------------------------- */
   useEffect(() => {
-    if (!selectedPhoto) {
-      return;
-    }
-
-    const previousOverflow =
-      document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow =
-        previousOverflow;
-    };
-  }, [selectedPhoto]);
-
-  useEffect(() => {
-    if (
-      selectedPhoto === null ||
-      selectedIndex === null
-    ) {
-      return;
-    }
-
-    function handleKeyDown(
-      event: KeyboardEvent
-    ) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeDetail();
-        return;
-      }
-
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        showPrevious();
-        return;
-      }
-
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        showNext();
-      }
-    }
-
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
-
-    return () => {
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
+    let raf = 0;
+    const update = () => {
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect =
+        section.getBoundingClientRect();
+      const distance = Math.max(
+        section.offsetHeight -
+          window.innerHeight,
+        1,
+      );
+      setSectionProgress(
+        clamp(-rect.top / distance),
       );
     };
-  }, [
-    selectedPhoto,
-    selectedIndex,
-    orderedPhotos,
-  ]);
-
-  function openDetail(
-    photo: PhotographyItem,
-    index: number
-  ) {
-    setSelectedPhoto(photo);
-    setSelectedIndex(index);
-    setDetailDirection(null);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setIsDetailVisible(true);
-      });
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener(
+      "scroll",
+      onScroll,
+      { passive: true },
+    );
+    window.addEventListener(
+      "resize",
+      onScroll,
+    );
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener(
+        "scroll",
+        onScroll,
+      );
+      window.removeEventListener(
+        "resize",
+        onScroll,
+      );
+    };
+  }, []);
+  /* ---------------------------- Focused photo ---------------------------- */
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeFocusedPhoto();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [activeIndex]);
+  /* --------------------------- Timeline --------------------------------- */
+  /*
+   * 0.00 ───────────── 0.32
+   * HEADING ONLY
+   *
+   * 0.32 ───────────── 0.58
+   * SPIRAL ENTERS FROM BOTTOM
+   *
+   * 0.58 ───────────── 0.90
+   * HEADING + SPIRAL
+   *
+   * 0.90 ───────────── 1.00
+   * RELEASE
+   */
+  const headingProgress = easeOut(
+    range(sectionProgress, 0.03, 0.32),
+  );
+  const spiralProgress = easeOut(
+    range(sectionProgress, 0.34, 0.58),
+  );
+  const spiralActive =
+    spiralProgress > 0.96;
+  const sectionOutro = easeInOut(
+    range(sectionProgress, 0.90, 1),
+  );
+  const items = useMemo<SpiralItem[]>(
+    () =>
+      photos.map((photo, index) => ({
+        src: photo.photo,
+        title: photo.title,
+        alt: photo.title,
+        index,
+      })),
+    [photos],
+  );
+  const activePhoto =
+    activeIndex === null
+      ? null
+      : photos[activeIndex] ?? null;
+  /* ---------------------- Right-side wheel ------------------------------- */
+  useEffect(() => {
+    const element = spiralViewportRef.current;
+    if (!element) return;
+    const onWheel = (event: WheelEvent) => {
+      if (!spiralActive || activePhoto !== null) return;
+      // This is a native non-passive listener. It prevents the browser from
+      // chaining the wheel gesture to document scrolling.
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      const raw = event.deltaY || event.deltaX;
+      const delta =
+        Math.sign(raw) *
+        Math.min(Math.abs(raw), 160);
+      if (!delta) return;
+      // Never clamp: SpiralScene wraps the visual positions indefinitely.
+      targetProgress.current += delta * 0.0032;
+    };
+    element.addEventListener("wheel", onWheel, {
+      passive: false,
+      capture: true,
     });
-  }
-
-  function closeDetail() {
-    setIsDetailVisible(false);
-
+    return () => {
+      element.removeEventListener("wheel", onWheel, true);
+    };
+  }, [spiralActive, activePhoto]);
+  const handleSpiralWheel = (
+    event: ReactWheelEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const closeFocusedPhoto = () => {
+    if (activeIndex === null || closingFocus) return;
+    setClosingFocus(true);
     window.setTimeout(() => {
-      setSelectedPhoto(null);
-      setSelectedIndex(null);
-      setDetailDirection(null);
-    }, 450);
-  }
-
-  function changePhoto(
-    nextIndex: number,
-    direction: "next" | "previous"
-  ) {
-    if (orderedPhotos.length === 0) {
-      return;
-    }
-
-    const normalizedIndex =
-      (nextIndex +
-        orderedPhotos.length) %
-      orderedPhotos.length;
-
-    setDetailDirection(direction);
-    setSelectedIndex(normalizedIndex);
-    setSelectedPhoto(
-      orderedPhotos[normalizedIndex]
-    );
-  }
-
-  function showPrevious() {
-    if (
-      selectedIndex === null ||
-      orderedPhotos.length === 0
-    ) {
-      return;
-    }
-
-    changePhoto(
-      selectedIndex - 1,
-      "previous"
-    );
-  }
-
-  function showNext() {
-    if (
-      selectedIndex === null ||
-      orderedPhotos.length === 0
-    ) {
-      return;
-    }
-
-    changePhoto(
-      selectedIndex + 1,
-      "next"
-    );
-  }
-
-  function handlePointerMove(
-    event: React.PointerEvent<HTMLDivElement>
-  ) {
-    if (selectedPhoto) {
-      return;
-    }
-
-    const rect =
-      event.currentTarget.getBoundingClientRect();
-
-    const x =
-      (event.clientX - rect.left) /
-        rect.width -
-      0.5;
-
-    const y =
-      (event.clientY - rect.top) /
-        rect.height -
-      0.5;
-
-    setPointer({
-      x,
-      y,
-    });
-  }
-
-  function resetPointer() {
-    setPointer({
-      x: 0,
-      y: 0,
-    });
-  }
-
-  if (orderedPhotos.length === 0) {
-    return (
-      <section
-        ref={sectionRef}
-        id="outside-the-code"
-        className="border-t border-neutral-900 px-6 py-24 md:px-10 lg:px-16 lg:py-32"
-      >
-        <div className="mx-auto max-w-7xl">
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-neutral-600">
-            08 / Outside the Code
-          </p>
-
-          <h2 className="text-4xl font-medium tracking-tight md:text-6xl">
-            Outside the Code.
-          </h2>
-
-          <p className="mt-6 max-w-xl text-sm leading-7 text-neutral-500">
-            When I&apos;m not building things, I
-            like to slow down and capture the
-            moments around me.
-          </p>
-        </div>
-      </section>
-    );
-  }
-
+      setActiveIndex(null);
+      setClosingFocus(false);
+    }, 650);
+  };
+  if (!photos.length) return null;
   return (
     <section
-      ref={sectionRef}
       id="photography"
-      className="relative overflow-hidden border-t border-neutral-900 bg-[#050505] px-6 py-24 md:px-10 lg:px-16 lg:py-32"
+      ref={sectionRef}
+      className="relative w-full"
+      style={{
+        height: "300svh",
+        background:
+          "var(--portfolio-background)",
+        color: "var(--portfolio-text)",
+      }}
     >
-      <div className="mx-auto max-w-7xl">
-        {/* INTRO */}
-
+      <div
+        className="sticky top-0 h-[100svh] w-full overflow-hidden"
+        style={{
+          background:
+            "var(--portfolio-background)",
+        }}
+      >
+        {/* Persistent eyebrow */}
         <div
-          className="relative z-[200] transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="absolute left-6 top-20 z-[70] md:left-10 lg:left-16 lg:top-24"
           style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible
-              ? "translateY(0)"
-              : "translateY(40px)",
+            opacity:
+              activeIndex === null
+                ? 1 - sectionOutro
+                : 0,
           }}
         >
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-neutral-600">
-            08 / Outside the Code
-          </p>
-
-          <h2 className="text-4xl font-medium tracking-tight md:text-6xl">
-            Outside the Code.
-          </h2>
-
-          <p className="mt-6 max-w-xl text-sm leading-7 text-neutral-500">
-            When I&apos;m not building things, I
-            like to slow down and capture the
-            moments around me.
+          <p
+            className="font-mono text-[9px] uppercase tracking-[0.3em]"
+            style={{
+              color:
+                "var(--portfolio-accent)",
+            }}
+          >
+            / Outside the Code
           </p>
         </div>
-
-        {/* PHOTO FIELD */}
-
+        {/* ---------------------------------------------------------------- */}
+        {/* HEADING — intentionally above the spiral                         */}
+        {/* ---------------------------------------------------------------- */}
         <div
-          className="photo-field relative mt-14 h-[1250px] w-full md:mt-20 md:h-[1400px] lg:h-[1500px]"
-          onPointerMove={handlePointerMove}
-          onPointerLeave={resetPointer}
+          className="pointer-events-none absolute inset-x-0 top-0 z-[60] px-6 pt-28 md:px-10 lg:px-16 lg:pt-32"
+          style={{
+            opacity: 1,
+            transform: `translate3d(0, ${
+              (1 - headingProgress) * 20 -
+              sectionOutro * 16
+            }px, 0)`,
+          }}
         >
-          {orderedPhotos.map((photo, index) => {
-            const layout =
-              PHOTO_LAYOUTS[
-                index %
-                  PHOTO_LAYOUTS.length
-              ];
-
-            const parallaxMultiplier =
-              8 + (index % 4) * 3;
-
-            const parallaxX =
-              pointer.x *
-              parallaxMultiplier;
-
-            const parallaxY =
-              pointer.y *
-              (parallaxMultiplier * 0.7);
-
-            const delay =
-              120 + index * 90;
-
-            return (
-              <article
-                key={
-                  photo.id ??
-                  `${photo.title}-${index}`
-                }
-                className="group absolute cursor-pointer outline-none"
-                style={{
-                  left: `${layout.left}%`,
-                  top: `${layout.top}%`,
-                  width: `${layout.width}%`,
-                  zIndex: layout.depth,
-                  opacity: isVisible ? 1 : 0,
-
-                  transform: isVisible
-                    ? `
-                        translate3d(
-                          calc(-50% + ${parallaxX}px),
-                          calc(-50% + ${parallaxY}px),
-                          0
-                        )
-                        rotate(${layout.rotation}deg)
-                      `
-                    : `
-                        translate3d(
-                          calc(-50% + ${parallaxX}px),
-                          calc(-50% + ${parallaxY + 45}px),
-                          0
-                        )
-                        rotate(${layout.rotation + 3}deg)
-                        scale(0.94)
-                      `,
-
-                  transitionProperty:
-                    "transform, opacity",
-
-                  transitionDuration:
-                    "1200ms",
-
-                  transitionTimingFunction:
-                    "cubic-bezier(0.16,1,0.3,1)",
-
-                  transitionDelay: isVisible
-                    ? `${delay}ms`
-                    : "0ms",
+          <div className="max-w-[52rem]">
+            <PhotographyHeading
+              progress={headingProgress}
+            />
+            <p
+              className="mt-6 max-w-md text-sm leading-7"
+              style={{
+                color:
+                  "var(--portfolio-muted)",
+                opacity: easeOut(
+                  range(
+                    sectionProgress,
+                    0.18,
+                    0.34,
+                  ),
+                ),
+              }}
+            >
+              Moments, places and details
+              outside the code.
+            </p>
+          </div>
+        </div>
+        {/* ---------------------------------------------------------------- */}
+        {/* SPIRAL — the only area that captures wheel input                 */}
+        {/* ---------------------------------------------------------------- */}
+        <div
+          ref={spiralViewportRef}
+          className="absolute right-[1.5%] top-0 z-[20] h-full w-[56%]"
+          onWheel={handleSpiralWheel}
+          style={{
+            overscrollBehavior: "contain",
+            overscrollBehaviorY: "contain",
+            touchAction: "none",
+            pointerEvents:
+              spiralProgress > 0.03 && activePhoto === null
+                ? "auto"
+                : "none",
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              opacity:
+                activePhoto
+                  ? 0
+                  : spiralProgress,
+              transform: `translate3d(0, ${
+                (1 - spiralProgress) * 110
+              }px, 0)`,
+              transition:
+                "opacity 550ms ease, transform 900ms cubic-bezier(.16,1,.3,1)",
+              pointerEvents:
+                activePhoto
+                  ? "none"
+                  : "auto",
+            }}
+          >
+            {webglAvailable === true ? (
+              <Canvas
+                className="!h-full !w-full"
+                dpr={[1, 1.5]}
+                camera={{
+                  position: [0, 0, 10],
+                  fov: 44,
+                  near: 0.1,
+                  far: 100,
                 }}
-                tabIndex={0}
-                role="button"
-                aria-label={`Open ${photo.title}`}
-                onClick={() =>
-                  openDetail(
-                    photo,
-                    index
-                  )
-                }
-                onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter" ||
-                    event.key === " "
-                  ) {
-                    event.preventDefault();
-
-                    openDetail(
-                      photo,
-                      index
-                    );
-                  }
+                gl={{
+                  alpha: true,
+                  antialias: false,
+                  powerPreference: "default",
                 }}
               >
-                {/* PHOTO FRAME */}
-
-                <div className="relative bg-[#0a0a0a] p-2 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-2 group-hover:bg-[#0d0d0d] group-hover:shadow-[0_30px_90px_rgba(0,0,0,0.5)] md:p-[10px]">
-                  {/* Outer border */}
-
-                  <div className="pointer-events-none absolute inset-0 border border-white/[0.14] transition-colors duration-500 group-hover:border-white/[0.32]" />
-
-                  {/* Inner border */}
-
-                  <div className="pointer-events-none absolute inset-[5px] border border-white/[0.05] transition-colors duration-500 group-hover:border-white/[0.14] md:inset-[7px]" />
-
-                  {/* IMAGE */}
-
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={photo.photo}
-                      alt={photo.title}
-                      draggable={false}
-                      className="block h-auto w-full select-none object-contain transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.025] group-hover:brightness-[0.62]"
-                    />
-
-                    {/* HOVER TITLE */}
-
-                    <div className="pointer-events-none absolute inset-0 flex items-end justify-between p-4 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-100 md:p-5">
-                      {/* Gradient */}
-
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 via-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-                      {/* Title */}
-
-                      <div className="relative z-10 translate-y-3 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0">
-                        <p className="text-xs font-medium tracking-wide text-white md:text-sm">
-                          {photo.title}
-                        </p>
-
-                        <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-neutral-300">
-                          {photo.location}
-                        </p>
-                      </div>
-
-                      {/* Open */}
-
-                      <span className="relative z-10 translate-y-3 text-[9px] uppercase tracking-[0.2em] text-neutral-300 transition-all duration-500 group-hover:translate-y-0 group-hover:text-white">
-                        Open ↗
-                      </span>
-                    </div>
-
-                    {/* Hover border */}
-
-                    <div className="pointer-events-none absolute inset-0 border border-transparent transition-colors duration-500 group-hover:border-white/[0.28]" />
-                  </div>
+                <Suspense fallback={null}>
+                  <SpiralScene
+                    items={items}
+                    targetProgress={targetProgress}
+                    onSelect={(index) => {
+                      setClosingFocus(false);
+                      setActiveIndex(index);
+                    }}
+                  />
+                </Suspense>
+              </Canvas>
+            ) : webglAvailable === false ? (
+              <div
+                className="absolute inset-0 flex items-center justify-center px-8 text-center"
+                aria-label="Photography gallery preview"
+              >
+                <div className="max-w-sm">
+                  <p
+                    className="font-mono text-[9px] uppercase tracking-[0.28em]"
+                    style={{ color: "var(--portfolio-accent)" }}
+                  >
+                    Photography archive
+                  </p>
+                  <p
+                    className="mt-4 text-sm leading-7 opacity-65"
+                    style={{ color: "var(--portfolio-text)" }}
+                  >
+                    The interactive 3D gallery is unavailable because WebGL is disabled in this browser.
+                  </p>
                 </div>
-              </article>
-            );
-          })}
-
-          {/* EDITORIAL ANNOTATIONS */}
-
-          <div
-            className="pointer-events-none absolute right-2 top-[18%] hidden rotate-[-4deg] text-right text-[10px] uppercase tracking-[0.25em] text-neutral-700 transition-opacity duration-1000 md:block"
-            style={{
-              opacity: isVisible ? 1 : 0,
-            }}
-          >
-            Different places.
-            <br />
-            Same curiosity.
-          </div>
-
-          <div
-            className="pointer-events-none absolute left-0 top-[48%] hidden rotate-[-8deg] text-[10px] uppercase tracking-[0.25em] text-neutral-700 transition-opacity duration-1000 md:block"
-            style={{
-              opacity: isVisible ? 1 : 0,
-            }}
-          >
-            Small
-            <br />
-            encounters.
-          </div>
-
-          <div
-            className="pointer-events-none absolute right-1 bottom-[17%] hidden rotate-[5deg] text-right text-[10px] uppercase tracking-[0.25em] text-neutral-700 transition-opacity duration-1000 md:block"
-            style={{
-              opacity: isVisible ? 1 : 0,
-            }}
-          >
-            Details
-            <br />
-            matter.
+              </div>
+            ) : null}
           </div>
         </div>
-
-        {/* FOOTER */}
-
+        {/* ---------------------------------------------------------------- */}
+        {/* Focused photograph + inline details                             */}
+        {/* ---------------------------------------------------------------- */}
+        {activePhoto && (
+          <>
+            {/* Left-side details live directly under the persistent heading. */}
+            <div
+              className="absolute left-6 top-[39%] z-[80] w-[min(38vw,34rem)] md:left-10 lg:left-16"
+              style={{
+                opacity: closingFocus ? 0 : 1,
+                transform: closingFocus
+                  ? "translate3d(0,18px,0)"
+                  : "translate3d(0,0,0)",
+                transition:
+                  "opacity 500ms ease, transform 650ms cubic-bezier(.16,1,.3,1)",
+              }}
+            >
+              <p
+                className="font-mono text-[8px] uppercase tracking-[.25em]"
+                style={{
+                  color:
+                    "var(--portfolio-accent)",
+                }}
+              >
+                Photography
+              </p>
+              <h3
+                className="mt-3 font-[Syne,sans-serif] text-[clamp(1.7rem,3vw,3.2rem)] font-medium leading-[.94] tracking-[-.045em]"
+                style={{
+                  color:
+                    "var(--portfolio-text)",
+                }}
+              >
+                {activePhoto.title}
+              </h3>
+              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[8px] uppercase tracking-[.18em]">
+                {activePhoto.location && (
+                  <span
+                    style={{
+                      color:
+                        "var(--portfolio-muted)",
+                    }}
+                  >
+                    {activePhoto.location}
+                  </span>
+                )}
+                {activePhoto.date && (
+                  <span
+                    style={{
+                      color:
+                        "var(--portfolio-muted)",
+                    }}
+                  >
+                    {activePhoto.date}
+                  </span>
+                )}
+              </div>
+              {activePhoto.description && (
+                <p
+                  className="mt-5 max-w-md text-sm leading-7"
+                  style={{
+                    color:
+                      "var(--portfolio-muted)",
+                  }}
+                >
+                  {activePhoto.description}
+                </p>
+              )}
+            </div>
+            {/* The selected image replaces the spiral on the right. */}
+            <div
+              className="absolute right-[1.5%] top-0 z-[75] flex h-full w-[56%] items-center justify-center"
+              role="dialog"
+              aria-modal="true"
+              aria-label={activePhoto.title}
+            >
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  opacity: closingFocus ? 0 : 1,
+                  transform: closingFocus
+                    ? "translate3d(0,24px,0) scale(.72)"
+                    : "translate3d(0,0,0) scale(1)",
+                  transition:
+                    "opacity 600ms ease, transform 750ms cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <img
+                  src={activePhoto.photo}
+                  alt={activePhoto.title}
+                  draggable={false}
+                  onClick={closeFocusedPhoto}
+                  className="max-h-[82%] max-w-[92%] cursor-pointer object-contain select-none"
+                  style={{
+                    filter: "none",
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                aria-label="Return photograph to spiral"
+                onClick={closeFocusedPhoto}
+                className="absolute right-2 top-0 z-[90] font-mono text-[9px] uppercase tracking-[.22em]"
+                style={{
+                  color:
+                    "var(--portfolio-muted)",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </>
+        )}
+        {/* Release marker */}
         <div
-          className="relative z-20 flex items-center justify-between border-t border-neutral-900 pt-6 text-[10px] uppercase tracking-[0.25em] text-neutral-700 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="pointer-events-none absolute bottom-6 left-6 z-[70] md:left-10 lg:left-16"
           style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible
-              ? "translateY(0)"
-              : "translateY(25px)",
+            opacity:
+              activeIndex === null
+                ? sectionOutro
+                : 0,
+            transform: `translateY(${
+              (1 - sectionOutro) * 12
+            }px)`,
           }}
         >
-          <span>Photography</span>
-
-          <span className="hidden md:block">
-            Move through the moments
-          </span>
-
-          <span className="md:hidden">
-            Tap a photograph
+          <span
+            className="font-mono text-[8px] uppercase tracking-[.24em]"
+            style={{
+              color:
+                "var(--portfolio-muted)",
+            }}
+          >
+            The journey ahead
           </span>
         </div>
       </div>
-
-      {/* ================================================= */}
-      {/* EXPANDED DETAIL VIEW                              */}
-      {/* ================================================= */}
-
-      {selectedPhoto && (
-        <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center px-4 py-6 md:px-8 md:py-10"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="photography-detail-title"
-          onMouseDown={(event) => {
-            if (
-              event.target === event.currentTarget
-            ) {
-              closeDetail();
-            }
-          }}
-          style={{
-            opacity: isDetailVisible ? 1 : 0,
-            transition:
-              "opacity 450ms cubic-bezier(0.16,1,0.3,1)",
-          }}
-        >
-          {/* BACKDROP */}
-
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            style={{
-              opacity: isDetailVisible
-                ? 1
-                : 0,
-              transition:
-                "opacity 500ms ease",
-            }}
-          />
-
-          {/* DETAIL CARD */}
-
-          <div
-            className="relative z-10 flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden border border-white/[0.16] bg-[#090909] shadow-[0_40px_120px_rgba(0,0,0,0.65)] md:flex-row"
-            onMouseDown={(event) =>
-              event.stopPropagation()
-            }
-            style={{
-              opacity: isDetailVisible
-                ? 1
-                : 0,
-
-              transform: isDetailVisible
-                ? "translateY(0) scale(1)"
-                : "translateY(35px) scale(0.96)",
-
-              transition:
-                "opacity 500ms cubic-bezier(0.16,1,0.3,1), transform 650ms cubic-bezier(0.16,1,0.3,1)",
-            }}
-          >
-            {/* Inner border */}
-
-            <div className="pointer-events-none absolute inset-2 z-20 border border-white/[0.06]" />
-
-            {/* IMAGE */}
-
-            <div className="relative flex min-h-[300px] flex-1 items-center justify-center overflow-hidden bg-[#050505] p-5 md:min-h-[600px] md:p-10">
-              <img
-                key={selectedPhoto.id}
-                src={selectedPhoto.photo}
-                alt={selectedPhoto.title}
-                className="relative z-10 max-h-[52vh] max-w-full object-contain md:max-h-[72vh]"
-                style={{
-                  animation:
-                    detailDirection === "next"
-                      ? "photoDetailNext 450ms cubic-bezier(0.16,1,0.3,1)"
-                      : detailDirection ===
-                          "previous"
-                        ? "photoDetailPrevious 450ms cubic-bezier(0.16,1,0.3,1)"
-                        : undefined,
-                }}
-              />
-
-              <div className="pointer-events-none absolute inset-5 border border-white/[0.08] md:inset-10" />
-            </div>
-
-            {/* INFORMATION */}
-
-            <div className="relative flex w-full min-w-0 flex-col justify-between overflow-y-auto border-t border-white/[0.08] p-7 md:w-[380px] md:border-l md:border-t-0 md:p-10">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-600">
-                  Photography /
-                  {String(
-                    (selectedIndex ?? 0) + 1
-                  ).padStart(2, "0")}
-                  {" "}
-                  <span className="text-neutral-800">
-                    OF{" "}
-                    {String(
-                      orderedPhotos.length
-                    ).padStart(2, "0")}
-                  </span>
-                </p>
-
-                <h3
-                  id="photography-detail-title"
-                  className="mt-6 text-3xl font-medium leading-tight tracking-[-0.03em] text-white md:text-4xl"
-                >
-                  {selectedPhoto.title}
-                </h3>
-
-                {/* LOCATION */}
-
-                <div className="mt-8 border-t border-white/[0.08] pt-6">
-                  <p className="text-[9px] uppercase tracking-[0.25em] text-neutral-600">
-                    Location
-                  </p>
-
-                  <p className="mt-2 text-sm text-neutral-300">
-                    {selectedPhoto.location}
-                  </p>
-                </div>
-
-                {/* DATE */}
-
-                {selectedPhoto.date && (
-                  <div className="mt-6">
-                    <p className="text-[9px] uppercase tracking-[0.25em] text-neutral-600">
-                      Date
-                    </p>
-
-                    <p className="mt-2 text-sm text-neutral-300">
-                      {selectedPhoto.date}
-                    </p>
-                  </div>
-                )}
-
-                {/* DESCRIPTION */}
-
-                {selectedPhoto.description && (
-                  <div className="mt-6">
-                    <p className="text-[9px] uppercase tracking-[0.25em] text-neutral-600">
-                      About the moment
-                    </p>
-
-                    <p className="mt-3 text-sm leading-7 text-neutral-400">
-                      {
-                        selectedPhoto.description
-                      }
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* CONTROLS */}
-
-              <div className="mt-10 md:mt-12">
-                <div className="grid grid-cols-2 gap-2">
-                  {/* PREVIOUS */}
-
-                  <button
-                    type="button"
-                    onClick={showPrevious}
-                    disabled={
-                      orderedPhotos.length <= 1
-                    }
-                    className="group flex min-h-12 items-center justify-between border border-white/[0.12] px-4 text-[10px] uppercase tracking-[0.2em] text-neutral-400 transition-all duration-300 hover:border-white/35 hover:bg-white/[0.05] hover:text-white focus:outline-none focus:ring-1 focus:ring-white disabled:cursor-not-allowed disabled:opacity-30"
-                    aria-label="Previous photograph"
-                  >
-                    <span className="text-base transition-transform duration-300 group-hover:-translate-x-1">
-                      ←
-                    </span>
-
-                    <span>
-                      Previous
-                    </span>
-                  </button>
-
-                  {/* NEXT */}
-
-                  <button
-                    type="button"
-                    onClick={showNext}
-                    disabled={
-                      orderedPhotos.length <= 1
-                    }
-                    className="group flex min-h-12 items-center justify-between border border-white/[0.12] px-4 text-[10px] uppercase tracking-[0.2em] text-neutral-400 transition-all duration-300 hover:border-white/35 hover:bg-white/[0.05] hover:text-white focus:outline-none focus:ring-1 focus:ring-white disabled:cursor-not-allowed disabled:opacity-30"
-                    aria-label="Next photograph"
-                  >
-                    <span>
-                      Next
-                    </span>
-
-                    <span className="text-base transition-transform duration-300 group-hover:translate-x-1">
-                      →
-                    </span>
-                  </button>
-                </div>
-
-                {/* CLOSE */}
-
-                <button
-                  type="button"
-                  onClick={closeDetail}
-                  className="mt-2 flex min-h-12 w-full items-center justify-between border border-white/[0.14] bg-white/[0.02] px-5 text-[10px] uppercase tracking-[0.25em] text-neutral-400 transition-all duration-300 hover:border-white/40 hover:bg-white hover:text-black focus:outline-none focus:ring-1 focus:ring-white"
-                  aria-label="Close photography detail"
-                >
-                  <span>Close</span>
-
-                  <span className="text-lg leading-none">
-                    ×
-                  </span>
-                </button>
-
-                <p className="mt-4 text-center text-[9px] uppercase tracking-[0.2em] text-neutral-700">
-                  ← → Navigate
-                  <span className="mx-2">
-                    •
-                  </span>
-                  Esc Close
-                </p>
-              </div>
-            </div>
-
-            {/* TOP RIGHT CLOSE */}
-
-            <button
-              type="button"
-              onClick={closeDetail}
-              className="absolute right-5 top-5 z-30 flex h-10 w-10 items-center justify-center border border-white/[0.14] bg-black/50 text-lg text-neutral-300 backdrop-blur-md transition-all duration-300 hover:border-white/40 hover:bg-white hover:text-black focus:outline-none focus:ring-1 focus:ring-white"
-              aria-label="Close photography detail"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ================================================= */}
-      {/* ANIMATIONS                                        */}
-      {/* ================================================= */}
-
-      <style jsx>{`
-        @keyframes photoDetailNext {
-          0% {
-            opacity: 0;
-            transform: translateX(35px) scale(0.97);
-          }
-
-          100% {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-
-        @keyframes photoDetailPrevious {
-          0% {
-            opacity: 0;
-            transform: translateX(-35px) scale(0.97);
-          }
-
-          100% {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-
-        @media (max-width: 767px) {
-          #outside-the-code .absolute {
-            max-width: 70vw;
-          }
-
-          #outside-the-code article {
-            -webkit-tap-highlight-color: transparent;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          #outside-the-code * {
-            transition-duration: 0.01ms !important;
-            animation-duration: 0.01ms !important;
-          }
-
-          @keyframes photoDetailNext {
-            from,
-            to {
-              opacity: 1;
-              transform: none;
-            }
-          }
-
-          @keyframes photoDetailPrevious {
-            from,
-            to {
-              opacity: 1;
-              transform: none;
-            }
-          }
-        }
-      `}</style>
-      <style>{`
-        @media (max-width: 767px) {
-          #outside-the-code .photo-field {
-            height: auto !important;
-            min-height: 0 !important;
-            display: flex;
-            flex-direction: column;
-            gap: 3.75rem;
-            padding: 0.5rem 0.25rem 2rem;
-          }
-
-          #outside-the-code .photo-field > article {
-            position: relative !important;
-            left: auto !important;
-            top: auto !important;
-            width: min(88vw, 360px) !important;
-            margin: 0 auto;
-            transform: none !important;
-            -webkit-tap-highlight-color: transparent;
-          }
-
-          #outside-the-code .photo-field > article:nth-child(3n + 1) {
-            margin-left: 0.5rem;
-            margin-right: auto;
-            transform: rotate(-2deg) !important;
-          }
-
-          #outside-the-code .photo-field > article:nth-child(3n + 2) {
-            margin-left: auto;
-            margin-right: 0.5rem;
-            transform: rotate(1.5deg) !important;
-          }
-
-          #outside-the-code .photo-field > article:nth-child(3n) {
-            margin-left: auto;
-            margin-right: auto;
-            transform: rotate(-1deg) !important;
-          }
-        }
-      `}</style>
-
     </section>
   );
 }

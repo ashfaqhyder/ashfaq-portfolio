@@ -2,12 +2,21 @@
 
 import {
   useEffect,
+  useRef,
   useState,
   type ComponentType,
   type ReactNode,
 } from "react";
 
 import Link from "next/link";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useReducedMotion,
+  type MotionValue,
+} from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 
 import {
@@ -28,6 +37,7 @@ import {
   FlaskConical,
   MonitorCog,
   Images,
+  Clapperboard,
   Palette,
   Search,
   Settings,
@@ -38,6 +48,10 @@ import {
 } from "lucide-react";
 
 import { auth } from "@/lib/firebase/auth";
+import {
+  defaultAppearanceSettings,
+  type AppearanceSettings,
+} from "@/services/appearance";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -109,6 +123,11 @@ const navigation: NavItem[] = [
     icon: Images,
   },
   {
+    label: "Screen Culture",
+    href: "/admin/screen-culture",
+    icon: Clapperboard,
+  },
+  {
     label: "Appearance",
     href: "/admin/appearance",
     icon: Palette,
@@ -130,6 +149,142 @@ const navigation: NavItem[] = [
   },
 ];
 
+function MagneticAdminNavItem({
+  item,
+  isActive,
+  sidebarOpen,
+  mouseY,
+  reducedMotion,
+  onNavigate,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  sidebarOpen: boolean;
+  mouseY: MotionValue<number>;
+  reducedMotion: boolean;
+  onNavigate: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const distance = useTransform(mouseY, (value: number) => {
+    if (!ref.current) return 9999;
+
+    const rect = ref.current.getBoundingClientRect();
+    const center = rect.top + rect.height / 2;
+
+    return value - center;
+  });
+
+  const scale = useTransform(
+    distance,
+    [-110, 0, 110],
+    [1, 1.08, 1]
+  );
+
+  const magneticX = useTransform(
+    scale,
+    (value) => (value - 1) * 10
+  );
+
+  const springConfig = {
+    damping: 20,
+    stiffness: 300,
+    mass: 0.5,
+  };
+
+  const smoothScale = useSpring(scale, springConfig);
+  const smoothX = useSpring(magneticX, springConfig);
+
+  const Icon = item.icon;
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{
+        scale: reducedMotion ? 1 : smoothScale,
+        x: reducedMotion ? 0 : smoothX,
+        transformOrigin: "left center",
+      }}
+      className="relative z-0"
+    >
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        aria-label={item.label}
+        className={[
+          "group relative flex h-11 items-center",
+          "rounded-xl",
+          "transition-colors duration-200",
+          sidebarOpen
+            ? "gap-3 px-3"
+            : "justify-center px-2",
+          isActive
+            ? "text-white scale-[1.04] origin-left"
+            : "text-neutral-500 hover:bg-transparent hover:text-[var(--portfolio-text)]",
+        ].join(" ")}
+      >
+        {/* Active indicator */}
+        <span
+          className={[
+            "absolute left-0 top-1/2 h-5 w-px -translate-y-1/2",
+            "transition-colors duration-200",
+            isActive
+              ? "bg-[var(--portfolio-accent)]"
+              : "bg-transparent",
+          ].join(" ")}
+        />
+
+        {/* Icon */}
+        <span
+          className={[
+            "flex h-8 w-8 shrink-0 items-center justify-center",
+            "transition-all duration-200",
+            isActive
+              ? "text-[var(--portfolio-accent)]"
+              : "text-neutral-600 group-hover:text-neutral-300",
+          ].join(" ")}
+        >
+          <Icon size={17} strokeWidth={1.5} />
+        </span>
+
+        {/* Expanded label */}
+        {sidebarOpen && (
+          <span className="truncate text-xs font-medium">
+            {item.label}
+          </span>
+        )}
+
+        {/* Collapsed tooltip */}
+        {!sidebarOpen && (
+          <span
+            className={[
+              "pointer-events-none absolute left-[calc(100%+12px)] top-1/2 z-[100]",
+              "-translate-y-1/2 translate-x-[-4px]",
+              "whitespace-nowrap",
+              "border border-neutral-800",
+              "bg-[#0b0b0b]",
+              "px-3 py-2",
+              "text-[10px] font-medium uppercase tracking-[0.16em]",
+              "text-neutral-300",
+              "opacity-0 shadow-2xl",
+              "transition-all duration-150",
+              "group-hover:translate-x-0",
+              "group-hover:opacity-100",
+            ].join(" ")}
+          >
+            {item.label}
+
+            <span
+              className="absolute left-[-4px] top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 border-b border-l border-neutral-800 bg-[#0b0b0b]"
+              aria-hidden="true"
+            />
+          </span>
+        )}
+      </Link>
+    </motion.div>
+  );
+}
+
 export default function AdminLayout({
   children,
 }: AdminLayoutProps) {
@@ -147,6 +302,66 @@ export default function AdminLayout({
 
   const [isAdmin, setIsAdmin] =
     useState(false);
+
+  const [appearance, setAppearance] =
+    useState<AppearanceSettings>(
+      defaultAppearanceSettings
+    );
+
+  /*
+   * Magnetic sidebar navigation.
+   * The mouse position is tracked vertically so nearby
+   * menu items subtly scale and move toward the pointer.
+   */
+  const menuMouseY = useMotionValue(Infinity);
+  const reducedMotion = useReducedMotion() ?? false;
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    let cancelled = false;
+
+    async function loadAdminAppearance() {
+      try {
+        const response = await fetch(
+          "/api/admin/appearance",
+          {
+            method: "GET",
+            cache: "no-store",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load CMS Appearance."
+          );
+        }
+
+        const result = await response.json();
+
+        if (!cancelled && result?.settings) {
+          setAppearance({
+            ...defaultAppearanceSettings,
+            ...result.settings,
+          });
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load CMS Appearance:",
+          error
+        );
+      }
+    }
+
+    loadAdminAppearance();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin, pathname]);
 
   /*
    * Restore sidebar state after refresh.
@@ -173,6 +388,102 @@ export default function AdminLayout({
       String(sidebarOpen)
     );
   }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const root = document.documentElement;
+    const body = document.body;
+
+    root.dataset.adminAnimations = appearance.animationsEnabled
+      ? "enabled"
+      : "disabled";
+
+    root.dataset.adminSmoothScroll = appearance.smoothScrollEnabled
+      ? "enabled"
+      : "disabled";
+
+    /*
+     * Keep the CMS Appearance values available globally.
+     *
+     * The admin shell has its own data-admin-theme wrapper, but
+     * global elements such as the dither canvas, scrollbar and
+     * html/body also need to read the same CMS variables.
+     */
+    root.style.setProperty(
+      "--portfolio-background",
+      appearance.backgroundColor
+    );
+    root.style.setProperty(
+      "--portfolio-surface",
+      appearance.surfaceColor
+    );
+    root.style.setProperty(
+      "--portfolio-text",
+      appearance.textColor
+    );
+    root.style.setProperty(
+      "--portfolio-muted",
+      appearance.mutedColor
+    );
+    root.style.setProperty(
+      "--portfolio-border",
+      appearance.borderColor
+    );
+    root.style.setProperty(
+      "--portfolio-accent",
+      appearance.accentColor
+    );
+
+    body.style.backgroundColor = appearance.backgroundColor;
+    body.style.color = appearance.textColor;
+    root.style.backgroundColor = appearance.backgroundColor;
+    root.style.color = appearance.textColor;
+
+    root.style.scrollBehavior = appearance.smoothScrollEnabled
+      ? "smooth"
+      : "auto";
+
+    return () => {
+      delete root.dataset.adminAnimations;
+      delete root.dataset.adminSmoothScroll;
+      root.style.scrollBehavior = "auto";
+    };
+  }, [appearance, isAdmin]);
+
+  /*
+   * Listen for an Appearance save made from the CMS Appearance
+   * page so every already-mounted admin section updates instantly.
+   */
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    function handleAppearanceUpdate(
+      event: Event
+    ) {
+      const customEvent =
+        event as CustomEvent<AppearanceSettings>;
+
+      if (!customEvent.detail) return;
+
+      setAppearance({
+        ...defaultAppearanceSettings,
+        ...customEvent.detail,
+      });
+    }
+
+    window.addEventListener(
+      "portfolio-appearance-updated",
+      handleAppearanceUpdate
+    );
+
+    return () => {
+      window.removeEventListener(
+        "portfolio-appearance-updated",
+        handleAppearanceUpdate
+      );
+    };
+  }, [isAdmin]);
 
   /*
    * ============================================================
@@ -310,7 +621,7 @@ export default function AdminLayout({
    */
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-transparent text-white">
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-xs uppercase tracking-[0.3em] text-neutral-600">
             Verifying administrator access
@@ -335,7 +646,7 @@ export default function AdminLayout({
    */
   if (!user || !isAdmin) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-transparent text-white">
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
             <div className="text-xs uppercase tracking-[0.3em] text-neutral-600">
@@ -374,7 +685,138 @@ export default function AdminLayout({
    * ============================================================
    */
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div
+      data-admin-theme="true"
+      className="min-h-screen"
+      style={{
+        "--portfolio-background": appearance.backgroundColor,
+        "--portfolio-surface": appearance.surfaceColor,
+        "--portfolio-text": appearance.textColor,
+        "--portfolio-muted": appearance.mutedColor,
+        "--portfolio-border": appearance.borderColor,
+        "--portfolio-accent": appearance.accentColor,
+        backgroundColor: appearance.backgroundColor,
+        color: appearance.textColor,
+      } as React.CSSProperties}
+    >
+
+      <style jsx global>{`
+        [data-admin-theme] {
+          --cms-bg: var(--portfolio-background);
+          --cms-surface: var(--portfolio-surface);
+          --cms-text: var(--portfolio-text);
+          --cms-muted: var(--portfolio-muted);
+          --cms-border: var(--portfolio-border);
+          --cms-accent: var(--portfolio-accent);
+          background: var(--cms-bg);
+          color: var(--cms-text);
+        }
+
+        [data-admin-theme] .bg-\[\#050505\],
+        [data-admin-theme] .bg-\[\#080808\],
+        [data-admin-theme] .bg-\[\#090909\] {
+          background-color: var(--cms-bg) !important;
+        }
+
+        /* Keep explicitly transparent admin surfaces transparent so the
+           global dither field can remain visible underneath them. */
+        [data-admin-theme] .bg-transparent {
+          background-color: transparent !important;
+        }
+
+        [data-admin-theme] .bg-neutral-900,
+        [data-admin-theme] .bg-neutral-800 {
+          background-color: var(--cms-surface) !important;
+        }
+
+        [data-admin-theme] .text-white,
+        [data-admin-theme] .text-neutral-100,
+        [data-admin-theme] .text-neutral-200 {
+          color: var(--cms-text) !important;
+        }
+
+        [data-admin-theme] .text-neutral-300,
+        [data-admin-theme] .text-neutral-400 {
+          color: color-mix(in srgb, var(--cms-text) 78%, var(--cms-muted)) !important;
+        }
+
+        [data-admin-theme] .text-neutral-500,
+        [data-admin-theme] .text-neutral-600,
+        [data-admin-theme] .text-neutral-700 {
+          color: var(--cms-muted) !important;
+        }
+
+        [data-admin-theme] .border-neutral-900,
+        [data-admin-theme] .border-neutral-800,
+        [data-admin-theme] .border-neutral-700 {
+          border-color: var(--cms-border) !important;
+        }
+
+        [data-admin-theme] .hover\:text-white:hover {
+          color: var(--cms-text) !important;
+        }
+
+        [data-admin-theme] .hover\:text-neutral-300:hover,
+        [data-admin-theme] .hover\:text-neutral-400:hover {
+          color: var(--cms-text) !important;
+        }
+
+        [data-admin-theme] .hover\:border-neutral-600:hover,
+        [data-admin-theme] .hover\:border-neutral-700:hover,
+        [data-admin-theme] .hover\:border-neutral-800:hover {
+          border-color: var(--cms-accent) !important;
+        }
+
+        [data-admin-theme] input,
+        [data-admin-theme] textarea,
+        [data-admin-theme] select {
+          color: var(--cms-text);
+          background-color: var(--cms-bg);
+          border-color: var(--cms-border);
+        }
+
+        [data-admin-theme] input::placeholder,
+        [data-admin-theme] textarea::placeholder {
+          color: var(--cms-muted);
+        }
+
+        [data-admin-theme] input:focus,
+        [data-admin-theme] textarea:focus,
+        [data-admin-theme] select:focus {
+          border-color: var(--cms-accent);
+          outline-color: var(--cms-accent);
+        }
+
+        [data-admin-theme] ::selection {
+          background: var(--cms-accent);
+          color: var(--cms-bg);
+        }
+
+        /* Hide scrollbars while keeping scrolling fully functional */
+        [data-admin-theme] {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        [data-admin-theme] * {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        [data-admin-theme]::-webkit-scrollbar,
+        [data-admin-theme] *::-webkit-scrollbar {
+          display: none;
+          width: 0;
+          height: 0;
+        }
+
+        html[data-admin-animations=\"disabled\"] [data-admin-theme] *,
+        html[data-admin-animations=\"disabled\"] [data-admin-theme] *::before,
+        html[data-admin-animations=\"disabled\"] [data-admin-theme] *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      `}</style>
 
       {/* =====================================================
           MOBILE BACKDROP
@@ -387,7 +829,7 @@ export default function AdminLayout({
           onClick={() =>
             setSidebarOpen(false)
           }
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-[2px] md:hidden"
+          className="fixed inset-0 z-30 bg-transparent/60 backdrop-blur-[2px] md:hidden"
         />
       )}
 
@@ -398,7 +840,7 @@ export default function AdminLayout({
       <aside
         className={[
           "fixed left-0 top-0 z-40 flex h-screen flex-col",
-          "border-r border-neutral-900 bg-[#050505]",
+          "rounded-r-2xl border-r border-neutral-900 bg-transparent",
           "transition-[width,transform] duration-300 ease-out",
 
           sidebarOpen
@@ -411,6 +853,11 @@ export default function AdminLayout({
             ? "max-md:translate-x-0"
             : "max-md:-translate-x-full",
         ].join(" ")}
+        style={{
+          backgroundColor: "var(--portfolio-background)",
+          borderColor: "var(--portfolio-border)",
+          color: "var(--portfolio-text)",
+        }}
       >
 
         {/* =================================================
@@ -426,18 +873,39 @@ export default function AdminLayout({
               ? "justify-between px-5"
               : "justify-center px-2",
           ].join(" ")}
+          style={{
+            borderColor: "var(--portfolio-border)",
+          }}
         >
           {sidebarOpen && (
             <Link
               href="/admin"
-              className="group min-w-0"
+              className="group flex min-w-0 items-center gap-3"
             >
-              <div className="truncate text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500 transition group-hover:text-white">
-                Ashfaq Hyder
-              </div>
+              <span
+                aria-label="Ashfaq Hyder"
+                role="img"
+                className="h-9 w-9 shrink-0 bg-[var(--portfolio-text)]"
+                style={{
+                  WebkitMaskImage: 'url("/ashfaq-hyder-logo.png?v=2")',
+                  maskImage: 'url("/ashfaq-hyder-logo.png?v=2")',
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
+              />
 
-              <div className="mt-1 text-[10px] uppercase tracking-[0.22em] text-neutral-700">
-                Portfolio CMS
+              <div className="min-w-0">
+                <div className="truncate text-[11px] font-medium uppercase tracking-[0.28em] text-[var(--portfolio-text)] transition group-hover:text-[var(--portfolio-text)]">
+                  Ashfaq Hyder
+                </div>
+
+                <div className="mt-1 text-[10px] uppercase tracking-[0.22em] text-neutral-700">
+                  Portfolio CMS
+                </div>
               </div>
             </Link>
           )}
@@ -463,12 +931,16 @@ export default function AdminLayout({
             }
             className={[
               "flex h-9 w-9 shrink-0 items-center justify-center",
-              "border border-neutral-800",
+              "border",
               "text-neutral-500",
               "transition",
               "hover:border-[var(--portfolio-accent)]",
               "hover:text-[var(--portfolio-accent)]",
             ].join(" ")}
+            style={{
+              borderColor: "var(--portfolio-border)",
+              color: "var(--portfolio-muted)",
+            }}
           >
             {sidebarOpen ? (
               <X
@@ -488,7 +960,15 @@ export default function AdminLayout({
             NAVIGATION
         ================================================== */}
 
-        <nav className="flex-1 overflow-y-auto px-3 py-5">
+        <nav
+          className="flex-1 overflow-y-auto px-3 py-5"
+          onMouseMove={
+            reducedMotion
+              ? undefined
+              : (event) => menuMouseY.set(event.clientY)
+          }
+          onMouseLeave={() => menuMouseY.set(Infinity)}
+        >
 
           {sidebarOpen && (
             <div className="mb-4 px-3 text-[9px] uppercase tracking-[0.3em] text-neutral-700">
@@ -506,121 +986,25 @@ export default function AdminLayout({
                 item.href === "/admin"
                   ? pathname === "/admin"
                   : pathname === item.href ||
-                    pathname.startsWith(
-                      `${item.href}/`
-                    );
-
-              const Icon = item.icon;
+                    pathname.startsWith(`${item.href}/`);
 
               return (
-                <Link
+                <MagneticAdminNavItem
                   key={item.href}
-                  href={item.href}
-                  onClick={() => {
+                  item={item}
+                  isActive={isActive}
+                  sidebarOpen={sidebarOpen}
+                  mouseY={menuMouseY}
+                  reducedMotion={reducedMotion}
+                  onNavigate={() => {
                     /*
                      * Automatically close on mobile.
                      */
-                    if (
-                      window.innerWidth < 768
-                    ) {
+                    if (window.innerWidth < 768) {
                       setSidebarOpen(false);
                     }
                   }}
-                  aria-label={item.label}
-                  className={[
-                    "group relative flex h-11 items-center",
-                    "transition-all duration-200",
-
-                    sidebarOpen
-                      ? "gap-3 px-3"
-                      : "justify-center px-2",
-
-                    isActive
-                      ? "bg-neutral-900 text-white"
-                      : "text-neutral-500 hover:bg-neutral-950 hover:text-white",
-                  ].join(" ")}
-                >
-
-                  {/* Active indicator */}
-
-                  <span
-                    className={[
-                      "absolute left-0 top-1/2 h-5 w-px -translate-y-1/2",
-                      "transition-colors duration-200",
-
-                      isActive
-                        ? "bg-[var(--portfolio-accent)]"
-                        : "bg-transparent",
-                    ].join(" ")}
-                  />
-
-                  {/* =================================================
-                      ICON
-                  ================================================== */}
-
-                  <span
-                    className={[
-                      "flex h-8 w-8 shrink-0 items-center justify-center",
-                      "transition-all duration-200",
-
-                      isActive
-                        ? "text-[var(--portfolio-accent)]"
-                        : "text-neutral-600 group-hover:text-neutral-300",
-                    ].join(" ")}
-                  >
-                    <Icon
-                      size={17}
-                      strokeWidth={1.5}
-                    />
-                  </span>
-
-                  {/* =================================================
-                      EXPANDED LABEL
-                  ================================================== */}
-
-                  {sidebarOpen && (
-                    <span className="truncate text-xs font-medium">
-                      {item.label}
-                    </span>
-                  )}
-
-                  {/* =================================================
-                      COLLAPSED TOOLTIP
-                  ================================================== */}
-
-                  {!sidebarOpen && (
-                    <span
-                      className={[
-                        "pointer-events-none absolute left-[calc(100%+12px)] top-1/2 z-[100]",
-                        "-translate-y-1/2 translate-x-[-4px]",
-                        "whitespace-nowrap",
-
-                        "border border-neutral-800",
-                        "bg-[#0b0b0b]",
-                        "px-3 py-2",
-
-                        "text-[10px] font-medium uppercase tracking-[0.16em]",
-                        "text-neutral-300",
-
-                        "opacity-0 shadow-2xl",
-
-                        "transition-all duration-150",
-
-                        "group-hover:translate-x-0",
-                        "group-hover:opacity-100",
-                      ].join(" ")}
-                    >
-                      {item.label}
-
-                      {/* Tooltip arrow */}
-
-                      <span
-                        className="absolute left-[-4px] top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 border-b border-l border-neutral-800 bg-[#0b0b0b]"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  )}
-                </Link>
+                />
               );
             })}
           </div>
@@ -630,10 +1014,13 @@ export default function AdminLayout({
             SIDEBAR FOOTER
         ================================================== */}
 
-        <div className="shrink-0 border-t border-neutral-900 p-3">
+        <div
+          className="shrink-0 border-t p-3"
+          style={{ borderColor: "var(--portfolio-border)" }}
+        >
 
           {sidebarOpen && user && (
-            <div className="mb-3 border border-neutral-900 bg-neutral-950 px-3 py-3">
+            <div className="mb-3 border border-neutral-900 bg-transparent px-3 py-3">
               <p className="text-[9px] uppercase tracking-[0.2em] text-neutral-700">
                 Administrator
               </p>
@@ -711,8 +1098,7 @@ export default function AdminLayout({
           className={[
             "fixed left-4 top-4 z-20",
             "flex h-9 w-9 items-center justify-center",
-            "border border-neutral-800",
-            "bg-[#050505]/90",
+            "border",
             "text-neutral-500",
             "backdrop-blur",
             "transition",

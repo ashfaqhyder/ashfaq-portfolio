@@ -10,174 +10,165 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-
 import { db } from "@/lib/firebase/firestore";
+
+export type AchievementStructure = "standalone" | "master" | "course";
 
 export interface Achievement {
   id?: string;
-
   title: string;
-
   organization: string;
-
-  /**
-   * Public URL of the organization's logo.
-   *
-   * Example:
-   * https://example.com/logo.svg
-   */
   organizationLogoUrl?: string;
-
-  /**
-   * Example:
-   * "June 2026"
-   * "April 10–11, 2025"
-   */
   date: string;
-
-  /**
-   * Examples:
-   * Certification
-   * Hackathon
-   * Research
-   * Award
-   * Participation
-   */
   type: string;
-
   description: string;
-
-  /**
-   * Official issuer verification page.
-   */
   verificationUrl?: string;
-
-  /**
-   * Controls whether this achievement is highlighted.
-   */
   featured: boolean;
-
-  /**
-   * Controls whether this achievement appears publicly.
-   */
   published: boolean;
-
-  /**
-   * Controls the order in the public portfolio.
-   */
   displayOrder: number;
-
+  structure?: AchievementStructure;
+  parentId?: string | null;
   createdAt?: unknown;
-
   updatedAt?: unknown;
 }
 
-const achievementsCollection = collection(
-  db,
-  "achievements"
-);
+const achievementsCollection = collection(db, "achievements");
 
-/**
- * Get all achievements for the admin CMS.
- */
-export async function getAchievements(): Promise<
-  Achievement[]
-> {
-  const q = query(
-    achievementsCollection,
-    orderBy("displayOrder", "asc")
-  );
-
-  const snapshot = await getDocs(q);
-
-  return snapshot.docs.map((item) => ({
-    id: item.id,
-    ...item.data(),
-  })) as Achievement[];
+function normalizeAchievement(
+  id: string,
+  data: Record<string, unknown>
+): Achievement {
+  return {
+    id,
+    title: String(data.title ?? ""),
+    organization: String(data.organization ?? ""),
+    organizationLogoUrl: data.organizationLogoUrl
+      ? String(data.organizationLogoUrl)
+      : "",
+    date: String(data.date ?? ""),
+    type: String(data.type ?? "Certification"),
+    description: String(data.description ?? ""),
+    verificationUrl: data.verificationUrl
+      ? String(data.verificationUrl)
+      : "",
+    featured: data.featured === true,
+    published: data.published === true,
+    displayOrder: Number(data.displayOrder ?? 0),
+    structure:
+      data.structure === "master" || data.structure === "course"
+        ? data.structure
+        : "standalone",
+    parentId:
+      typeof data.parentId === "string" && data.parentId
+        ? data.parentId
+        : null,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+  };
 }
 
-/**
- * Get only published achievements for the public portfolio.
- *
- * Sorting is done in JavaScript so Firestore does not
- * require a composite index for published + displayOrder.
- */
-export async function getPublishedAchievements(): Promise<
-  Achievement[]
-> {
-  const q = query(
-    achievementsCollection,
-    where("published", "==", true)
+export async function getAchievements(): Promise<Achievement[]> {
+  const snapshot = await getDocs(
+    query(achievementsCollection, orderBy("displayOrder", "asc"))
   );
 
-  const snapshot = await getDocs(q);
-
-  const achievements = snapshot.docs.map((item) => ({
-    id: item.id,
-    ...item.data(),
-  })) as Achievement[];
-
-  return achievements.sort(
-    (a, b) => a.displayOrder - b.displayOrder
+  return snapshot.docs.map((item) =>
+    normalizeAchievement(
+      item.id,
+      item.data() as Record<string, unknown>
+    )
   );
 }
 
-/**
- * Create a new achievement.
- */
+export async function getPublishedAchievements(): Promise<Achievement[]> {
+  const snapshot = await getDocs(
+    query(achievementsCollection, where("published", "==", true))
+  );
+
+  return snapshot.docs
+    .map((item) =>
+      normalizeAchievement(
+        item.id,
+        item.data() as Record<string, unknown>
+      )
+    )
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+}
+
+export async function getAchievementChildren(
+  parentId: string
+): Promise<Achievement[]> {
+  const snapshot = await getDocs(
+    query(
+      achievementsCollection,
+      where("published", "==", true),
+      where("parentId", "==", parentId)
+    )
+  );
+
+  return snapshot.docs
+    .map((item) =>
+      normalizeAchievement(
+        item.id,
+        item.data() as Record<string, unknown>
+      )
+    )
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+}
+
+export function getAchievementChildrenFromList(
+  achievements: Achievement[],
+  parentId: string
+): Achievement[] {
+  return achievements
+    .filter((item) => item.parentId === parentId)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+}
+
 export async function createAchievement(
-  achievement: Omit<
-    Achievement,
-    "id" | "createdAt" | "updatedAt"
-  >
+  achievement: Omit<Achievement, "id" | "createdAt" | "updatedAt">
 ) {
-  const docRef = await addDoc(
-    achievementsCollection,
-    {
-      ...achievement,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }
-  );
+  const structure = achievement.structure ?? "standalone";
 
-  return docRef.id;
+  const parentId =
+    structure === "course"
+      ? achievement.parentId ?? null
+      : null;
+
+  const ref = await addDoc(achievementsCollection, {
+    ...achievement,
+    structure,
+    parentId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  return ref.id;
 }
 
-/**
- * Update an existing achievement.
- */
 export async function updateAchievement(
   id: string,
   data: Partial<
-    Omit<
-      Achievement,
-      "id" | "createdAt" | "updatedAt"
-    >
+    Omit<Achievement, "id" | "createdAt" | "updatedAt">
   >
 ) {
-  const achievementRef = doc(
-    db,
-    "achievements",
-    id
-  );
-
-  await updateDoc(achievementRef, {
+  const payload = {
     ...data,
+    ...(data.structure
+      ? {
+          structure: data.structure,
+          parentId:
+            data.structure === "course"
+              ? data.parentId ?? null
+              : null,
+        }
+      : {}),
     updatedAt: serverTimestamp(),
-  });
+  };
+
+  await updateDoc(doc(db, "achievements", id), payload);
 }
 
-/**
- * Delete an achievement.
- */
-export async function deleteAchievement(
-  id: string
-) {
-  const achievementRef = doc(
-    db,
-    "achievements",
-    id
-  );
-
-  await deleteDoc(achievementRef);
+export async function deleteAchievement(id: string) {
+  await deleteDoc(doc(db, "achievements", id));
 }

@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ScrollReveal from "@/components/motion/ScrollReveal";
-import AnimatedText from "@/components/motion/AnimatedText";
-import HoverTilt from "@/components/motion/HoverTilt";
+import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 
 import {
   getPublishedSkills,
@@ -44,7 +41,6 @@ import {
 } from "react-icons/si";
 
 import {
-  ArrowUpRight,
   BrainCircuit,
   Code2,
   Database,
@@ -56,40 +52,29 @@ import {
   Wrench,
 } from "lucide-react";
 
-const groupDescriptions: Record<SkillGroup, string> = {
-  Programming:
-    "Languages and programming foundations used to build software and solve problems.",
-
-  "Web Development":
-    "Technologies used to create responsive, functional and interactive web experiences.",
-
-  "AI / ML":
-    "Artificial intelligence, machine learning and intelligent application development.",
-
-  "Cloud / Backend":
-    "Backend systems, databases, cloud platforms and application infrastructure.",
-
-  "Creative / Multimedia":
-    "Visual design, multimedia, motion and creative technology.",
-
-  Tools:
-    "Development and technical tools used across projects and workflows.",
-
-  "Soft Skills":
-    "The ways I collaborate, communicate, think and work with others.",
-
-  Languages:
-    "Human languages used for communication and collaboration.",
-};
-
-type IconComponent = React.ComponentType<{
+type IconComponent = ComponentType<{
   size?: number;
   className?: string;
 }>;
 
-/* =========================================================
-   SKILL ICONS
-   ========================================================= */
+const groupDescriptions: Record<SkillGroup, string> = {
+  Programming:
+    "Languages and programming foundations used to build software and solve problems.",
+  "Web Development":
+    "Technologies used to create responsive, functional and interactive web experiences.",
+  "AI / ML":
+    "Artificial intelligence, machine learning and intelligent application development.",
+  "Cloud / Backend":
+    "Backend systems, databases, cloud platforms and application infrastructure.",
+  "Creative / Multimedia":
+    "Visual design, multimedia, motion and creative technology.",
+  Tools:
+    "Development and technical tools used across projects and workflows.",
+  "Soft Skills":
+    "The ways I collaborate, communicate, think and work with others.",
+  Languages:
+    "Human languages used for communication and collaboration.",
+};
 
 const skillIcons: Record<string, IconComponent> = {
   C: SiC,
@@ -125,10 +110,6 @@ const skillIcons: Record<string, IconComponent> = {
   TypeScript: SiTypescript,
 };
 
-/* =========================================================
-   GROUP ICONS
-   ========================================================= */
-
 const groupIcons: Record<SkillGroup, IconComponent> = {
   Programming: Terminal,
   "Web Development": Globe,
@@ -140,490 +121,220 @@ const groupIcons: Record<SkillGroup, IconComponent> = {
   Languages: Languages,
 };
 
-/* =========================================================
-   INTEGRATED CAPABILITIES
-   ========================================================= */
-
-const capabilities = [
-  {
-    number: "01",
-    title: "Web Development",
-    shortTitle: "WEB",
-    description:
-      "Designing and developing responsive, interactive digital experiences with a focus on clean interfaces, usability and performance.",
-    capabilities: [
-      "Frontend Development",
-      "Full-Stack Applications",
-      "Responsive Interfaces",
-      "Interactive Experiences",
-    ],
-    icon: Code2,
-  },
-  {
-    number: "02",
-    title: "AI / Machine Learning",
-    shortTitle: "AI / ML",
-    description:
-      "Exploring intelligent systems through machine learning, AI applications, data-driven solutions and prompt engineering.",
-    capabilities: [
-      "Machine Learning",
-      "AI Applications",
-      "Prompt Engineering",
-      "Data-Driven Solutions",
-    ],
-    icon: BrainCircuit,
-  },
-  {
-    number: "03",
-    title: "Creative Technology",
-    shortTitle: "CREATE",
-    description:
-      "Combining technology and visual thinking to create distinctive digital work across design, multimedia and communication.",
-    capabilities: [
-      "Graphic Design",
-      "Visual Communication",
-      "Multimedia",
-      "Creative Direction",
-    ],
-    icon: Palette,
-  },
-  {
-    number: "04",
-    title: "Interactive / 3D",
-    shortTitle: "3D / UX",
-    description:
-      "Experimenting with motion, spatial interfaces and immersive interactions to make digital experiences feel more alive.",
-    capabilities: [
-      "Motion & Animation",
-      "3D Experiences",
-      "Interactive Interfaces",
-      "Experimental Web",
-    ],
-    icon: Layers3,
-  },
-];
-
-/* =========================================================
-   MAIN SKILLS SECTION
-   ========================================================= */
-
-export default function Skills() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadSkills() {
-      try {
-        const data = await getPublishedSkills();
-        setSkills(data);
-      } catch (error) {
-        console.error(
-          "Failed to load published skills:",
-          error
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadSkills();
-  }, []);
-
-  const groupedSkills = skillGroups
-    .map((group) => ({
-      group,
-      skills: skills
-        .filter((skill) => skill.group === group)
-        .sort(
-          (a, b) =>
-            a.displayOrder - b.displayOrder
-        ),
-    }))
-    .filter(
-      (item) => item.skills.length > 0
-    );
-
-  return (
-    <section
-      id="skills"
-      className="border-t border-neutral-900 px-6 py-20 md:px-10 lg:px-16 lg:py-28"
-    >
-      <div className="mx-auto max-w-7xl">
-
-        {/* =================================================
-            SKILLS HEADER
-        ================================================= */}
-
-        <ScrollReveal direction="up">
-          <div className="mb-14 grid gap-7 md:grid-cols-[0.7fr_1.3fr] md:items-end">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-600 group">
-                07 / Skills
-                <span className="inline-block w-8 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 ml-2 group-hover:w-12 transition-all duration-300"></span>
-              </p>
-
-              <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-600">
-                A growing toolkit shaped by projects,
-                experimentation, internships and
-                continuous learning.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="max-w-5xl text-4xl font-medium leading-[0.98] tracking-tight md:text-6xl lg:text-7xl">
-                <AnimatedText delay={0.2}>
-                  Tools, technologies
-                </AnimatedText>
-                <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                  <AnimatedText delay={0.4}>
-                    and ways of thinking.
-                  </AnimatedText>
-                </span>
-              </h2>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        {/* =================================================
-            SKILL GROUPS
-        ================================================= */}
-
-        {loading ? (
-          <SkillsLoading />
-        ) : groupedSkills.length === 0 ? (
-          <div className="border-t border-neutral-900 py-14">
-            <p className="text-sm text-neutral-600">
-              Skills coming soon.
-            </p>
-          </div>
-        ) : (
-          <div className="border-t border-neutral-900">
-            {groupedSkills.map(
-              ({ group, skills }, groupIndex) => (
-                <SkillGroupBlock
-                  key={group}
-                  group={group}
-                  skills={skills}
-                  index={groupIndex}
-                />
-              )
-            )}
-          </div>
-        )}
-
-        {/* =================================================
-            CAPABILITIES — INTEGRATED INTO SKILLS
-        ================================================= */}
-
-        <CapabilitiesBlock />
-
-      </div>
-    </section>
-  );
+function clamp(value: number, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
 }
 
-/* =========================================================
-   SKILL GROUP
-   ========================================================= */
+function easeOut(value: number) {
+  const t = clamp(value);
+  return 1 - Math.pow(1 - t, 3);
+}
 
-function SkillGroupBlock({
-  group,
-  skills,
-  index,
+function easeInOut(value: number) {
+  const t = clamp(value);
+  return t < 0.5
+    ? 4 * t * t * t
+    : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function range(value: number, start: number, end: number) {
+  return clamp((value - start) / Math.max(end - start, 0.0001));
+}
+
+function lerp(start: number, end: number, progress: number) {
+  return start + (end - start) * clamp(progress);
+}
+
+function wrapIndex(index: number, length: number) {
+  if (!length) return 0;
+  return ((index % length) + length) % length;
+}
+
+function shortestOffset(index: number, rotation: number, length: number) {
+  let offset = index - rotation;
+
+  while (offset > length / 2) offset -= length;
+  while (offset < -length / 2) offset += length;
+
+  return offset;
+}
+
+/**
+ * Same character-by-character treatment used by Recognition / Projects:
+ * accent colour -> main text colour.
+ */
+function SectionHeading({
+  progress,
 }: {
-  group: SkillGroup;
-  skills: Skill[];
-  index: number;
+  progress: number;
 }) {
-  const GroupIcon = groupIcons[group];
+  const text = "Tools, technologies and ways of thinking.";
 
   return (
-    <ScrollReveal direction={index % 2 === 0 ? "left" : "right"} delay={index * 0.05}>
-      <div
-        className="
-          group/section
-          grid gap-8
-          border-b border-neutral-900
-          py-10
-          md:grid-cols-[0.72fr_1.28fr]
-          md:gap-12
-          md:py-12
-          lg:py-14
-          transition-all duration-300 hover:border-neutral-800
-        "
-      >
+    <h2
+      aria-label={text}
+      className="max-w-[1000px] font-[Syne,sans-serif] text-[clamp(2.6rem,6vw,6.8rem)] font-medium leading-[0.9] tracking-[-0.065em]"
+    >
+      {Array.from(text).map((character, index) => {
+        const count = text.length;
+        const start = index / count;
+        const end = (index + 1) / count;
+        const local = clamp(
+          (progress - start) / Math.max(end - start, 0.001)
+        );
+        const reveal = easeOut(local);
 
-        {/* GROUP INFORMATION */}
-
-        <div>
-          <div className="flex items-start gap-4">
-
-            <span className="pt-1 font-mono text-[10px] tracking-widest text-neutral-700">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-
-            <div>
-
-              <div className="mb-4 flex items-center gap-3">
-                <HoverTilt intensity={0.02}>
-                  <span
-                    className="
-                      flex h-9 w-9
-                      items-center justify-center
-                      rounded-xl
-                      border border-neutral-900
-                      bg-[#080808]
-                      text-neutral-500
-                      transition-all duration-300
-                      group-hover/section:border-neutral-800
-                      group-hover/section:text-[var(--portfolio-accent)]
-                      hover:shadow-lg hover:shadow-blue-500/20
-                    "
-                  >
-                    <GroupIcon size={15} />
-                  </span>
-                </HoverTilt>
-
-                <span className="text-[9px] uppercase tracking-[0.25em] text-neutral-700">
-                  Skill Group
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-medium tracking-tight text-white md:text-3xl">
-                {group}
-              </h3>
-
-              <p className="mt-3 max-w-sm text-xs leading-6 text-neutral-600 hover:text-neutral-500 transition-colors duration-300">
-                {groupDescriptions[group]}
-              </p>
-
-            </div>
-          </div>
-        </div>
-
-        {/* SKILLS */}
-
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {skills.map((skill) => (
-            <SkillItem
-              key={skill.id ?? skill.name}
-              skill={skill}
-            />
-          ))}
-        </div>
-
-      </div>
-    </ScrollReveal>
+        return (
+          <span
+            key={`${character}-${index}`}
+            aria-hidden="true"
+            style={{
+              display: "inline-block",
+              color:
+                reveal > 0.5
+                  ? "var(--portfolio-text)"
+                  : "var(--portfolio-accent)",
+              opacity: 0.08 + reveal * 0.92,
+              transform: `translate3d(0, ${(1 - reveal) * 10}px, 0)`,
+              filter: `blur(${(1 - reveal) * 1.6}px)`,
+              transition:
+                "color 600ms cubic-bezier(0.16,1,0.3,1), opacity 450ms cubic-bezier(0.16,1,0.3,1)",
+            }}
+          >
+            {character === " " ? "\u00A0" : character}
+          </span>
+        );
+      })}
+    </h2>
   );
 }
 
-/* =========================================================
-   SKILL ITEM
-   ========================================================= */
+function MetadataRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <p
+        className="font-mono text-[8px] uppercase tracking-[0.2em]"
+        style={{ color: "var(--portfolio-muted)" }}
+      >
+        {label}
+      </p>
+      <p
+        className="mt-1.5 text-xs leading-5"
+        style={{ color: "var(--portfolio-text)" }}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
 
-function SkillItem({
+function SkillDetailCard({
   skill,
+  index,
+  total,
 }: {
   skill: Skill;
+  index: number;
+  total: number;
 }) {
-  const Icon = skillIcons[skill.name];
-
-  const hasMetadata =
-    Boolean(skill.proficiency) ||
-    skill.yearsOfExperience !== undefined ||
-    Boolean(
-      skill.learningContext?.length
-    );
+  const Icon = skillIcons[skill.name] ?? Code2;
 
   return (
-    <div className="group relative">
-
-      {/* CARD */}
-
+    <article
+      className="relative min-h-[21rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border p-5 md:min-h-[22rem] md:p-6"
+      style={{
+        background: "var(--portfolio-background)",
+        color: "var(--portfolio-text)",
+        borderColor: "var(--portfolio-border)",
+        boxShadow:
+          "0 35px 90px color-mix(in srgb, var(--portfolio-text) 7%, transparent)",
+      }}
+    >
       <div
-        className="
-          relative
-          flex min-h-[64px]
-          items-center justify-between
-          gap-4
-          rounded-xl
-          border border-neutral-900
-          bg-[#080808]
-          px-4 py-3
-          transition-all duration-300
-          hover:-translate-y-0.5
-          hover:border-neutral-800
-          hover:bg-[#0a0a0a]
-        "
-      >
+        className="absolute -right-24 -top-24 h-56 w-56 rounded-full blur-3xl"
+        style={{
+          background: "var(--portfolio-accent)",
+          opacity: 0.035,
+        }}
+      />
 
-        <div className="flex min-w-0 items-center gap-3">
-
-          {/* ICON */}
-
-          <span
-            className="
-              flex h-9 w-9 shrink-0
-              items-center justify-center
-              rounded-lg
-              border border-neutral-900
-              bg-[#080808]
-              text-neutral-500
-              transition-colors duration-300
-              group-hover:border-neutral-800
-              group-hover:text-[var(--portfolio-accent)]
-            "
-          >
-            {Icon ? (
-              <Icon
-                size={17}
-                aria-hidden="true"
-              />
-            ) : (
-              <Code2
-                size={17}
-                aria-hidden="true"
-              />
-            )}
-          </span>
-
-          <span
-            className="
-              truncate
-              text-sm
-              text-neutral-300
-              transition-colors duration-300
-              group-hover:text-white
-            "
-          >
-            {skill.name}
-          </span>
-
-        </div>
-
-        {hasMetadata && (
-          <span
-            className="
-              shrink-0
-              font-mono
-              text-[9px]
-              uppercase
-              tracking-widest
-              text-neutral-700
-              transition-colors duration-300
-              group-hover:text-neutral-500
-            "
-          >
-            info
-          </span>
-        )}
-
-        {/* ACCENT LINE */}
-
+      <div className="relative flex items-start justify-between gap-4">
         <span
-          className="
-            absolute bottom-0 left-3 right-3
-            h-px
-            origin-left
-            scale-x-0
-            bg-[var(--portfolio-accent)]
-            transition-transform duration-300
-            group-hover:scale-x-100
-          "
-        />
+          className="font-mono text-[8px] uppercase tracking-[0.24em]"
+          style={{ color: "var(--portfolio-muted)" }}
+        >
+          {String(index + 1).padStart(2, "0")} /{" "}
+          {String(total).padStart(2, "0")}
+        </span>
 
+        <a
+          href={`https://en.wikipedia.org/wiki/${encodeURIComponent(
+            skill.name
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open ${skill.name} on Wikipedia`}
+          title={`Open ${skill.name} on Wikipedia`}
+          className="relative z-50 grid size-16 shrink-0 cursor-pointer place-items-center rounded-full border outline-none transition-transform duration-300 hover:scale-105 focus-visible:ring-2 md:size-20"
+          style={{
+            borderColor: "var(--portfolio-border)",
+            color: "var(--portfolio-accent)",
+            boxShadow:
+              "0 0 50px color-mix(in srgb, var(--portfolio-accent) 10%, transparent)",
+          }}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <span
+            key={skill.name}
+            className="grid place-items-center"
+            style={{
+              animation:
+                "skills-icon-change 700ms cubic-bezier(.16,1,.3,1)",
+            }}
+          >
+            <Icon size={34} className="md:hidden" />
+            <Icon size={42} className="hidden md:block" />
+          </span>
+        </a>
       </div>
 
-      {/* DESKTOP METADATA */}
-
-      {hasMetadata && (
-        <div
-          className="
-            pointer-events-none
-            absolute bottom-full left-1/2 z-30
-            mb-3 hidden w-64
-            -translate-x-1/2
-            translate-y-1
-            opacity-0
-            transition-all duration-200
-            group-hover:pointer-events-auto
-            group-hover:translate-y-0
-            group-hover:opacity-100
-            md:block
-          "
+      <div className="relative mt-12 flex min-h-[8rem] flex-1 flex-col justify-center">
+        <p
+          className="mb-3 font-mono text-[8px] uppercase tracking-[0.24em]"
+          style={{ color: "var(--portfolio-muted)" }}
         >
-          <div
-            className="
-              rounded-xl
-              border border-neutral-800
-              bg-[#0a0a0a]
-              p-5
-              shadow-2xl
-            "
-          >
+          {skill.group}
+        </p>
 
-            <div className="flex items-center justify-between gap-4">
-
-              <p className="text-sm font-medium text-white">
-                {skill.name}
-              </p>
-
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--portfolio-accent)]" />
-
-            </div>
-
-            <div className="mt-5 space-y-4">
-
-              {skill.proficiency && (
-                <MetadataRow
-                  label="Proficiency"
-                  value={skill.proficiency}
-                />
-              )}
-
-              {skill.yearsOfExperience !== undefined && (
-                <MetadataRow
-                  label="Experience"
-                  value={`${skill.yearsOfExperience} ${
-                    skill.yearsOfExperience === 1
-                      ? "year"
-                      : "years"
-                  }`}
-                />
-              )}
-
-              {skill.learningContext &&
-                skill.learningContext.length > 0 && (
-                  <MetadataRow
-                    label="Learning context"
-                    value={skill.learningContext.join(
-                      " · "
-                    )}
-                  />
-                )}
-
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MOBILE METADATA */}
-
-      {hasMetadata && (
-        <div
-          className="
-            rounded-b-xl
-            border-x
-            border-b
-            border-neutral-900
-            bg-[#080808]
-            px-4 py-4
-            md:hidden
-          "
+        <h3
+          className="max-w-full break-words font-[Syne,sans-serif] font-medium leading-[0.94] tracking-[-0.055em]"
+          style={{
+            fontSize:
+              skill.name.length > 26
+                ? "clamp(1.65rem, 3vw, 2.35rem)"
+                : skill.name.length > 18
+                  ? "clamp(1.85rem, 3.3vw, 2.7rem)"
+                  : "clamp(2rem, 4vw, 3.25rem)",
+          }}
         >
-          <div className="grid gap-3">
+          {skill.name}
+        </h3>
+      </div>
 
+      <div className="relative mt-auto pt-5">
+        <div
+          className="border-t pt-4"
+          style={{ borderColor: "var(--portfolio-border)" }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
             {skill.proficiency && (
               <MetadataRow
                 label="Proficiency"
@@ -635,358 +346,866 @@ function SkillItem({
               <MetadataRow
                 label="Experience"
                 value={`${skill.yearsOfExperience} ${
-                  skill.yearsOfExperience === 1
-                    ? "year"
-                    : "years"
+                  skill.yearsOfExperience === 1 ? "year" : "years"
                 }`}
               />
             )}
+          </div>
 
-            {skill.learningContext &&
-              skill.learningContext.length > 0 && (
+          {skill.learningContext &&
+            skill.learningContext.length > 0 && (
+              <div className="mt-4">
                 <MetadataRow
                   label="Learning context"
-                  value={skill.learningContext.join(
-                    " · "
-                  )}
+                  value={skill.learningContext.join(" · ")}
                 />
-              )}
-
-          </div>
+              </div>
+            )}
         </div>
-      )}
-
-    </div>
+      </div>
+    </article>
   );
 }
 
-/* =========================================================
-   INTEGRATED CAPABILITIES
-   ========================================================= */
+export default function Skills() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const dragOriginRef = useRef({
+    x: 0,
+    y: 0,
+    rotation: 0,
+  });
+  const previousDragRef = useRef(0);
+  const draggingRef = useRef(false);
+  const dragMovedRef = useRef(false);
+  const pendingSkillRef = useRef<number | null>(null);
 
-function CapabilitiesBlock() {
-  const [activeIndex, setActiveIndex] =
-    useState<number | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [rotation, setRotation] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [wheelAnimating, setWheelAnimating] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSkills() {
+      try {
+        const data = await getPublishedSkills();
+
+        if (active) {
+          setSkills(data);
+        }
+      } catch (error) {
+        console.error("Failed to load published skills:", error);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadSkills();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const orderedSkills = useMemo(() => {
+    return skillGroups.flatMap((group) =>
+      skills
+        .filter((skill) => skill.group === group)
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+    );
+  }, [skills]);
+
+  /*
+   * The whole section behaves as a scroll-driven page:
+   *
+   * INTRO     0.00 -> 0.22
+   * WHEEL     0.18 -> 0.84
+   * OUTRO     0.84 -> 1.00
+   */
+  useEffect(() => {
+    let raf = 0;
+
+    const update = () => {
+      const section = sectionRef.current;
+
+      if (!section) return;
+
+      const rect = section.getBoundingClientRect();
+      const distance = Math.max(
+        section.offsetHeight - window.innerHeight,
+        1
+      );
+
+      setScrollProgress(
+        clamp(-rect.top / distance)
+      );
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+
+    update();
+
+    window.addEventListener("scroll", onScroll, {
+      passive: true,
+    });
+    window.addEventListener("resize", onScroll);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  /*
+   * Map page scroll onto the wheel carousel.
+   * This keeps the wheel interaction visually identical to
+   * the uploaded carousel while making the section behave
+   * like Projects / Recognition.
+   */
+  useEffect(() => {
+    if (
+      draggingRef.current ||
+      orderedSkills.length === 0
+    ) {
+      return;
+    }
+
+    const carouselProgress = easeInOut(
+      range(scrollProgress, 0.2, 0.84)
+    );
+
+    // Treat the wheel as a continuous circular carousel.
+    // One full scroll span advances exactly one complete cycle,
+    // so the last skill never has to be forced into a terminal
+    // "front" position.
+    const nextRotation =
+      carouselProgress * orderedSkills.length;
+
+    setRotation(nextRotation);
+
+    const nextIndex = wrapIndex(
+      Math.round(nextRotation),
+      orderedSkills.length
+    );
+
+    setSelectedIndex(nextIndex);
+  }, [orderedSkills.length, scrollProgress]);
+
+  const introProgress = easeOut(
+    range(scrollProgress, 0.03, 0.22)
+  );
+
+  const headingProgress = easeOut(
+    range(scrollProgress, 0.08, 0.42)
+  );
+
+  const wheelProgress = easeInOut(
+    range(scrollProgress, 0.16, 0.86)
+  );
+
+  const outroProgress = easeInOut(
+    range(scrollProgress, 0.82, 1)
+  );
+
+  const introOpacity = 1;
+
+  const wheelOpacity =
+    easeOut(range(scrollProgress, 0.15, 0.25)) *
+    (1 - easeInOut(range(scrollProgress, 0.87, 0.98)));
+
+  const wheelY = lerp(
+    90,
+    0,
+    easeOut(range(scrollProgress, 0.15, 0.3))
+  );
+
+  const wheelScale = lerp(
+    0.94,
+    1,
+    easeOut(range(scrollProgress, 0.15, 0.3))
+  );
+
+  const activeSkill =
+    orderedSkills[
+      wrapIndex(selectedIndex, orderedSkills.length)
+    ];
+
+  const activeIcon = activeSkill
+    ? skillIcons[activeSkill.name] ?? Code2
+    : Code2;
+
+  const sectionIntroText =
+    "A growing toolkit shaped by projects, experimentation, internships and continuous learning.";
+
+  const handlePointerDown = (
+    event: React.PointerEvent<HTMLDivElement>
+  ) => {
+    if (!event.isPrimary || event.button !== 0) return;
+
+    dragMovedRef.current = false;
+
+    const target = event.target as HTMLElement | null;
+    const skillButton = target?.closest<HTMLElement>(
+      "[data-skill-index]"
+    );
+
+    pendingSkillRef.current = skillButton
+      ? Number(skillButton.dataset.skillIndex)
+      : null;
+
+    draggingRef.current = true;
+    setDragging(true);
+
+    dragOriginRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      rotation,
+    };
+
+    previousDragRef.current = rotation;
+
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture is not available in every browser/context.
+    }
+  };
+
+  const handlePointerMove = (
+    event: React.PointerEvent<HTMLDivElement>
+  ) => {
+    if (!draggingRef.current || orderedSkills.length === 0) {
+      return;
+    }
+
+    const deltaX = event.clientX - dragOriginRef.current.x;
+    const deltaY = event.clientY - dragOriginRef.current.y;
+
+    // Allow either vertical wheel dragging or horizontal dragging.
+    // The larger movement axis determines the direction.
+    const distance =
+      Math.abs(deltaY) >= Math.abs(deltaX)
+        ? deltaY
+        : -deltaX;
+
+    if (Math.abs(deltaX) + Math.abs(deltaY) > 4) {
+      dragMovedRef.current = true;
+      pendingSkillRef.current = null;
+    }
+
+    const nextRotation =
+      dragOriginRef.current.rotation -
+      distance * 0.024;
+
+    previousDragRef.current = nextRotation;
+    setRotation(nextRotation);
+
+    const nextIndex = wrapIndex(
+      Math.round(nextRotation),
+      orderedSkills.length
+    );
+
+    setSelectedIndex(nextIndex);
+  };
+
+  const handlePointerEnd = (
+    event: React.PointerEvent<HTMLDivElement>
+  ) => {
+    if (!draggingRef.current) return;
+
+    draggingRef.current = false;
+    setDragging(false);
+
+    if (
+      event.currentTarget.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId
+      );
+    }
+
+    const pendingSkill = pendingSkillRef.current;
+    pendingSkillRef.current = null;
+
+    if (
+      !dragMovedRef.current &&
+      pendingSkill !== null &&
+      Number.isFinite(pendingSkill)
+    ) {
+      spinToSkill(pendingSkill);
+      return;
+    }
+
+    const target = Math.round(rotation);
+
+    setRotation(target);
+    setSelectedIndex(
+      wrapIndex(target, orderedSkills.length)
+    );
+  };
+
+  const spinToSkill = (targetIndex: number) => {
+    if (!orderedSkills.length) return;
+
+    const length = orderedSkills.length;
+    const normalizedTarget = wrapIndex(
+      targetIndex,
+      length
+    );
+
+    // Pick the nearest equivalent position on the circular wheel.
+    let target = normalizedTarget;
+    const current = rotation;
+    const delta = normalizedTarget - wrapIndex(
+      Math.round(current),
+      length
+    );
+
+    if (delta > length / 2) {
+      target -= length;
+    } else if (delta < -length / 2) {
+      target += length;
+    }
+
+    // Preserve the current cycle while moving only as far as needed.
+    const currentCycle = Math.round(current / length) * length;
+    target += currentCycle;
+
+    setWheelAnimating(true);
+    setRotation(target);
+    setSelectedIndex(normalizedTarget);
+
+    window.setTimeout(() => {
+      setWheelAnimating(false);
+    }, 750);
+  };
+
+  const moveBy = (amount: number) => {
+    if (!orderedSkills.length) return;
+
+    const target = clamp(
+      Math.round(rotation) + amount,
+      0,
+      orderedSkills.length - 1
+    );
+
+    spinToSkill(target);
+  };
 
   return (
-    <div className="pt-20 md:pt-24">
-
-      {/* HEADER */}
-
-      <div className="mb-12 grid gap-7 md:grid-cols-[0.7fr_1.3fr] md:items-end">
-
-        <div>
-
-          <p className="text-xs uppercase tracking-[0.3em] text-neutral-600">
-            Capabilities
-          </p>
-
-          <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-600">
-            Different disciplines, one approach —
-            combining technology, intelligence and
-            visual thinking.
-          </p>
-
+    <section
+      id="skills"
+      ref={sectionRef}
+      className="relative w-full"
+      style={{
+        height: "350svh",
+        background: "var(--portfolio-background)",
+        color: "var(--portfolio-text)",
+      }}
+    >
+      <div
+        className="sticky top-0 h-[100svh] w-full overflow-hidden"
+        style={{
+          background: "var(--portfolio-background)",
+        }}
+      >
+        {/* SUBTLE ATMOSPHERE */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div
+            className="absolute left-1/2 top-1/2 h-[55vw] w-[55vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
+            style={{
+              background: "var(--portfolio-accent)",
+              opacity: 0.018,
+            }}
+          />
         </div>
 
-        <div>
-
-          <h3 className="max-w-5xl text-4xl font-medium leading-[0.98] tracking-tight md:text-6xl lg:text-7xl">
-            What I can
-            <br />
-            <span className="text-neutral-500">
-              build and create.
-            </span>
-          </h3>
-
+        {/* =================================================
+            PERSISTENT EYEBROW
+        ================================================= */}
+        <div className="absolute left-6 top-20 z-50 flex items-center gap-3 md:left-10 lg:left-16 lg:top-24">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{
+              background: "var(--portfolio-accent)",
+            }}
+          />
+          <span
+            className="font-mono text-[9px] uppercase tracking-[0.3em]"
+            style={{
+              color: "var(--portfolio-muted)",
+            }}
+          >
+             / Tools &amp; techniques
+          </span>
         </div>
 
-      </div>
+        {/* =================================================
+            INTRO / HEADING
+        ================================================= */}
+        <div
+          className="absolute inset-x-0 top-0 z-30 pointer-events-none px-6 pt-20 md:px-10 lg:px-16 lg:pt-24"
+          style={{
+            opacity: 1,
+            transform: `translate3d(0, ${
+              lerp(30, 0, introProgress)
+            }px, 0)`,
+            pointerEvents: "none",
+            transition:
+              "transform 800ms cubic-bezier(.16,1,.3,1)",
+          }}
+        >
+          <div className="mx-auto flex max-w-[1650px] justify-end">
+            <div className="w-full max-w-[50%] pl-8 md:max-w-[48%] lg:max-w-[44%] lg:pl-6">
+              <SectionHeading
+                progress={headingProgress}
+              />
 
-      {/* CAPABILITY CARDS */}
-
-      <div className="grid gap-3 md:grid-cols-2">
-
-        {capabilities.map(
-          (capability, index) => {
-            const Icon = capability.icon;
-            const isActive =
-              activeIndex === index;
-
-            return (
-              <article
-                key={capability.number}
-                className="
-                  group
-                  relative
-                  overflow-hidden
-                  rounded-2xl
-                  border border-neutral-900
-                  bg-[#080808]
-                  transition-all duration-500
-                  hover:-translate-y-0.5
-                  hover:border-neutral-800
-                "
-                onMouseEnter={() =>
-                  setActiveIndex(index)
-                }
-                onMouseLeave={() =>
-                  setActiveIndex(null)
-                }
+              <p
+                className="mt-7 max-w-md font-[Manrope,sans-serif] text-sm leading-7"
+                style={{
+                  color: "var(--portfolio-muted)",
+                  opacity: easeOut(
+                    range(scrollProgress, 0.16, 0.3)
+                  ),
+                }}
               >
+                {sectionIntroText}
+              </p>
+            </div>
+          </div>
+        </div>
 
-                {/* CARD HEADER */}
-
-                <div className="p-5 md:p-6">
-
-                  <div className="flex items-start justify-between">
-
-                    <span
-                      className={[
-                        "font-mono text-[9px] tracking-widest transition-colors duration-300",
-                        isActive
-                          ? "text-[var(--portfolio-accent)]"
-                          : "text-neutral-700",
-                      ].join(" ")}
-                    >
-                      {capability.number}
+        {/* =================================================
+            WHEEL CAROUSEL PAGE
+        ================================================= */}
+        <div
+          className="absolute inset-0 z-40"
+          style={{
+            opacity: wheelOpacity,
+            transform: `translate3d(0, ${wheelY}px, 0) scale(${wheelScale})`,
+            pointerEvents:
+              wheelOpacity > 0.35 ? "auto" : "none",
+            transition:
+              "opacity 650ms cubic-bezier(.16,1,.3,1), transform 900ms cubic-bezier(.16,1,.3,1)",
+          }}
+        >
+          <div className="mx-auto flex h-full max-w-[1500px] items-center px-6 pt-20 md:px-10 lg:px-16 lg:pt-24">
+            <div className="grid w-full items-center gap-2 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8">
+              {/* ACTIVE DETAIL CARD */}
+              <div
+                className="relative z-50 flex w-full justify-start lg:justify-start lg:pr-6"
+                style={{
+                  opacity: easeOut(
+                    range(scrollProgress, 0.21, 0.34)
+                  ),
+                  transform: `translate3d(0, ${
+                    lerp(
+                      35,
+                      0,
+                      easeOut(
+                        range(
+                          scrollProgress,
+                          0.21,
+                          0.34
+                        )
+                      )
+                    )
+                  }px, 0)`,
+                }}
+              >
+                {loading ? (
+                  <div
+                    className="flex h-[25rem] w-full max-w-[25rem] items-center justify-center rounded-[1.55rem] border"
+                    style={{
+                      borderColor:
+                        "var(--portfolio-border)",
+                      color: "var(--portfolio-muted)",
+                    }}
+                  >
+                    <span className="font-mono text-[9px] uppercase tracking-[0.24em]">
+                      Loading tools
                     </span>
-
-                    <span
-                      className="
-                        flex h-9 w-9
-                        items-center justify-center
-                        rounded-xl
-                        border border-neutral-900
-                        bg-[#050505]
-                        text-neutral-600
-                        transition-all duration-300
-                        group-hover:border-neutral-800
-                        group-hover:text-[var(--portfolio-accent)]
-                      "
-                    >
-                      <Icon size={16} />
-                    </span>
-
                   </div>
-
-                  <div className="mt-8 flex items-center gap-3">
-
-                    <h4
-                      className="
-                        text-xl
-                        font-medium
-                        tracking-tight
-                        text-neutral-200
-                        transition-colors duration-300
-                        group-hover:text-white
-                        md:text-2xl
-                      "
-                    >
-                      {capability.title}
-                    </h4>
-
-                    <ArrowUpRight
-                      size={17}
-                      className="
-                        text-neutral-800
-                        opacity-0
-                        transition-all duration-300
-                        group-hover:translate-x-1
-                        group-hover:-translate-y-1
-                        group-hover:text-[var(--portfolio-accent)]
-                        group-hover:opacity-100
-                      "
+                ) : activeSkill ? (
+                  <div
+                    key={activeSkill.id ?? activeSkill.name}
+                    className="w-full max-w-[21rem]"
+                    style={{
+                      animation:
+                        "skills-card-in 600ms cubic-bezier(.16,1,.3,1)",
+                    }}
+                  >
+                    <SkillDetailCard
+                      skill={activeSkill}
+                      index={selectedIndex}
+                      total={orderedSkills.length}
                     />
 
-                  </div>
+                    <div className="mt-5 flex items-center gap-3">
+                      <span
+                        className="font-mono text-[8px] uppercase tracking-[0.2em]"
+                        style={{
+                          color:
+                            "var(--portfolio-muted)",
+                        }}
+                      >
+                        Drag or scroll through the wheel
+                      </span>
 
-                  {/* DESCRIPTION */}
-
-                  <div
-                    className="
-                      grid
-                      grid-rows-[0fr]
-                      opacity-0
-                      transition-all duration-500 ease-out
-                      group-hover:mt-4
-                      group-hover:grid-rows-[1fr]
-                      group-hover:opacity-100
-                    "
-                  >
-                    <div className="min-h-0 overflow-hidden">
-
-                      <p className="max-w-xl text-xs leading-6 text-neutral-500">
-                        {capability.description}
-                      </p>
-
+                      <span
+                        className="h-px w-8"
+                        style={{
+                          background:
+                            "var(--portfolio-border)",
+                        }}
+                      />
                     </div>
                   </div>
-
-                  {/* CAPABILITY TAGS */}
-
-                  <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-
-                    {capability.capabilities.map(
-                      (item, itemIndex) => (
-                        <div
-                          key={item}
-                          className="
-                            flex items-center gap-2
-                            text-[10px]
-                            text-neutral-600
-                            transition-colors duration-300
-                            group-hover:text-neutral-400
-                          "
-                        >
-
-                          <span
-                            className="
-                              h-px w-3 shrink-0
-                              bg-neutral-800
-                              transition-colors duration-300
-                              group-hover:bg-[var(--portfolio-accent)]
-                            "
-                          />
-
-                          <span>
-                            {item}
-                          </span>
-
-                          <span className="ml-auto font-mono text-[8px] text-neutral-800">
-                            {String(
-                              itemIndex + 1
-                            ).padStart(2, "0")}
-                          </span>
-
-                        </div>
-                      )
-                    )}
-
+                ) : (
+                  <div
+                    className="text-sm"
+                    style={{
+                      color:
+                        "var(--portfolio-muted)",
+                    }}
+                  >
+                    Skills coming soon.
                   </div>
+                )}
+              </div>
 
-                </div>
+              {/* WHEEL */}
+              <div
+                className="relative -ml-64 h-[25rem] w-full max-w-[29rem] select-none overflow-visible touch-none bg-transparent md:-ml-72 md:h-[29rem] lg:-ml-80 lg:h-[31rem]"
+                style={{
+                  touchAction: "none",
+                  cursor: dragging ? "grabbing" : "grab",
+                }}
+                role="listbox"
+                aria-label="Skills wheel carousel"
+                tabIndex={0}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerEnd}
+                onPointerCancel={handlePointerEnd}
+                onKeyDown={(event) => {
+                  if (
+                    event.key === "ArrowDown" ||
+                    event.key === "ArrowRight"
+                  ) {
+                    event.preventDefault();
+                    moveBy(1);
+                  }
 
-                {/* ACCENT LINE */}
+                  if (
+                    event.key === "ArrowUp" ||
+                    event.key === "ArrowLeft"
+                  ) {
+                    event.preventDefault();
+                    moveBy(-1);
+                  }
 
+                  if (event.key === "Home") {
+                    event.preventDefault();
+                    setRotation(0);
+                    setSelectedIndex(0);
+                  }
+
+                  if (event.key === "End") {
+                    event.preventDefault();
+                    const last =
+                      orderedSkills.length - 1;
+                    setRotation(last);
+                    setSelectedIndex(last);
+                  }
+                }}
+              >
+                {/* ACTIVE MARKER */}
                 <span
-                  className="
-                    absolute bottom-0 left-5 right-5
-                    h-px
-                    origin-left
-                    scale-x-0
-                    bg-[var(--portfolio-accent)]
-                    transition-transform duration-500
-                    group-hover:scale-x-100
-                  "
+                  aria-hidden="true"
+                  className="absolute -left-[3%] top-1/2 z-20 -translate-x-full -translate-y-1/2 rounded-full"
+                  style={{
+                    width: 14,
+                    height: 14,
+                    background:
+                      "var(--portfolio-accent)",
+                    boxShadow:
+                      "0 0 28px color-mix(in srgb, var(--portfolio-accent) 45%, transparent)",
+                  }}
                 />
 
-              </article>
-            );
-          }
-        )}
+                {orderedSkills.map(
+                  (skill, index) => {
+                    const offset = shortestOffset(
+                      index,
+                      rotation,
+                      orderedSkills.length
+                    );
 
-      </div>
+                    if (Math.abs(offset) > 2.5) {
+                      return null;
+                    }
 
-      {/* CLOSING STATEMENT */}
+                    /*
+                     * Geometry mirrors the uploaded wheel carousel:
+                     * x bends inward, y follows a curved vertical path,
+                     * and rotation follows the wheel tangent.
+                     */
+                    const radius = 365;
+                    const spacing = 14;
+                    const angle =
+                      offset * spacing;
+                    const radians =
+                      (angle * Math.PI) / 180;
 
-      <div className="mt-12 flex flex-col gap-4 md:mt-14 md:flex-row md:items-end md:justify-between">
+                    const x =
+                      -radius *
+                      (1 - Math.cos(radians));
+                    const y =
+                      radius * Math.sin(radians);
 
-        <p className="max-w-xl text-sm leading-7 text-neutral-600">
-          I approach each project as an opportunity
-          to combine different disciplines rather
-          than staying inside a single category.
-        </p>
+                    const distance = Math.min(
+                      Math.abs(offset) / 2.5,
+                      1
+                    );
 
-        <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-neutral-700">
-          CODE × DESIGN × INTELLIGENCE
-        </span>
+                    const opacity = Math.cos(
+                      (distance * Math.PI) / 2
+                    );
 
-      </div>
+                    const scale =
+                      1 -
+                      Math.min(
+                        Math.abs(offset) * 0.04,
+                        0.35
+                      );
 
-    </div>
-  );
-}
+                    const selected =
+                      Math.abs(offset) < 0.5;
 
-/* =========================================================
-   METADATA
-   ========================================================= */
+                    const Icon =
+                      skillIcons[skill.name] ??
+                      Code2;
 
-function MetadataRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
+                    return (
+                      <button
+                        key={
+                          skill.id ??
+                          `${skill.name}-${index}`
+                        }
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        aria-label={`Select ${skill.name}`}
+                        data-skill-index={index}
+                        onClick={(event) => {
+                          // Pointer capture on the wheel handles selection
+                          // on pointer-up. Prevent the native click from
+                          // causing a second navigation/selection.
+                          event.preventDefault();
+                        }}
+                        className="absolute left-[15%] top-1/2 origin-left whitespace-nowrap text-left outline-none"
+                        style={{
+                          color: selected
+                            ? "var(--portfolio-text)"
+                            : "var(--portfolio-muted)",
+                          opacity,
+                          transform: `translate(${x}px, ${y}px) translateY(-50%) rotate(${angle}deg) scale(${scale})`,
+                          zIndex:
+                            100 -
+                            Math.round(
+                              Math.abs(offset) * 10
+                            ),
+                          transition:
+                            wheelAnimating
+                              ? "transform 750ms cubic-bezier(.16,1,.3,1), color 350ms ease, opacity 500ms ease, filter 500ms ease"
+                              : "transform 650ms cubic-bezier(.16,1,.3,1), color 350ms ease, opacity 500ms ease, filter 500ms ease",
+                        }}
+                      >
+                        <span
+                          className="flex items-center gap-4"
+                          style={{
+                            filter: selected
+                              ? "none"
+                              : `blur(${Math.min(
+                                  1.5,
+                                  Math.abs(offset) * 0.35
+                                )}px)`,
+                          }}
+                        >
+                          <span
+                            className="grid size-10 shrink-0 place-items-center rounded-full border"
+                            style={{
+                              borderColor: selected
+                                ? "var(--portfolio-accent)"
+                                : "var(--portfolio-border)",
+                              color: selected
+                                ? "var(--portfolio-accent)"
+                                : "var(--portfolio-muted)",
+                              background:
+                                "var(--portfolio-background)",
+                            }}
+                          >
+                            <Icon size={17} />
+                          </span>
 
-      <span className="text-[9px] uppercase tracking-[0.18em] text-neutral-700">
-        {label}
-      </span>
+                          <span
+                            className="font-[Manrope,sans-serif] text-[clamp(1rem,2.3vw,1.55rem)] font-medium tracking-[-0.02em]"
+                            style={{
+                              color: selected
+                                ? "var(--portfolio-text)"
+                                : "var(--portfolio-muted)",
+                            }}
+                          >
+                            {skill.name}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
 
-      <span className="text-xs leading-5 text-neutral-400">
-        {value}
-      </span>
-
-    </div>
-  );
-}
-
-/* =========================================================
-   LOADING STATE
-   ========================================================= */
-
-function SkillsLoading() {
-  return (
-    <div className="border-t border-neutral-900">
-
-      {[1, 2, 3].map((group) => (
-        <div
-          key={group}
-          className="
-            grid gap-8
-            border-b border-neutral-900
-            py-10
-            md:grid-cols-[0.72fr_1.28fr]
-            md:gap-12
-            md:py-12
-          "
-        >
-
-          <div className="space-y-4">
-
-            <div className="h-3 w-10 animate-pulse bg-neutral-900" />
-
-            <div className="h-7 w-36 animate-pulse bg-neutral-900" />
-
-            <div className="h-4 w-full max-w-sm animate-pulse bg-neutral-900" />
-
-            <div className="h-4 w-4/5 max-w-sm animate-pulse bg-neutral-900" />
-
+                {/* EDGE FADES REMOVED — keep the wheel completely transparent
+                    over the heading area. */}
+              </div>
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="
-                  h-16
-                  animate-pulse
-                  rounded-xl
-                  border border-neutral-900
-                  bg-[#080808]
-                "
-              />
-            ))}
-
-          </div>
-
         </div>
-      ))}
 
-    </div>
+        {/* =================================================
+            OUTRO
+        ================================================= */}
+        <div
+          className="pointer-events-none absolute inset-0 z-40 flex items-end px-6 pb-10 md:px-10 lg:px-16 lg:pb-14"
+          style={{
+            opacity: outroProgress,
+            transform: `translate3d(0, ${
+              lerp(30, 0, outroProgress)
+            }px, 0)`,
+          }}
+        >
+          <div className="mx-auto flex w-full max-w-[1650px] items-end justify-between gap-8">
+            <p
+              className="max-w-md font-[Manrope,sans-serif] text-sm leading-7"
+              style={{
+                color: "var(--portfolio-muted)",
+              }}
+            >
+              Different tools, one approach — combining
+              technology, intelligence and visual thinking
+              to build purposeful experiences.
+            </p>
+
+            <span
+              className="hidden font-mono text-[9px] uppercase tracking-[0.24em] md:block"
+              style={{
+                color: "var(--portfolio-muted)",
+              }}
+            >
+              CODE × DESIGN × INTELLIGENCE
+            </span>
+          </div>
+        </div>
+
+        {/* PROGRESS INDICATOR */}
+        <div
+          className="absolute bottom-8 right-6 z-50 hidden md:block lg:right-16"
+          style={{
+            opacity: wheelProgress,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className="font-mono text-[8px] uppercase tracking-[0.2em]"
+              style={{
+                color: "var(--portfolio-muted)",
+              }}
+            >
+              {activeSkill?.name ?? "Skills"}
+            </span>
+
+            <span
+              className="h-px w-12"
+              style={{
+                background:
+                  "var(--portfolio-border)",
+              }}
+            />
+
+            <span
+              className="font-mono text-[8px]"
+              style={{
+                color: "var(--portfolio-muted)",
+              }}
+            >
+              {orderedSkills.length
+                ? `${String(
+                    selectedIndex + 1
+                  ).padStart(2, "0")} / ${String(
+                    orderedSkills.length
+                  ).padStart(2, "0")}`
+                : "-- / --"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes skills-card-in {
+          from {
+            opacity: 0;
+            transform: translate3d(18px, 0, 0) scale(0.985);
+          }
+
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+
+        @keyframes skills-icon-change {
+          from {
+            opacity: 0;
+            transform: scale(0.7) rotate(-10deg);
+          }
+
+          55% {
+            opacity: 1;
+            transform: scale(1.08) rotate(3deg);
+          }
+
+          to {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            scroll-behavior: auto !important;
+          }
+
+          .skills-card-in {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </section>
   );
 }

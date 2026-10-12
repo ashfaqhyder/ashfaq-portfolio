@@ -380,7 +380,7 @@ export default function DashboardPage() {
         {/* PRIMARY STATS */}
 
         <section className="mt-10">
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-900 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-neutral-900 bg-transparent md:grid-cols-2 xl:grid-cols-4">
 
             <StatCard
               label="PROJECTS"
@@ -496,11 +496,11 @@ export default function DashboardPage() {
           </div>
 
           {loading ? (
-            <div className="rounded-2xl border border-neutral-900 bg-[#080808] p-8 text-sm text-neutral-600">
+            <div className="rounded-2xl border border-neutral-900 bg-transparent p-8 text-sm text-neutral-600">
               Loading current experience...
             </div>
           ) : currentExperience ? (
-            <div className="group relative overflow-hidden rounded-2xl border border-[#B6FF3B]/25 bg-[#B6FF3B]/[0.025] p-7 transition hover:border-[#B6FF3B]/50 md:p-9">
+            <div className="group relative overflow-hidden rounded-2xl border border-[#B6FF3B]/25 bg-transparent p-7 transition hover:border-[#B6FF3B]/50 md:p-9">
 
               <div className="absolute right-7 top-7 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
@@ -554,7 +554,7 @@ export default function DashboardPage() {
               <div className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-[#B6FF3B] transition-transform duration-700 group-hover:scale-x-100" />
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-neutral-900 bg-[#080808] p-8">
+            <div className="rounded-2xl border border-dashed border-neutral-900 bg-transparent p-8">
               <p className="text-sm text-neutral-500">
                 No current experience is marked.
               </p>
@@ -752,7 +752,7 @@ function StatCard({
   loading,
 }: StatCardProps) {
   const content = (
-    <div className="bg-[#080808] p-6 transition hover:bg-[#0b0b0b]">
+    <div className="bg-transparent p-6 transition hover:bg-transparent">
       <p className="text-[9px] tracking-[0.2em] text-neutral-700">
         {label}
       </p>
@@ -800,7 +800,7 @@ function ContentCard({
   loading,
 }: ContentCardProps) {
   const content = (
-    <div className="group rounded-2xl border border-neutral-900 bg-[#080808] p-6 transition hover:border-neutral-700 hover:bg-[#0a0a0a]">
+    <div className="group rounded-2xl border border-neutral-900 bg-transparent p-6 transition hover:border-neutral-700 hover:bg-transparent">
       <div className="flex items-start justify-between gap-4">
         <p className="text-sm text-neutral-400">
           {label}
@@ -854,7 +854,7 @@ function StatusCard({
   return (
     <Link
       href={href}
-      className="group rounded-2xl border border-neutral-900 bg-[#080808] p-5 transition hover:border-neutral-700"
+      className="group rounded-2xl border border-neutral-900 bg-transparent p-5 transition hover:border-neutral-700"
     >
       <div className="flex items-center justify-between">
         <p className="text-sm text-neutral-400">
@@ -905,7 +905,7 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="group rounded-2xl border border-neutral-900 bg-[#080808] p-6 transition hover:border-neutral-700 hover:bg-[#0a0a0a]"
+      className="group rounded-2xl border border-neutral-900 bg-transparent p-6 transition hover:border-neutral-700 hover:bg-transparent"
     >
       <div className="flex items-center justify-between">
         <span className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-800 text-sm text-neutral-400 transition group-hover:border-neutral-600 group-hover:text-white">
@@ -957,7 +957,7 @@ function RecentPanel({
   items,
 }: RecentPanelProps) {
   return (
-    <div className="rounded-2xl border border-neutral-900 bg-[#080808]">
+    <div className="rounded-2xl border border-neutral-900 bg-transparent">
 
       <div className="flex items-center justify-between border-b border-neutral-900 px-6 py-5">
 

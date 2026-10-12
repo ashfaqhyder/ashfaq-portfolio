@@ -506,3 +506,253 @@ html[data-smooth-scroll="disabled"] {
     scroll-behavior: auto !important;
   }
 }
+/* =========================================================
+   RECOGNITION & MILESTONES
+   ========================================================= */
+
+@keyframes achievement-swipe {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  42% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  58% {
+    transform: scaleX(1);
+    transform-origin: right center;
+  }
+
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+
+.animate-achievement-swipe {
+  animation: achievement-swipe
+    900ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+/*
+ * Row entrance
+ *
+ * Kept separate from the global animation system so the
+ * Recognition section can progressively reveal each row
+ * while preserving all previously revealed rows.
+ */
+
+@keyframes achievement-row-enter {
+  from {
+    opacity: 0;
+    transform:
+      translate3d(0, 60px, 0)
+      scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translate3d(0, 0, 0)
+      scale(1);
+  }
+}
+
+.animate-achievement-row-enter {
+  animation:
+    achievement-row-enter
+    1000ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+/*
+ * Certificate hover color wipe.
+ *
+ * The actual colors remain controlled by:
+ *
+ * --portfolio-background
+ * --portfolio-text
+ * --portfolio-muted
+ * --portfolio-border
+ * --portfolio-accent
+ *
+ * These are supplied by AppearanceProvider.
+ */
+
+@keyframes achievement-color-wipe {
+  from {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  to {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+.achievement-color-wipe {
+  animation:
+    achievement-color-wipe
+    650ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+/*
+ * Respect the existing Appearance CMS animation toggle.
+ * globals.css already disables animations when
+ * data-animations="disabled" is applied.
+ */
+
+/*
+ * Reduced-motion fallback.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-achievement-swipe,
+  .animate-achievement-row-enter,
+  .achievement-color-wipe {
+    animation: none !important;
+  }
+}
+@keyframes achievement-detail-swipe {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  45% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  55% {
+    transform: scaleX(1);
+    transform-origin: right center;
+  }
+
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+
+@keyframes achievement-detail {
+  from {
+    opacity: 0;
+    transform: translate3d(24px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-achievement-detail {
+  animation: achievement-detail
+    650ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+@keyframes achievement-detail-swipe {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  42% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  58% {
+    transform: scaleX(1);
+    transform-origin: right center;
+  }
+
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+
+@keyframes achievement-detail {
+  0% {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group,
+  .group *,
+  .animate-achievement-detail {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   GLOBAL DITHER BACKGROUND — VISIBILITY FIX
+   =========================================================
+   Keep the CMS Appearance background on html/body, but allow
+   the fixed dither canvas to remain visible behind the public
+   page content. Existing cards/panels are not affected.
+   ========================================================= */
+
+main#top {
+  background: transparent !important;
+}
+
+main#top > div > section {
+  background-color: transparent !important;
+}
+
+
+/* Minimal scrollbar — no arrows */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--portfolio-text) transparent;
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--portfolio-text);
+  border: none;
+  border-radius: 999px;
+}
+
+/* Explicitly hide scrollbar buttons/arrows */
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:vertical,
+::-webkit-scrollbar-button:horizontal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

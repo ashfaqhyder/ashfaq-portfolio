@@ -1,409 +1,620 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
-/**
- * PortfolioCursor
- *
- * Liquid-style pointer for the public portfolio.
- *
- * Behaviour:
- * - Directional stretching based on pointer velocity
- * - Viscous trailing through spring/damped interpolation
- * - Hover deformation over interactive elements
- * - Click compression + elastic recovery
- * - Disabled for touch/coarse pointers
- * - Respects prefers-reduced-motion
- *
- * Drop-in usage:
- *   import PortfolioCursor from "@/components/PortfolioCursor";
- *   ...
- *   <PortfolioCursor />
- */
+type Point = {
+  x: number;
+  y: number;
+};
+
 export default function PortfolioCursor() {
+  const cursorRef = useRef<HTMLDivElement | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
+
+  const target = useRef<Point>({
+    x: 0,
+    y: 0,
+  });
+
+  const position = useRef<Point>({
+    x: 0,
+    y: 0,
+  });
+
+  const previous = useRef<Point>({
+    x: 0,
+    y: 0,
+  });
+
+  const animationFrame = useRef<number | null>(null);
+
+  const [visible, setVisible] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const [pressed, setPressed] = useState(false);
+  const [clickId, setClickId] = useState(0);
+
+  /*
+   * ------------------------------------------------------------
+   * POINTER
+   * ------------------------------------------------------------
+   */
+
   useEffect(() => {
-    const finePointer = window.matchMedia("(pointer: fine)");
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+    const handlePointerMove = (event: PointerEvent) => {
+      if (
+        event.pointerType &&
+        event.pointerType !== "mouse"
+      ) {
+        return;
+      }
+
+      target.current.x = event.clientX;
+      target.current.y = event.clientY;
+
+      if (!visible) {
+        position.current.x = event.clientX;
+        position.current.y = event.clientY;
+
+        previous.current.x = event.clientX;
+        previous.current.y = event.clientY;
+
+        setVisible(true);
+      }
+
+      const element = event.target;
+
+      if (!(element instanceof Element)) {
+        setHovering(false);
+        return;
+      }
+
+      const interactive = element.closest(
+        "a, button, input, textarea, select, [role='button']"
+      );
+
+      setHovering(Boolean(interactive));
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        event.pointerType &&
+        event.pointerType !== "mouse"
+      ) {
+        return;
+      }
+
+      setPressed(true);
+      setClickId((value) => value + 1);
+    };
+
+    const handlePointerUp = () => {
+      setPressed(false);
+    };
+
+    const handleBlur = () => {
+      setVisible(false);
+      setPressed(false);
+    };
+
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      { passive: true }
     );
 
-    if (!finePointer.matches || reducedMotion.matches) {
+    window.addEventListener(
+      "pointerdown",
+      handlePointerDown,
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "pointerup",
+      handlePointerUp,
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "blur",
+      handleBlur
+    );
+
+    return () => {
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+
+      window.removeEventListener(
+        "pointerdown",
+        handlePointerDown
+      );
+
+      window.removeEventListener(
+        "pointerup",
+        handlePointerUp
+      );
+
+      window.removeEventListener(
+        "blur",
+        handleBlur
+      );
+    };
+  }, [visible]);
+
+  /*
+   * ------------------------------------------------------------
+   * LIQUID MOTION
+   * ------------------------------------------------------------
+   */
+
+  useEffect(() => {
+    const animate = () => {
+      const dx =
+        target.current.x -
+        position.current.x;
+
+      const dy =
+        target.current.y -
+        position.current.y;
+
+      /*
+       * Smooth following.
+       */
+
+      position.current.x += dx * 0.28;
+      position.current.y += dy * 0.28;
+
+      /*
+       * Movement velocity.
+       */
+
+      const vx =
+        position.current.x -
+        previous.current.x;
+
+      const vy =
+        position.current.y -
+        previous.current.y;
+
+      previous.current.x =
+        position.current.x;
+
+      previous.current.y =
+        position.current.y;
+
+      const speed = Math.sqrt(
+        vx * vx + vy * vy
+      );
+
+      /*
+       * Limit the effect so the cursor
+       * never becomes excessively distorted.
+       */
+
+      const energy = Math.min(
+        speed / 14,
+        1
+      );
+
+      const angle =
+        Math.atan2(vy, vx) *
+        (180 / Math.PI);
+
+      /*
+       * Main cursor position.
+       */
+
+      if (cursorRef.current) {
+        cursorRef.current.style.transform =
+          `translate3d(${position.current.x}px, ${position.current.y}px, 0) translate(-50%, -50%)`;
+
+        cursorRef.current.style.setProperty(
+          "--cursor-energy",
+          String(energy)
+        );
+      }
+
+      /*
+       * Liquid deformation.
+       */
+
+      if (ringRef.current) {
+        const stretch =
+          1 + energy * 0.5;
+
+        const squash =
+          1 - energy * 0.2;
+
+        ringRef.current.style.transform =
+          `translate(-50%, -50%) rotate(${angle}deg) scale(${stretch}, ${squash})`;
+
+        /*
+         * Subtle organic deformation.
+         */
+
+        const radiusA =
+          50 - energy * 12;
+
+        const radiusB =
+          50 + energy * 12;
+
+        ringRef.current.style.borderRadius =
+          `${radiusA}% ${radiusB}% ${radiusB}% ${radiusA}%`;
+      }
+
+      animationFrame.current =
+        requestAnimationFrame(animate);
+    };
+
+    animationFrame.current =
+      requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrame.current !== null) {
+        cancelAnimationFrame(
+          animationFrame.current
+        );
+      }
+    };
+  }, []);
+
+  return (
+    <>
+      <div
+        ref={cursorRef}
+        aria-hidden="true"
+        className={[
+          "portfolio-liquid-cursor",
+
+          visible
+            ? "portfolio-liquid-cursor--visible"
+            : "",
+
+          hovering
+            ? "portfolio-liquid-cursor--hover"
+            : "",
+
+          pressed
+            ? "portfolio-liquid-cursor--pressed"
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {/* Soft atmosphere */}
+
+        <div className="portfolio-liquid-cursor__glow" />
+
+        {/* Main liquid ring */}
+
+        <div
+          ref={ringRef}
+          className="portfolio-liquid-cursor__ring"
+        />
+
+        {/* Center point */}
+
+        <div className="portfolio-liquid-cursor__core" />
+
+        {/* Click particles */}
+
+        {clickId > 0 &&
+          [0, 90, 180, 270].map(
+            (angle) => (
+              <span
+                key={`${clickId}-${angle}`}
+                className="portfolio-liquid-cursor__particle"
+                style={
+                  {
+                    "--particle-angle":
+                      `${angle}deg`,
+                  } as React.CSSProperties
+                }
+              />
+            )
+          )}
+      </div>
+
+      <CursorActivator />
+    </>
+  );
+}
+
+/*
+ * --------------------------------------------------------------
+ * ENABLE CUSTOM CURSOR
+ * --------------------------------------------------------------
+ */
+
+function CursorActivator() {
+  useEffect(() => {
+    const finePointer =
+      window.matchMedia(
+        "(pointer: fine)"
+      );
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+    if (
+      !finePointer.matches ||
+      reducedMotion.matches
+    ) {
       return;
     }
 
-    const root = document.documentElement;
-
-    const cursor = document.createElement("div");
-    const blob = document.createElement("div");
-    const ripple = document.createElement("div");
-
-    cursor.setAttribute("aria-hidden", "true");
-    blob.setAttribute("aria-hidden", "true");
-    ripple.setAttribute("aria-hidden", "true");
-
-    cursor.className = "portfolio-liquid-cursor";
-    blob.className = "portfolio-liquid-cursor__blob";
-    ripple.className = "portfolio-liquid-cursor__ripple";
-
-    cursor.appendChild(ripple);
-    cursor.appendChild(blob);
-    document.body.appendChild(cursor);
-
-    const style = document.createElement("style");
-    style.textContent = `
-      html.portfolio-liquid-cursor-active,
-      html.portfolio-liquid-cursor-active body,
-      html.portfolio-liquid-cursor-active a,
-      html.portfolio-liquid-cursor-active button,
-      html.portfolio-liquid-cursor-active [role="button"],
-      html.portfolio-liquid-cursor-active input,
-      html.portfolio-liquid-cursor-active textarea,
-      html.portfolio-liquid-cursor-active select {
-        cursor: none !important;
-      }
-
-      .portfolio-liquid-cursor {
-        --cursor-size: 13px;
-        --cursor-scale-x: 1;
-        --cursor-scale-y: 1;
-        --cursor-rotation: 0deg;
-        --cursor-opacity: 1;
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: var(--cursor-size);
-        height: var(--cursor-size);
-        z-index: 2147483647;
-        pointer-events: none;
-        opacity: var(--cursor-opacity);
-        transform:
-          translate3d(
-            calc(var(--cursor-x, -100px) - 50%),
-            calc(var(--cursor-y, -100px) - 50%),
-            0
-          );
-        will-change: transform, opacity;
-      }
-
-      .portfolio-liquid-cursor__blob {
-        position: absolute;
-        inset: 0;
-        border: 1px solid rgba(255, 255, 255, 0.88);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.035);
-        box-shadow:
-          0 0 0 0.5px rgba(255, 255, 255, 0.10) inset,
-          0 0 18px rgba(255, 255, 255, 0.045);
-        transform:
-          rotate(var(--cursor-rotation))
-          scaleX(var(--cursor-scale-x))
-          scaleY(var(--cursor-scale-y));
-        transform-origin: 50% 50%;
-        will-change: transform, border-radius;
-        transition:
-          width 180ms cubic-bezier(.22, 1, .36, 1),
-          height 180ms cubic-bezier(.22, 1, .36, 1),
-          border-radius 220ms cubic-bezier(.22, 1, .36, 1),
-          background 180ms ease,
-          border-color 180ms ease;
-        backdrop-filter: blur(1px);
-        -webkit-backdrop-filter: blur(1px);
-      }
-
-      .portfolio-liquid-cursor__ripple {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 28px;
-        height: 28px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 50%;
-        transform: translate(-50%, -50%) scale(0.45);
-        opacity: 0;
-        will-change: transform, opacity;
-      }
-
-      .portfolio-liquid-cursor.is-hovering .portfolio-liquid-cursor__blob {
-        border-radius: 42% 58% 55% 45% / 50% 44% 56% 50%;
-        border-color: rgba(255, 255, 255, 0.98);
-        background: rgba(255, 255, 255, 0.07);
-      }
-
-      .portfolio-liquid-cursor.is-hovering .portfolio-liquid-cursor__ripple {
-        opacity: 0.32;
-      }
-
-      .portfolio-liquid-cursor.is-pressed .portfolio-liquid-cursor__blob {
-        border-radius: 48% 52% 54% 46% / 55% 44% 56% 45%;
-      }
-
-      @media (hover: none), (pointer: coarse) {
-        .portfolio-liquid-cursor {
-          display: none !important;
-        }
-      }
-    `;
-
-    document.head.appendChild(style);
-    root.classList.add("portfolio-liquid-cursor-active");
-
-    let targetX = window.innerWidth * 0.5;
-    let targetY = window.innerHeight * 0.5;
-
-    let x = targetX;
-    let y = targetY;
-
-    let previousTargetX = targetX;
-    let previousTargetY = targetY;
-
-    let velocityX = 0;
-    let velocityY = 0;
-
-    let rotation = 0;
-    let scaleX = 1;
-    let scaleY = 1;
-
-    let hover = false;
-    let pressed = false;
-    let visible = false;
-    let raf = 0;
-
-    const interactiveSelector = [
-      "a",
-      "button",
-      "[role='button']",
-      "input",
-      "textarea",
-      "select",
-      "summary",
-      "[data-cursor-hover]",
-    ].join(",");
-
-    const setPointerPosition = (event: PointerEvent) => {
-      targetX = event.clientX;
-      targetY = event.clientY;
-
-      if (!visible) {
-        x = targetX;
-        y = targetY;
-        visible = true;
-      }
-    };
-
-    const updateHover = (event: PointerEvent) => {
-      const target = event.target;
-
-      if (!(target instanceof Element)) {
-        hover = false;
-        cursor.classList.remove("is-hovering");
-        return;
-      }
-
-      const interactive = target.closest(interactiveSelector);
-      hover = Boolean(interactive);
-      cursor.classList.toggle("is-hovering", hover);
-    };
-
-    const pointerMove = (event: PointerEvent) => {
-      if (event.pointerType && event.pointerType !== "mouse") {
-        return;
-      }
-
-      setPointerPosition(event);
-      updateHover(event);
-    };
-
-    const pointerDown = (event: PointerEvent) => {
-      if (event.pointerType && event.pointerType !== "mouse") {
-        return;
-      }
-
-      pressed = true;
-      cursor.classList.add("is-pressed");
-
-      blob.animate(
-        [
-          {
-            transform: `
-              rotate(${rotation}deg)
-              scaleX(${scaleX})
-              scaleY(${scaleY})
-            `,
-          },
-          {
-            transform: `
-              rotate(${rotation}deg)
-              scaleX(${scaleX * 0.72})
-              scaleY(${scaleY * 1.18})
-            `,
-          },
-          {
-            transform: `
-              rotate(${rotation}deg)
-              scaleX(${scaleX * 1.06})
-              scaleY(${scaleY * 0.96})
-            `,
-          },
-          {
-            transform: `
-              rotate(${rotation}deg)
-              scaleX(${scaleX})
-              scaleY(${scaleY})
-            `,
-          },
-        ],
-        {
-          duration: 420,
-          easing: "cubic-bezier(.22, 1, .36, 1)",
-        }
-      );
-
-      ripple.animate(
-        [
-          {
-            transform: "translate(-50%, -50%) scale(0.25)",
-            opacity: 0.55,
-          },
-          {
-            transform: "translate(-50%, -50%) scale(1.55)",
-            opacity: 0,
-          },
-        ],
-        {
-          duration: 520,
-          easing: "cubic-bezier(.22, 1, .36, 1)",
-        }
-      );
-    };
-
-    const pointerUp = () => {
-      pressed = false;
-      cursor.classList.remove("is-pressed");
-    };
-
-    const pointerLeave = () => {
-      visible = false;
-      cursor.style.setProperty("--cursor-opacity", "0");
-    };
-
-    const pointerEnter = (event: PointerEvent) => {
-      visible = true;
-      targetX = event.clientX;
-      targetY = event.clientY;
-      x = targetX;
-      y = targetY;
-      cursor.style.setProperty("--cursor-opacity", "1");
-    };
-
-    const animate = () => {
-      /*
-       * Spring-like position interpolation.
-       * The low-ish stiffness creates the viscous "following" sensation
-       * without producing an obvious delayed cursor.
-       */
-      x += (targetX - x) * 0.22;
-      y += (targetY - y) * 0.22;
-
-      const rawVX = targetX - previousTargetX;
-      const rawVY = targetY - previousTargetY;
-
-      previousTargetX = targetX;
-      previousTargetY = targetY;
-
-      velocityX += (rawVX - velocityX) * 0.18;
-      velocityY += (rawVY - velocityY) * 0.18;
-
-      const speed = Math.min(
-        Math.hypot(velocityX, velocityY),
-        55
-      );
-
-      const direction = Math.atan2(velocityY, velocityX);
-      const speedRatio = speed / 55;
-
-      /*
-       * Stretch along the direction of movement and compress on the
-       * perpendicular axis. The effect eases back naturally when stopped.
-       */
-      const targetScaleX = 1 + speedRatio * 0.72;
-      const targetScaleY = 1 - speedRatio * 0.28;
-
-      scaleX += (targetScaleX - scaleX) * 0.18;
-      scaleY += (targetScaleY - scaleY) * 0.18;
-
-      if (speed > 0.15) {
-        let targetRotation = (direction * 180) / Math.PI;
-
-        /*
-         * Avoid unnecessary rotation jumps around ±180 degrees.
-         */
-        while (targetRotation - rotation > 180) {
-          targetRotation -= 360;
-        }
-
-        while (targetRotation - rotation < -180) {
-          targetRotation += 360;
-        }
-
-        rotation += (targetRotation - rotation) * 0.16;
-      } else {
-        scaleX += (1 - scaleX) * 0.12;
-        scaleY += (1 - scaleY) * 0.12;
-        rotation += (0 - rotation) * 0.08;
-      }
-
-      /*
-       * Hover adds a subtle organic deformation rather than a simple
-       * size change.
-       */
-      if (hover) {
-        scaleX += (1.13 - scaleX) * 0.08;
-        scaleY += (0.94 - scaleY) * 0.08;
-      }
-
-      /*
-       * Pointer-down slightly compresses the live state as well, while
-       * the Web Animation above supplies the elastic impact.
-       */
-      if (pressed) {
-        scaleX += (0.86 - scaleX) * 0.12;
-        scaleY += (0.86 - scaleY) * 0.12;
-      }
-
-      cursor.style.setProperty("--cursor-x", `${x}px`);
-      cursor.style.setProperty("--cursor-y", `${y}px`);
-      cursor.style.setProperty("--cursor-scale-x", scaleX.toFixed(3));
-      cursor.style.setProperty("--cursor-scale-y", scaleY.toFixed(3));
-      cursor.style.setProperty("--cursor-rotation", `${rotation.toFixed(2)}deg`);
-      cursor.style.setProperty("--cursor-opacity", visible ? "1" : "0");
-
-      raf = requestAnimationFrame(animate);
-    };
-
-    window.addEventListener("pointermove", pointerMove, { passive: true });
-    window.addEventListener("pointerdown", pointerDown, { passive: true });
-    window.addEventListener("pointerup", pointerUp, { passive: true });
-    window.addEventListener("pointercancel", pointerUp, { passive: true });
-    window.addEventListener("pointerenter", pointerEnter, { passive: true });
-    window.addEventListener("pointerleave", pointerLeave, { passive: true });
-
-    raf = requestAnimationFrame(animate);
+    document.documentElement.classList.add(
+      "portfolio-custom-cursor"
+    );
 
     return () => {
-      cancelAnimationFrame(raf);
-
-      window.removeEventListener("pointermove", pointerMove);
-      window.removeEventListener("pointerdown", pointerDown);
-      window.removeEventListener("pointerup", pointerUp);
-      window.removeEventListener("pointercancel", pointerUp);
-      window.removeEventListener("pointerenter", pointerEnter);
-      window.removeEventListener("pointerleave", pointerLeave);
-
-      root.classList.remove("portfolio-liquid-cursor-active");
-      cursor.remove();
-      style.remove();
+      document.documentElement.classList.remove(
+        "portfolio-custom-cursor"
+      );
     };
   }, []);
 
   return null;
+}
+
+/*
+ * --------------------------------------------------------------
+ * CURSOR STYLES
+ * --------------------------------------------------------------
+ */
+
+const cursorStyles = `
+  html.portfolio-custom-cursor,
+  html.portfolio-custom-cursor body,
+  html.portfolio-custom-cursor *,
+  html.portfolio-custom-cursor a,
+  html.portfolio-custom-cursor button,
+  html.portfolio-custom-cursor input,
+  html.portfolio-custom-cursor textarea,
+  html.portfolio-custom-cursor select {
+    cursor: none !important;
+  }
+
+  .portfolio-liquid-cursor {
+    --cursor-color: var(--portfolio-text, #f5f5f5);
+
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    width: 44px;
+    height: 44px;
+
+    pointer-events: none;
+
+    z-index: 2147483647;
+
+    opacity: 0;
+
+    transform:
+      translate3d(0, 0, 0)
+      translate(-50%, -50%);
+
+    will-change: transform;
+
+    color: var(--cursor-color);
+
+    transition: opacity 160ms ease;
+  }
+
+  .portfolio-liquid-cursor--visible {
+    opacity: 1;
+  }
+
+  .portfolio-liquid-cursor__glow {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 34px;
+    height: 34px;
+
+    transform:
+      translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.09),
+        rgba(255, 255, 255, 0) 70%
+      );
+
+    filter: blur(4px);
+
+    opacity:
+      calc(
+        0.25 +
+        var(--cursor-energy, 0) * 0.25
+      );
+  }
+
+  .portfolio-liquid-cursor__ring {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 17px;
+    height: 17px;
+
+    transform:
+      translate(-50%, -50%);
+
+    box-sizing: border-box;
+
+    border:
+      1.5px solid
+      var(--cursor-color);
+
+    border-radius: 50%;
+
+    will-change:
+      transform,
+      border-radius;
+
+    transition:
+      width 180ms ease,
+      height 180ms ease,
+      border-width 180ms ease;
+  }
+
+  .portfolio-liquid-cursor__core {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 4px;
+    height: 4px;
+
+    transform:
+      translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background:
+      var(--cursor-color);
+
+    transition:
+      width 160ms ease,
+      height 160ms ease,
+      transform 160ms ease;
+  }
+
+  /*
+   * Hover
+   */
+
+  .portfolio-liquid-cursor--hover
+    .portfolio-liquid-cursor__ring {
+    width: 24px;
+    height: 24px;
+
+    border-width: 1.8px;
+  }
+
+  .portfolio-liquid-cursor--hover
+    .portfolio-liquid-cursor__core {
+    width: 5px;
+    height: 5px;
+  }
+
+  /*
+   * Click
+   */
+
+  .portfolio-liquid-cursor--pressed
+    .portfolio-liquid-cursor__ring {
+    width: 9px;
+    height: 9px;
+
+    border-width: 2px;
+  }
+
+  .portfolio-liquid-cursor--pressed
+    .portfolio-liquid-cursor__core {
+    width: 7px;
+    height: 7px;
+  }
+
+  /*
+   * Click particles
+   */
+
+  .portfolio-liquid-cursor__particle {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 3px;
+    height: 3px;
+
+    border-radius: 50%;
+
+    background:
+      var(--cursor-color);
+
+    animation:
+      portfolio-liquid-particle
+      420ms
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      )
+      forwards;
+  }
+
+  @keyframes portfolio-liquid-particle {
+    0% {
+      opacity: 0.9;
+
+      transform:
+        translate(-50%, -50%)
+        rotate(var(--particle-angle))
+        translateX(6px)
+        scale(1);
+    }
+
+    100% {
+      opacity: 0;
+
+      transform:
+        translate(-50%, -50%)
+        rotate(var(--particle-angle))
+        translateX(30px)
+        scale(0.2);
+    }
+  }
+
+  /*
+   * Mobile
+   */
+
+  @media (hover: none), (pointer: coarse) {
+    .portfolio-liquid-cursor {
+      display: none !important;
+    }
+  }
+
+  /*
+   * Reduced motion
+   */
+
+  @media (prefers-reduced-motion: reduce) {
+    .portfolio-liquid-cursor {
+      display: none !important;
+    }
+  }
+`;
+
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById(
+    "portfolio-liquid-cursor-styles"
+  )
+) {
+  const style =
+    document.createElement("style");
+
+  style.id =
+    "portfolio-liquid-cursor-styles";
+
+  style.textContent =
+    cursorStyles;
+
+  document.head.appendChild(style);
 }

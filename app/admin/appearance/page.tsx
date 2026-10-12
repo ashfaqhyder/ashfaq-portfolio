@@ -13,6 +13,12 @@ import {
   saveAppearanceSettings,
 } from "@/services/appearance";
 
+interface AppearancePreset {
+  id: string;
+  name: string;
+  settings: Omit<AppearanceSettings, "updatedAt">;
+}
+
 export default function AppearanceAdminPage() {
   const [settings, setSettings] =
     useState<AppearanceSettings>(
@@ -27,6 +33,15 @@ export default function AppearanceAdminPage() {
 
   const [message, setMessage] =
     useState("");
+
+  const [presets, setPresets] =
+    useState<AppearancePreset[]>([]);
+
+  const [presetName, setPresetName] =
+    useState("");
+
+  const [showPresetCreator, setShowPresetCreator] =
+    useState(false);
 
   useEffect(() => {
     async function loadAppearance() {
@@ -51,6 +66,91 @@ export default function AppearanceAdminPage() {
 
     loadAppearance();
   }, []);
+
+  useEffect(() => {
+    try {
+      const storedPresets =
+        window.localStorage.getItem(
+          "portfolio-appearance-presets"
+        );
+
+      if (!storedPresets) {
+        return;
+      }
+
+      const parsed = JSON.parse(storedPresets);
+
+      if (Array.isArray(parsed)) {
+        setPresets(parsed);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load Appearance presets:",
+        error
+      );
+    }
+  }, []);
+
+  function persistPresets(
+    nextPresets: AppearancePreset[]
+  ) {
+    setPresets(nextPresets);
+    window.localStorage.setItem(
+      "portfolio-appearance-presets",
+      JSON.stringify(nextPresets)
+    );
+  }
+
+  function createPreset() {
+    const name = presetName.trim();
+
+    if (!name) {
+      setMessage("Enter a name for the preset.");
+      return;
+    }
+
+    const preset: AppearancePreset = {
+      id: `${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}`,
+      name,
+      settings: {
+        backgroundColor: settings.backgroundColor,
+        surfaceColor: settings.surfaceColor,
+        textColor: settings.textColor,
+        mutedColor: settings.mutedColor,
+        borderColor: settings.borderColor,
+        accentColor: settings.accentColor,
+        animationsEnabled: settings.animationsEnabled,
+        smoothScrollEnabled: settings.smoothScrollEnabled,
+      },
+    };
+
+    persistPresets([...presets, preset]);
+    setPresetName("");
+    setShowPresetCreator(false);
+    setMessage(`Preset "${name}" saved.`);
+  }
+
+  function applyPreset(preset: AppearancePreset) {
+    setSettings((current) => ({
+      ...current,
+      ...preset.settings,
+    }));
+
+    setMessage(
+      `Preset "${preset.name}" applied. Click Save Appearance to make it live.`
+    );
+  }
+
+  function deletePreset(presetId: string) {
+    const nextPresets = presets.filter(
+      (preset) => preset.id !== presetId
+    );
+
+    persistPresets(nextPresets);
+    setMessage("Preset deleted.");
+  }
 
   function updateField<
     K extends keyof AppearanceSettings
@@ -152,6 +252,138 @@ export default function AppearanceAdminPage() {
           onSubmit={handleSubmit}
           className="space-y-10"
         >
+
+          {/* ================================================= */}
+          {/* THEME PRESETS                                      */}
+          {/* ================================================= */}
+
+          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+            <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
+                  Theme Presets
+                </p>
+
+                <h2 className="mt-2 text-xl font-medium">
+                  Saved combinations
+                </h2>
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+                  Save a complete Appearance combination and reuse it whenever you need it.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPresetCreator((current) => !current)
+                }
+                className="shrink-0 rounded-lg border border-neutral-800 px-5 py-3 text-sm font-medium text-neutral-300 transition-colors hover:border-neutral-600 hover:text-white"
+              >
+                {showPresetCreator
+                  ? "Cancel"
+                  : "Save Current as Preset"}
+              </button>
+            </div>
+
+            {showPresetCreator && (
+              <div className="mb-6 rounded-xl border border-neutral-800 bg-black p-5">
+                <label className="block text-sm font-medium text-neutral-300">
+                  Preset name
+                </label>
+
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                  <input
+                    type="text"
+                    value={presetName}
+                    onChange={(event) =>
+                      setPresetName(event.target.value)
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        createPreset();
+                      }
+                    }}
+                    placeholder="e.g. Midnight Lime"
+                    maxLength={40}
+                    className="min-w-0 flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-700 focus:border-neutral-500"
+                    autoFocus
+                  />
+
+                  <button
+                    type="button"
+                    onClick={createPreset}
+                    className="rounded-lg bg-white px-5 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90"
+                  >
+                    Save Preset
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {presets.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-neutral-800 bg-black p-8 text-center">
+                <p className="text-sm text-neutral-500">
+                  No presets saved yet.
+                </p>
+
+                <p className="mt-2 text-xs text-neutral-700">
+                  Create your first preset from the current Appearance settings.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {presets.map((preset) => (
+                  <div
+                    key={preset.id}
+                    className="rounded-xl border border-neutral-800 bg-black p-5"
+                  >
+                    <h3 className="truncate text-sm font-medium text-neutral-200">
+                      {preset.name}
+                    </h3>
+
+                    <div className="mt-4 flex items-center gap-1.5">
+                      {[
+                        preset.settings.backgroundColor,
+                        preset.settings.surfaceColor,
+                        preset.settings.textColor,
+                        preset.settings.accentColor,
+                      ].map((color, index) => (
+                        <span
+                          key={`${preset.id}-${index}`}
+                          className="h-6 w-6 rounded-full border border-neutral-800"
+                          style={{ backgroundColor: color }}
+                          title={color}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="mt-5 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => applyPreset(preset)}
+                        className="flex-1 rounded-lg border border-neutral-800 px-3 py-2.5 text-xs font-medium text-neutral-300 transition-colors hover:border-neutral-600 hover:text-white"
+                      >
+                        Apply
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => deletePreset(preset.id)}
+                        className="rounded-lg border border-neutral-900 px-3 py-2.5 text-xs text-neutral-600 transition-colors hover:border-red-900 hover:text-red-400"
+                        aria-label={`Delete ${preset.name}`}
+                        title="Delete preset"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
 
           {/* ================================================= */}
           {/* COLORS                                            */}

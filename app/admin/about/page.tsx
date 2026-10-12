@@ -78,23 +78,57 @@ export default function AboutAdminPage() {
     }
   }
 
+    const cmsStyle = (
+    <style jsx global>{`
+      .admin-cms-field::placeholder {
+        color: var(--portfolio-muted);
+        opacity: 0.55;
+      }
+
+      .admin-cms-field:focus {
+        border-color: var(--portfolio-accent);
+        box-shadow: 0 0 0 1px var(--portfolio-accent);
+      }
+
+      .admin-cms-field:-webkit-autofill,
+      .admin-cms-field:-webkit-autofill:hover,
+      .admin-cms-field:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--portfolio-text);
+        -webkit-box-shadow: 0 0 0 1000px var(--portfolio-background) inset;
+        transition: background-color 5000s ease-in-out 0s;
+      }
+    `}</style>
+  );
+
+
   if (loading) {
-    return (
-      <main className="p-6 md:p-10">
+  return (
+    <>
+      {cmsStyle}
+      <main
+        className="min-h-full p-6 text-[var(--portfolio-text)] md:p-10"
+        style={{
+          backgroundColor: "var(--portfolio-background)",
+          color: "var(--portfolio-text)",
+        }}
+      >
         <div className="max-w-5xl">
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-[var(--portfolio-muted)]">
             Loading About content...
           </p>
         </div>
       </main>
-    );
-  }
+    </>
+  );
+}
 
   return (
-    <main className="p-6 md:p-10">
+    <>
+      {cmsStyle}
+      <main className="min-h-full p-6 text-[var(--portfolio-text)] md:p-10">
       <div className="mx-auto max-w-5xl">
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-[0.25em] text-neutral-500">
+          <p className="text-xs uppercase tracking-[0.25em] text-[var(--portfolio-muted)]">
             Content Management
           </p>
 
@@ -102,7 +136,7 @@ export default function AboutAdminPage() {
             About
           </h1>
 
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--portfolio-muted)]">
             Manage the personal introduction, biography,
             profile image and contact information shown in
             the public About section.
@@ -114,9 +148,9 @@ export default function AboutAdminPage() {
           className="space-y-10"
         >
           {/* Main Content */}
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+          <section className="rounded-2xl border border-[var(--portfolio-border)] bg-transparent p-6 md:p-8">
             <div className="mb-7">
-              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--portfolio-muted)]">
                 Main Content
               </p>
 
@@ -178,9 +212,9 @@ export default function AboutAdminPage() {
           </section>
 
           {/* Personal Details */}
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+          <section className="rounded-2xl border border-[var(--portfolio-border)] bg-transparent p-6 md:p-8">
             <div className="mb-7">
-              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--portfolio-muted)]">
                 Personal Details
               </p>
 
@@ -219,7 +253,7 @@ export default function AboutAdminPage() {
                 placeholder="/images/about/profile.jpg"
               />
 
-              <p className="text-xs leading-5 text-neutral-600">
+              <p className="text-xs leading-5 text-[var(--portfolio-muted)]">
                 Since permanent media is stored with the
                 project, enter the public path here rather
                 than uploading the image to Firebase.
@@ -228,9 +262,9 @@ export default function AboutAdminPage() {
           </section>
 
           {/* Contact */}
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+          <section className="rounded-2xl border border-[var(--portfolio-border)] bg-transparent p-6 md:p-8">
             <div className="mb-7">
-              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--portfolio-muted)]">
                 Contact & Social
               </p>
 
@@ -282,13 +316,13 @@ export default function AboutAdminPage() {
           </section>
 
           {/* Save */}
-          <div className="flex flex-col gap-4 border-t border-neutral-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-t border-[var(--portfolio-border)] pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               {message && (
                 <p
                   className={`text-sm ${
                     message.includes("successfully")
-                      ? "text-lime-400"
+                      ? "text-[var(--portfolio-accent)]"
                       : "text-red-400"
                   }`}
                 >
@@ -300,14 +334,15 @@ export default function AboutAdminPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-white px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-[var(--portfolio-accent)] px-6 py-3 text-sm font-medium text-[var(--portfolio-background)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save About"}
             </button>
           </div>
         </form>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -337,7 +372,7 @@ function Field({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="w-full rounded-lg border border-neutral-800 bg-black px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-700 focus:border-neutral-500"
+        className="admin-cms-field w-full rounded-lg border border-[var(--portfolio-border)] bg-[var(--portfolio-background)] px-4 py-3 text-sm text-[var(--portfolio-text)] outline-none transition-colors placeholder:text-[var(--portfolio-muted)] focus:border-[var(--portfolio-accent)]"
       />
     </div>
   );
@@ -369,7 +404,7 @@ function TextAreaField({
         }
         placeholder={placeholder}
         rows={rows}
-        className="w-full resize-y rounded-lg border border-neutral-800 bg-black px-4 py-3 text-sm leading-6 text-white outline-none transition-colors placeholder:text-neutral-700 focus:border-neutral-500"
+        className="admin-cms-field w-full resize-y rounded-lg border border-[var(--portfolio-border)] bg-[var(--portfolio-background)] px-4 py-3 text-sm leading-6 text-[var(--portfolio-text)] outline-none transition-colors placeholder:text-[var(--portfolio-muted)] focus:border-[var(--portfolio-accent)]"
       />
     </div>
   );

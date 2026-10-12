@@ -654,16 +654,7 @@ function ProjectVisual({
   project: Project;
 }) {
   return (
-    <Link
-      href={`/projects/${project.slug}`}
-      aria-label={`View ${project.title}`}
-      className="
-        group
-        relative
-        block
-        overflow-hidden
-      "
-    >
+    <div className="group relative block overflow-hidden">
       <div
         className="
           relative
@@ -798,7 +789,7 @@ function ProjectVisual({
           }
         />
       </div>
-    </Link>
+    </div>
   );
 }
 

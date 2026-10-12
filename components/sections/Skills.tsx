@@ -711,14 +711,14 @@ export default function Skills() {
       className="relative w-full"
       style={{
         height: "350svh",
-        background: "var(--portfolio-background)",
+        background: "transparent",
         color: "var(--portfolio-text)",
       }}
     >
       <div
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
         style={{
-          background: "var(--portfolio-background)",
+          background: "transparent",
         }}
       >
         {/* SUBTLE ATMOSPHERE */}

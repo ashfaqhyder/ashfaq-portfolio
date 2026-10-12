@@ -95,7 +95,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="border-t border-neutral-900 bg-[#050505] px-6 py-10 text-white md:px-10 lg:px-16 lg:py-12">
+    <footer className="border-t border-neutral-900 bg-transparent px-6 py-10 text-white md:px-10 lg:px-16 lg:py-12">
       <div className="mx-auto max-w-7xl">
         {/* Main footer */}
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">

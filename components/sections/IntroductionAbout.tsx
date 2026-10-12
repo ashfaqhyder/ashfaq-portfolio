@@ -913,15 +913,13 @@ export default function IntroductionAbout() {
       className="relative w-full"
       style={{
         height: "360svh",
-        background:
-          "var(--portfolio-background)",
+        background: "transparent",
       }}
     >
       <div
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
         style={{
-          background:
-            "var(--portfolio-background)",
+          background: "transparent",
         }}
       >
 

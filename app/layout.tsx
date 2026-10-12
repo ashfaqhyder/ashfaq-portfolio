@@ -48,8 +48,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        {/* Fixed background canvas sits behind the transparent public wrapper. */}
+        <PortfolioDitherBackground />
         <AppearanceProvider>
-          <PortfolioDitherBackground />
           {children}
         </AppearanceProvider>
       </body>

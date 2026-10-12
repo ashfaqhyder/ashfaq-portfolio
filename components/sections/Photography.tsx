@@ -498,16 +498,14 @@ export default function Photography() {
       className="relative w-full"
       style={{
         height: "300svh",
-        background:
-          "var(--portfolio-background)",
+        background: "transparent",
         color: "var(--portfolio-text)",
       }}
     >
       <div
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
         style={{
-          background:
-            "var(--portfolio-background)",
+          background: "transparent",
         }}
       >
         {/* Persistent eyebrow */}

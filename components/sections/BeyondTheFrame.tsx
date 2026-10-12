@@ -330,74 +330,18 @@ export default function BeyondTheFrame() {
       id="beyond-the-frame"
       ref={sectionRef}
       className="relative w-full"
-      style={{ height: "400svh", background: "var(--portfolio-background)", color: "var(--portfolio-text)" }}
+      style={{ height: "400svh", background: "transparent", color: "var(--portfolio-text)" }}
     >
       <div
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
         onWheel={handleWheel}
         onDoubleClick={returnToCategories}
-        style={{ background: "var(--portfolio-background)" }}
+        style={{ background: "transparent", isolation: "isolate" }}
       >
         <div className={`absolute left-6 top-20 z-[70] md:left-10 lg:left-16 lg:top-24 transition-opacity duration-500 ${enteredGallery ? "opacity-0 pointer-events-none" : "opacity-100"}`} style={{ opacity: 1 - outro }}>
           <p className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: "var(--portfolio-accent)" }}>
             09 / Beyond the Frame
           </p>
-        </div>
-
-        <div
-          className={`pointer-events-none absolute inset-x-0 top-0 z-[60] px-6 pt-28 md:px-10 lg:px-16 lg:pt-32 transition-opacity duration-500 ${enteredGallery ? "opacity-0" : "opacity-100"}`}
-          style={{ transform: `translate3d(0, ${(1 - headingProgress) * 20 - outro * 16}px, 0)` }}
-        >
-          <div className="max-w-[52rem]">
-            <ScrollHeading text="Beyond the Frame" progress={headingProgress} />
-            <p className="mt-6 max-w-md text-sm leading-7" style={{ color: "var(--portfolio-muted)", opacity: easeOut(range(sectionProgress, 0.16, 0.34)) }}>
-              Stories, worlds and characters I return to when I step outside the code.
-            </p>
-          </div>
-        </div>
-
-        <div className={`absolute left-6 top-[43%] z-[80] w-[min(42vw,31rem)] md:left-10 lg:left-16 transition-opacity duration-500 ${enteredGallery ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-          <div className="mb-6 flex flex-wrap gap-3 pointer-events-auto">
-            {([
-              ["movies-series", "Movies & Series"],
-              ["anime", "Anime"],
-            ] as const).map(([value, label]) => {
-              const selected = category === value;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setCategory(value)}
-                  aria-pressed={selected}
-                  className="border-b pb-2 font-mono text-[9px] uppercase tracking-[.18em] transition-colors duration-300"
-                  style={{ color: selected ? "var(--portfolio-text)" : "var(--portfolio-muted)", borderColor: selected ? "var(--portfolio-accent)" : "var(--portfolio-border)" }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          <p className="font-mono text-[8px] uppercase tracking-[.25em]" style={{ color: "var(--portfolio-accent)" }}>
-            {category === "anime" ? "Animated worlds" : "Film & television"}
-          </p>
-          {!enteredGallery && (
-            <h3 className="mt-3 font-[Syne,sans-serif] text-[clamp(1.7rem,3vw,3.2rem)] font-medium leading-[.94] tracking-[-.045em]">
-              {category === "anime" ? "Worlds beyond reality." : "Stories that stay."}
-            </h3>
-          )}
-          {!enteredGallery && (
-            <>
-              <p className="mt-4 max-w-md text-sm leading-7" style={{ color: "var(--portfolio-muted)" }}>
-                {loading
-                  ? "Loading the collection…"
-                  : collectionError
-                    ? "The collection could not be loaded. Please try again later."
-                    : activePoster
-                      ? `${activePosters.length} ${activePosters.length === 1 ? "title" : "titles"} in this collection. Choose this world to explore its posters.`
-                      : "The frame is waiting. Posters for this category have not been published yet."}
-              </p>
-            </>
-          )}
         </div>
 
         <div
@@ -557,7 +501,7 @@ export default function BeyondTheFrame() {
               exit={{ opacity: 0, y: -28, scale: 0.985, filter: "blur(6px)" }}
               transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
               className="absolute inset-0 z-[120] flex flex-col px-5 pb-7 pt-20 md:px-8 md:pb-10 md:pt-24 lg:px-12 lg:pb-12 lg:pt-24"
-              style={{ background: "var(--portfolio-background)" }}
+              style={{ background: "transparent" }}
             >
               <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
                 <div>

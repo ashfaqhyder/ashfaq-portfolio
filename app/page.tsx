@@ -51,7 +51,7 @@ export default function Home() {
   return (
     <main
       id="top"
-      className="relative z-0 min-h-screen overflow-x-clip"
+      className="relative z-10 min-h-screen overflow-x-clip"
       style={{
         // IMPORTANT: transparent here lets the fixed dither canvas show.
         // The actual CMS background is still supplied by body/html.

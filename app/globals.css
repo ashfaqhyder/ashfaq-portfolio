@@ -756,3 +756,33 @@ html {
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
+/* Reveal the global dither behind Beyond the Frame */
+main#top > div > section#beyond-the-frame > div {
+  background-color: transparent !important;
+}
+
+/* =========================================
+   GLOBAL DITHER — LAYER ORDER
+   ========================================= */
+
+/* Keep the animated canvas behind the portfolio. */
+body > canvas[aria-hidden="true"] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Keep the CMS wrapper transparent. */
+body > div[data-portfolio-public="true"] {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+/* Keep the main page above the canvas. */
+body > div[data-portfolio-public="true"] main#top {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}

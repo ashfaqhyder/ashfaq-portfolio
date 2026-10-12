@@ -384,8 +384,7 @@ export default function Contact() {
       className="relative w-full border-t"
       style={{
         height: "220svh",
-        background:
-          "var(--portfolio-background)",
+        background: "transparent",
         color:
           "var(--portfolio-text)",
         borderColor:
@@ -399,8 +398,7 @@ export default function Contact() {
       <div
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
         style={{
-          background:
-            "var(--portfolio-background)",
+          background: "transparent",
         }}
       >
         {/* =================================================
@@ -410,8 +408,7 @@ export default function Contact() {
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background:
-              "var(--portfolio-background)",
+            background: "transparent",
           }}
         />
 

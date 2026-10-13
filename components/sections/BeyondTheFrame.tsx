@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type WheelEvent as ReactWheelEvent,
+  type TouchEvent as ReactTouchEvent,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Expo, gsap, Power1, Quint } from "gsap";
@@ -280,7 +281,7 @@ export default function BeyondTheFrame() {
   }, [enteredGallery, activePosters.length]);
 
   // A swipe is the mobile equivalent of the desktop wheel gesture.
-  const handleTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+  const handleTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     if (!enteredGallery || !activePosters.length) return;
     const touch = event.changedTouches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };

@@ -93,6 +93,11 @@ function ImageTrail({
       const rect = contentRef.current?.getBoundingClientRect();
       if (rect) mousePos.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      const rect = contentRef.current?.getBoundingClientRect();
+      if (touch && rect) mousePos.current = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+    };
     const lerp = (a: number, b: number, n: number) => (1 - n) * a + n * b;
     const getMouseDistance = () => Math.hypot(
       mousePos.current.x - lastMousePos.current.x,
@@ -139,12 +144,14 @@ function ImageTrail({
     calcParentSize();
     if (!imagesRef.current.length) return;
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("resize", calcParentSize);
     raf = requestAnimationFrame(renderImages);
     return () => {
       running = false;
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("resize", calcParentSize);
       imagesRef.current.forEach((img) => gsap.killTweensOf(img));
     };

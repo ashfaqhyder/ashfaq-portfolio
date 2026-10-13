@@ -772,9 +772,10 @@ export default function Skills() {
         >
           <div className="mx-auto flex max-w-[1650px] justify-start md:justify-end">
             <div className="w-full max-w-full md:max-w-[48%] md:pl-8 lg:max-w-[44%] lg:pl-6">
-              <SectionHeading
-                progress={headingProgress}
-              />
+              <div className="mb-3 font-[Syne,sans-serif] text-3xl font-medium tracking-[-0.06em] md:hidden">Skills<span style={{ color: "var(--portfolio-accent)" }}>.</span></div>
+              <div className="hidden md:block">
+                <SectionHeading progress={headingProgress} />
+              </div>
 
               <p
                 className="mt-3 hidden max-w-md font-[Manrope,sans-serif] text-sm leading-7 md:mt-7 md:block"

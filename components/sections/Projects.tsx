@@ -658,8 +658,9 @@ function ProjectVisual({
       <div
         className="
           relative
-          aspect-[16/10]
+          aspect-[16/7]
           w-full
+          sm:aspect-[16/10]
           overflow-hidden
         "
         style={{
@@ -1344,8 +1345,9 @@ export default function Projects() {
           <div
             className="
               relative
-              mt-[5vh]
+              mt-[2vh]
               min-h-0
+              sm:mt-[5vh]
               flex-1
               overflow-hidden
             "
@@ -1388,7 +1390,8 @@ export default function Projects() {
                     grid
                     w-full
                     items-center
-                    gap-10
+                    gap-3
+                    sm:gap-10
                     lg:grid-cols-2
                     lg:gap-16
                   "
@@ -1473,10 +1476,12 @@ export default function Projects() {
 
                     <h3
                       className="
-                        mt-5
+                        mt-3
                         max-w-[650px]
+                        sm:mt-5
                         font-[Syne,sans-serif]
-                        text-[clamp(2.2rem,4.2vw,4.8rem)]
+                        text-[clamp(1.7rem,7vw,2.7rem)]
+                        sm:text-[clamp(2.2rem,4.2vw,4.8rem)]
                         font-medium
                         leading-[0.9]
                         tracking-[-0.065em]
@@ -1505,8 +1510,9 @@ export default function Projects() {
 
                     <div
                       className="
-                        mt-7
+                        mt-3
                         max-w-[650px]
+                        sm:mt-7
                       "
                       style={{
                         opacity:
@@ -1524,7 +1530,10 @@ export default function Projects() {
                         className="
                           font-[Manrope,sans-serif]
                           text-[clamp(.9rem,1.05vw,1.05rem)]
-                          leading-[1.8]
+                          leading-[1.55]
+                          sm:leading-[1.8]
+                          line-clamp-3
+                          sm:line-clamp-none
                         "
                       >
                         <SequentialParagraph
@@ -1543,9 +1552,10 @@ export default function Projects() {
 
                     <div
                       className="
-                        mt-8
+                        mt-4
                         flex
                         flex-wrap
+                        sm:mt-8
                         gap-3
                       "
                       style={{

@@ -2,6 +2,10 @@
 
 export default function PublicLogo() {
   function goToHero() {
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      window.dispatchEvent(new CustomEvent("portfolio:toggle-mobile-menu"));
+      return;
+    }
     document.getElementById("top")?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -12,7 +16,7 @@ export default function PublicLogo() {
     <button
       type="button"
       onClick={goToHero}
-      aria-label="Return to hero"
+      aria-label="Open section menu"
       className="
         group
         fixed

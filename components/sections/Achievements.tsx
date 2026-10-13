@@ -963,7 +963,7 @@ export default function Achievements() {
     const observer = new ResizeObserver(measure);
     observer.observe(track);
     return () => observer.disconnect();
-  }, [topLevelAchievements.length]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;

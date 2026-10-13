@@ -294,7 +294,7 @@ export default function BeyondTheFrame() {
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
   }, [enteredGallery, activePosters.length]);
 
-  const handleTouchEnd = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+  const handleTouchEnd = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
     const start = touchStartRef.current;
     touchStartRef.current = null;
     if (!enteredGallery || !activePosters.length || !start) return;

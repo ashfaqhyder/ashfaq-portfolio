@@ -974,7 +974,7 @@ export default function IntroductionAbout() {
             <div className="max-w-[1400px]">
 
               <div
-                className="mb-7 flex items-center gap-3"
+                className="mb-3 flex items-center gap-3 md:mb-7"
                 style={{
                   opacity:
                     introSupporting,
@@ -1080,14 +1080,14 @@ export default function IntroductionAbout() {
         >
           <div className="mx-auto w-full max-w-[1380px] px-6 sm:px-10 md:px-14 lg:px-20">
 
-            <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-[300px_minmax(0,1fr)] md:gap-16 lg:grid-cols-[350px_minmax(0,1fr)] lg:gap-24">
+            <div className="grid grid-cols-1 items-center gap-5 md:grid-cols-[300px_minmax(0,1fr)] md:gap-16 lg:grid-cols-[350px_minmax(0,1fr)] lg:gap-24">
 
               {/* =================================================
                   PORTRAIT
               ================================================= */}
 
               <div
-                className="relative mx-auto w-full max-w-[300px] md:mx-0"
+                className="relative mx-auto w-full max-w-[132px] md:mx-0 md:max-w-[300px]"
                 style={{
                   opacity:
                     portraitOpacity,
@@ -1244,7 +1244,7 @@ export default function IntroductionAbout() {
                 ================================================= */}
 
                 <h3
-                  className="max-w-[980px] font-[Syne,sans-serif] text-[clamp(2.35rem,5vw,5.7rem)] font-medium leading-[0.94] tracking-[-0.06em]"
+                  className="max-w-[980px] font-[Syne,sans-serif] text-[clamp(2rem,5vw,5.7rem)] font-medium leading-[0.96] tracking-[-0.06em] md:text-[clamp(2.35rem,5vw,5.7rem)]"
                   style={{
                     color:
                       "var(--portfolio-accent)",
@@ -1271,7 +1271,7 @@ export default function IntroductionAbout() {
                 ================================================= */}
 
                 <div
-                  className="mt-8 max-w-[680px]"
+                  className="mt-4 max-w-[680px] md:mt-8"
                   style={{
                     opacity:
                       aboutDetails,
@@ -1284,7 +1284,7 @@ export default function IntroductionAbout() {
                   }}
                 >
                   <p
-                    className="font-[Manrope,sans-serif] text-[clamp(0.94rem,1.1vw,1.08rem)] leading-[1.75]"
+                    className="font-[Manrope,sans-serif] text-[12px] leading-[1.6] md:text-[clamp(0.94rem,1.1vw,1.08rem)] md:leading-[1.75]"
                     style={{
                       color:
                         "var(--portfolio-muted)",
@@ -1296,7 +1296,7 @@ export default function IntroductionAbout() {
                   </p>
 
                   <p
-                    className="mt-4 max-w-[610px] font-[Manrope,sans-serif] text-sm leading-7"
+                    className="mt-4 hidden max-w-[610px] font-[Manrope,sans-serif] text-sm leading-7 md:block"
                     style={{
                       color:
                         "var(--portfolio-muted)",
@@ -1316,7 +1316,7 @@ export default function IntroductionAbout() {
                 ================================================= */}
 
                 <div
-                  className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
+                  className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between md:mt-8 md:gap-6"
                   style={{
                     opacity:
                       aboutDetails,
@@ -1328,7 +1328,7 @@ export default function IntroductionAbout() {
 
                   {/* META */}
 
-                  <div className="flex flex-wrap gap-x-10 gap-y-4">
+                  <div className="hidden flex-wrap gap-x-10 gap-y-4 md:flex">
 
                     <div>
                       <span
@@ -1383,7 +1383,7 @@ export default function IntroductionAbout() {
                   {/* SOCIAL */}
 
                   <div
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-3"
                     style={{
                       opacity:
                         aboutSocials,

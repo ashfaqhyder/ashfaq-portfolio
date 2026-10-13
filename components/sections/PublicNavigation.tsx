@@ -35,6 +35,7 @@ export default function PublicNavigation() {
   const [visible, setVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("projects");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -52,6 +53,17 @@ export default function PublicNavigation() {
       })),
     [hoveredIndex]
   );
+
+  useEffect(() => {
+    const toggleMenu = () => setMobileMenuOpen((open) => !open);
+    const closeMenu = () => setMobileMenuOpen(false);
+    window.addEventListener("portfolio:toggle-mobile-menu", toggleMenu);
+    window.addEventListener("portfolio:close-mobile-menu", closeMenu);
+    return () => {
+      window.removeEventListener("portfolio:toggle-mobile-menu", toggleMenu);
+      window.removeEventListener("portfolio:close-mobile-menu", closeMenu);
+    };
+  }, []);
 
   useEffect(() => {
     let ticking = false;
@@ -243,12 +255,48 @@ export default function PublicNavigation() {
   }
 
   return (
-    <nav
+    <>
+      <div className="fixed left-0 top-0 z-[130] h-0 w-0 md:hidden">
+        <div
+          className={`fixed inset-0 bg-black/65 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+        <nav
+          aria-label="Mobile section navigation"
+          aria-hidden={!mobileMenuOpen}
+          className={`fixed left-0 top-0 flex h-[100dvh] w-[min(82vw,340px)] flex-col border-r px-6 pb-8 pt-24 transition-transform duration-500 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+          style={{ background: "var(--portfolio-background)", borderColor: "var(--portfolio-border)", color: "var(--portfolio-text)", transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
+        >
+          <p className="mb-5 font-mono text-[9px] uppercase tracking-[0.25em]" style={{ color: "var(--portfolio-muted)" }}>Navigate / Sections</p>
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            {NAV_ITEMS.map((item) => {
+              const active = activeSection === item.target;
+              return (
+                <button
+                  key={item.target}
+                  type="button"
+                  tabIndex={mobileMenuOpen ? 0 : -1}
+                  aria-current={active ? "location" : undefined}
+                  onClick={() => navigateTo(item.target)}
+                  className="flex min-h-12 items-center justify-between border-b py-3 text-left font-mono text-[10px] uppercase tracking-[0.16em]"
+                  style={{ borderColor: "var(--portfolio-border)", color: active ? "var(--portfolio-text)" : "var(--portfolio-muted)" }}
+                >
+                  <span>{item.label}</span>
+                  <span aria-hidden="true" style={{ color: "var(--portfolio-accent)" }}>{active ? "—" : "↗"}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-6 font-mono text-[8px] uppercase tracking-[0.2em]" style={{ color: "var(--portfolio-muted)" }}>CODE × DESIGN × INTELLIGENCE</p>
+        </nav>
+      </div>
+      <nav
       ref={navRef}
       aria-label="Primary navigation"
       onPointerMove={handleNavPointerMove}
       onPointerLeave={handleNavPointerLeave}
-      className={`fixed left-1/2 top-0 z-[100] -translate-x-1/2 transition-[transform,opacity] duration-[900ms] ${
+      className={`hidden md:block fixed left-1/2 top-0 z-[100] -translate-x-1/2 transition-[transform,opacity] duration-[900ms] ${
         visible
           ? "translate-y-0 opacity-100"
           : "-translate-y-[calc(100%+18px)] pointer-events-none opacity-0"
@@ -360,6 +408,7 @@ export default function PublicNavigation() {
           })}
         </div>
       </div>
-    </nav>
+      </nav>
+    </>
   );
 }

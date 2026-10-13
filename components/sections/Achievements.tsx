@@ -605,7 +605,7 @@ function RecognitionCard({
       onBlur={() =>
         onHover(false)
       }
-      className="absolute left-1/2 top-1/2 h-[300px] w-[200px] md:h-[325px] md:w-[215px]"
+      className="absolute left-1/2 top-1/2 h-[min(42svh,340px)] w-[min(68vw,220px)] sm:h-[300px] sm:w-[200px] md:h-[325px] md:w-[215px]"
       style={{
         zIndex,
         opacity: visible
@@ -841,7 +841,7 @@ function SubCardStack({
               onBlur={() =>
                 onHover(null)
               }
-              className="absolute left-1/2 top-1/2 h-[300px] w-[200px] md:h-[325px] md:w-[215px]"
+              className="absolute left-1/2 top-1/2 h-[min(42svh,340px)] w-[min(68vw,220px)] sm:h-[300px] sm:w-[200px] md:h-[325px] md:w-[215px]"
               style={{
                 zIndex:
                   focused
@@ -1301,7 +1301,7 @@ export default function Achievements() {
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <div className="relative h-full w-full">
           <div
-            className="absolute inset-x-0 top-0 z-20 mx-auto w-full max-w-[1450px] px-6 pt-14 sm:px-10 md:px-14 md:pt-16 lg:px-20"
+            className="absolute inset-x-0 top-0 z-20 mx-auto w-full max-w-[1450px] px-5 pt-20 sm:px-10 sm:pt-14 md:px-14 md:pt-16 lg:px-20"
             style={{
               opacity:
                 1 -
@@ -1355,7 +1355,7 @@ export default function Achievements() {
           />
 
           <div
-            className="absolute inset-0 z-[20] flex items-center justify-center px-4 pt-[125px] sm:px-8 md:px-12 md:pt-[140px] lg:px-20"
+            className="absolute inset-0 z-[20] flex items-center justify-center overflow-hidden px-2 pt-[150px] sm:px-8 sm:pt-[125px] md:px-12 md:pt-[140px] lg:px-20"
             style={{
               opacity:
                 cardsVisible
@@ -1398,7 +1398,7 @@ export default function Achievements() {
                 No published recognition
               </p>
             ) : (
-              <div className="relative h-[610px] w-full max-w-[1250px]">
+              <div className="relative h-[min(610px,62svh)] w-full max-w-[1250px] sm:h-[610px]">
                 <div
                   className="absolute inset-0"
                   style={{

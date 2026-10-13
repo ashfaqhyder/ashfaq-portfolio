@@ -518,6 +518,7 @@ function RecognitionCard({
   onHover,
   onClick,
   focused,
+  mobileActiveIndex = 0,
 }: {
   achievement: Achievement;
   index: number;
@@ -531,6 +532,7 @@ function RecognitionCard({
   onHover: (value: boolean) => void;
   onClick: () => void;
   focused?: boolean;
+  mobileActiveIndex?: number;
 }) {
   const resting =
     getRestingPosition(
@@ -565,15 +567,16 @@ function RecognitionCard({
       resting.rotate) *
       expansion;
 
-  const mobileScale = isMobileCard ? 0.78 : 1;
-  const finalX =
-    x * (1 - outro) * mobileScale;
-
-  const finalY =
-    y * (1 - outro) * mobileScale;
-
-  const finalRotation =
-    rotation * (1 - outro);
+  // Mobile: a single centered certificate with adjacent cards off-canvas.
+  // Desktop keeps the existing layered fan composition.
+  const mobileCarousel = isMobileCard && outro < 0.01;
+  const mobileOffset = index - mobileActiveIndex;
+  const mobileStep = Math.min(230, window.innerWidth * 0.66);
+  const finalX = mobileCarousel
+    ? mobileOffset * mobileStep
+    : x * (1 - outro) * (isMobileCard ? 0.78 : 1);
+  const finalY = mobileCarousel ? 0 : y * (1 - outro) * (isMobileCard ? 0.78 : 1);
+  const finalRotation = mobileCarousel ? 0 : rotation * (1 - outro);
 
   const scale =
     flipped && selected
@@ -608,7 +611,7 @@ function RecognitionCard({
       onBlur={() =>
         onHover(false)
       }
-      className="absolute left-1/2 top-1/2 h-[270px] w-[180px] sm:h-[300px] sm:w-[200px] md:h-[325px] md:w-[215px]"
+      className="absolute left-1/2 top-1/2 h-[min(56svh,460px)] w-[min(78vw,340px)] sm:h-[300px] sm:w-[200px] md:h-[325px] md:w-[215px]"
       style={{
         zIndex,
         opacity: visible
@@ -621,7 +624,7 @@ function RecognitionCard({
             : "none",
         perspective:
           "1800px",
-        transform: `translate3d(calc(-50% + ${finalX}px),calc(-50% + ${finalY}px),0) rotate(${finalRotation}deg) scale(${scale})`,
+        transform: `translate3d(calc(-50% + ${finalX}px),calc(-50% + ${finalY}px),0) rotate(${finalRotation}deg) scale(${mobileCarousel ? (mobileOffset === 0 ? scale : 0.72) : scale})`,
         transition:
           "transform 760ms cubic-bezier(0.16,1,0.3,1), opacity 500ms ease, filter 400ms ease",
         filter:
@@ -1420,9 +1423,7 @@ export default function Achievements() {
                 <div
                   className="absolute inset-0"
                   style={{
-                    transform: typeof window !== "undefined" && window.innerWidth < 640
-                      ? `translateX(${(Math.max(0, mobileTrackWidth - 42) / 2) - mobileCertificateIndex * Math.min(58, Math.max(36, window.innerWidth * 0.105))}px) scale(0.62)`
-                      : undefined,
+                    transform: undefined,
                     transformOrigin: "center center",
                     opacity:
                       masterFocusMode
@@ -1495,6 +1496,7 @@ export default function Achievements() {
                             selectedMaster ||
                             selectedStandalone
                           }
+                          mobileActiveIndex={mobileCertificateIndex}
                           onHover={(
                             value
                           ) =>
@@ -1504,11 +1506,10 @@ export default function Achievements() {
                                 : null
                             )
                           }
-                          onClick={() =>
-                            handleAchievementClick(
-                              achievement
-                            )
-                          }
+                          onClick={() => {
+                            setMobileCertificateIndex(index);
+                            handleAchievementClick(achievement);
+                          }}
                         />
                       );
                     }
@@ -1616,12 +1617,12 @@ export default function Achievements() {
           </div>
 
           {cardsVisible && topLevelAchievements.length > 1 && (
-            <div className="absolute bottom-[4.25rem] left-1/2 z-[60] w-[min(64vw,220px)] -translate-x-1/2 md:hidden">
+            <div className="absolute bottom-[4.4rem] left-1/2 z-[60] w-[min(72vw,260px)] -translate-x-1/2 md:hidden">
               <div className="mb-2 flex items-center justify-between font-mono text-[7px] uppercase tracking-[0.18em]" style={{ color: "var(--portfolio-muted)" }}>
                 <span>Certificates</span>
                 <span>{String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}</span>
               </div>
-              <div ref={mobileCertificateTrackRef} className="relative h-4 w-full touch-pan-x rounded-full border" style={{ borderColor: "var(--portfolio-text)", background: "color-mix(in srgb, var(--portfolio-text) 5%, transparent)" }}>
+              <div ref={mobileCertificateTrackRef} className="relative h-3 w-full touch-pan-x rounded-full border" style={{ borderColor: "var(--portfolio-text)", background: "color-mix(in srgb, var(--portfolio-text) 5%, transparent)", clipPath: "inset(0 round 999px)" }}>
                 <div className="pointer-events-none absolute inset-x-2 top-1/2 h-px -translate-y-1/2 rounded-full" style={{ background: "color-mix(in srgb, var(--portfolio-text) 24%, transparent)" }} />
                 <div
                   ref={mobileCertificateThumbRef}

@@ -538,11 +538,13 @@ function RecognitionCard({
       total
     );
 
+  const isMobileCard =
+    typeof window !== "undefined" && window.innerWidth < 640;
   const expanded =
     getExpandedPosition(
       index,
       total,
-      total > 5 ? 125 : 150
+      isMobileCard ? 42 : total > 5 ? 125 : 150
     );
 
   const x =
@@ -563,8 +565,7 @@ function RecognitionCard({
       resting.rotate) *
       expansion;
 
-  const mobileScale =
-    typeof window !== "undefined" && window.innerWidth < 640 ? 0.62 : 1;
+  const mobileScale = isMobileCard ? 0.78 : 1;
   const finalX =
     x * (1 - outro) * mobileScale;
 
@@ -607,7 +608,7 @@ function RecognitionCard({
       onBlur={() =>
         onHover(false)
       }
-      className="absolute left-1/2 top-1/2 h-[300px] w-[200px] md:h-[325px] md:w-[215px]"
+      className="absolute left-1/2 top-1/2 h-[270px] w-[180px] sm:h-[300px] sm:w-[200px] md:h-[325px] md:w-[215px]"
       style={{
         zIndex,
         opacity: visible

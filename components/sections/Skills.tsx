@@ -770,8 +770,8 @@ export default function Skills() {
               "transform 800ms cubic-bezier(.16,1,.3,1)",
           }}
         >
-          <div className="mx-auto flex max-w-[1650px] justify-end">
-            <div className="w-full max-w-[50%] pl-8 md:max-w-[48%] lg:max-w-[44%] lg:pl-6">
+          <div className="mx-auto flex max-w-[1650px] justify-end md:justify-end">
+            <div className="w-full max-w-full pl-0 md:max-w-[48%] md:pl-8 lg:max-w-[44%] lg:pl-6">
               <SectionHeading
                 progress={headingProgress}
               />
@@ -805,8 +805,8 @@ export default function Skills() {
               "opacity 650ms cubic-bezier(.16,1,.3,1), transform 900ms cubic-bezier(.16,1,.3,1)",
           }}
         >
-          <div className="mx-auto flex h-full max-w-[1500px] items-center px-6 pt-20 md:px-10 lg:px-16 lg:pt-24">
-            <div className="grid w-full items-center gap-2 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8">
+          <div className="mx-auto flex h-full max-w-[1500px] items-center px-4 pt-24 sm:px-6 md:px-10 lg:px-16 lg:pt-24">
+            <div className="grid w-full items-center gap-3 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8">
               {/* ACTIVE DETAIL CARD */}
               <div
                 className="relative z-50 flex w-full justify-start lg:justify-start lg:pr-6"
@@ -845,7 +845,7 @@ export default function Skills() {
                 ) : activeSkill ? (
                   <div
                     key={activeSkill.id ?? activeSkill.name}
-                    className="w-full max-w-[21rem]"
+                    className="w-full max-w-[min(21rem,100%)]"
                     style={{
                       animation:
                         "skills-card-in 600ms cubic-bezier(.16,1,.3,1)",
@@ -892,7 +892,7 @@ export default function Skills() {
 
               {/* WHEEL */}
               <div
-                className="relative -ml-64 h-[25rem] w-full max-w-[29rem] select-none overflow-visible touch-none bg-transparent md:-ml-72 md:h-[29rem] lg:-ml-80 lg:h-[31rem]"
+                className="relative mx-auto mt-2 h-[15rem] w-full max-w-[20rem] select-none overflow-visible touch-none bg-transparent sm:h-[18rem] md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-72 lg:-ml-80 lg:h-[31rem]"
                 style={{
                   touchAction: "none",
                   cursor: dragging ? "grabbing" : "grab",
@@ -967,8 +967,8 @@ export default function Skills() {
                      * x bends inward, y follows a curved vertical path,
                      * and rotation follows the wheel tangent.
                      */
-                    const radius = 365;
-                    const spacing = 14;
+                    const radius = typeof window !== "undefined" && window.innerWidth < 768 ? 155 : 365;
+                    const spacing = typeof window !== "undefined" && window.innerWidth < 768 ? 22 : 14;
                     const angle =
                       offset * spacing;
                     const radians =

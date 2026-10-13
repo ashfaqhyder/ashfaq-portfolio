@@ -263,13 +263,13 @@ export default function PublicNavigation() {
           aria-label="Close mobile navigation"
           tabIndex={mobileMenuOpen ? 0 : -1}
           onClick={() => setMobileMenuOpen(false)}
-          className={`fixed inset-0 z-[125] bg-black/65 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+          className={`fixed inset-0 z-[125] bg-black/35 backdrop-blur-md transition-opacity duration-300 ${mobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         />
         <nav
           aria-label="Mobile section navigation"
           aria-hidden={!mobileMenuOpen}
-          className={`fixed left-0 top-0 z-[130] flex h-[100dvh] w-[min(82vw,340px)] flex-col border-r px-6 pb-8 pt-24 transition-transform duration-500 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
-          style={{ background: "var(--portfolio-background)", borderColor: "var(--portfolio-border)", color: "var(--portfolio-text)", transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
+          className={`fixed left-0 top-0 z-[130] flex h-[100dvh] w-[min(72vw,280px)] flex-col border-r px-5 pb-7 pt-20 transition-transform duration-500 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+          style={{ background: "color-mix(in srgb, var(--portfolio-background) 72%, transparent)", backdropFilter: "blur(24px) saturate(150%)", WebkitBackdropFilter: "blur(24px) saturate(150%)", borderColor: "color-mix(in srgb, var(--portfolio-text) 16%, transparent)", color: "var(--portfolio-text)", boxShadow: "0 18px 60px rgba(0,0,0,0.28)", transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
         >
           <p className="mb-5 font-mono text-[9px] uppercase tracking-[0.25em]" style={{ color: "var(--portfolio-muted)" }}>Navigate / Sections</p>
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">

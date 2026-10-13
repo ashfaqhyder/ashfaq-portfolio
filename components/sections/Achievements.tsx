@@ -951,6 +951,19 @@ export default function Achievements() {
   );
 
   const [mobileCertificateIndex, setMobileCertificateIndex] = useState(0);
+  const mobileCertificateTrackRef = useRef<HTMLDivElement | null>(null);
+  const mobileCertificateThumbRef = useRef<HTMLDivElement | null>(null);
+  const [mobileTrackWidth, setMobileTrackWidth] = useState(0);
+
+  useEffect(() => {
+    const track = mobileCertificateTrackRef.current;
+    if (!track) return;
+    const measure = () => setMobileTrackWidth(track.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -1407,7 +1420,7 @@ export default function Achievements() {
                   className="absolute inset-0"
                   style={{
                     transform: typeof window !== "undefined" && window.innerWidth < 640
-                      ? `translateX(${-mobileCertificateIndex * 62}px) scale(0.62)`
+                      ? `translateX(${(Math.max(0, mobileTrackWidth - 42) / 2) - mobileCertificateIndex * Math.min(58, Math.max(36, window.innerWidth * 0.105))}px) scale(0.62)`
                       : undefined,
                     transformOrigin: "center center",
                     opacity:
@@ -1602,22 +1615,55 @@ export default function Achievements() {
           </div>
 
           {!masterFocusMode && cardsVisible && topLevelAchievements.length > 1 && (
-            <div className="absolute bottom-14 left-1/2 z-[60] w-[min(78vw,320px)] -translate-x-1/2 md:hidden">
-              <div className="mb-2 flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.18em]" style={{ color: "var(--portfolio-muted)" }}>
+            <div className="absolute bottom-[4.5rem] left-1/2 z-[60] w-[min(76vw,260px)] -translate-x-1/2 md:hidden">
+              <div className="mb-2 flex items-center justify-between font-mono text-[7px] uppercase tracking-[0.18em]" style={{ color: "var(--portfolio-muted)" }}>
                 <span>Certificates</span>
                 <span>{String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}</span>
               </div>
-              <input
-                type="range"
-                min={0}
-                max={Math.max(0, topLevelAchievements.length - 1)}
-                step={1}
-                value={Math.min(mobileCertificateIndex, Math.max(0, topLevelAchievements.length - 1))}
-                onChange={(event) => setMobileCertificateIndex(Number(event.target.value))}
-                aria-label="Browse certificates"
-                className="h-8 w-full cursor-ew-resize appearance-none rounded-full border px-2"
-                style={{ borderColor: "var(--portfolio-border)", accentColor: "var(--portfolio-accent)", background: "color-mix(in srgb, var(--portfolio-text) 7%, transparent)", touchAction: "pan-x" }}
-              />
+              <div ref={mobileCertificateTrackRef} className="relative h-5 w-full touch-pan-x rounded-full border" style={{ borderColor: "var(--portfolio-text)", background: "color-mix(in srgb, var(--portfolio-text) 5%, transparent)" }}>
+                <div className="pointer-events-none absolute inset-x-2 top-1/2 h-px -translate-y-1/2 rounded-full" style={{ background: "color-mix(in srgb, var(--portfolio-text) 24%, transparent)" }} />
+                <div
+                  ref={mobileCertificateThumbRef}
+                  role="slider"
+                  tabIndex={0}
+                  aria-label="Browse certificates"
+                  aria-valuemin={0}
+                  aria-valuemax={Math.max(0, topLevelAchievements.length - 1)}
+                  aria-valuenow={Math.min(mobileCertificateIndex, Math.max(0, topLevelAchievements.length - 1))}
+                  onPointerDown={(event) => {
+                    const track = mobileCertificateTrackRef.current;
+                    if (!track) return;
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    const rect = track.getBoundingClientRect();
+                    const updateFromX = (clientX: number) => {
+                      const progress = clamp((clientX - rect.left) / Math.max(rect.width, 1));
+                      setMobileCertificateIndex(Math.round(progress * Math.max(0, topLevelAchievements.length - 1)));
+                    };
+                    updateFromX(event.clientX);
+                    const onMove = (moveEvent: PointerEvent) => updateFromX(moveEvent.clientX);
+                    const cleanup = () => {
+                      window.removeEventListener("pointermove", onMove);
+                      window.removeEventListener("pointerup", cleanup);
+                      window.removeEventListener("pointercancel", cleanup);
+                    };
+                    window.addEventListener("pointermove", onMove);
+                    window.addEventListener("pointerup", cleanup, { once: true });
+                    window.addEventListener("pointercancel", cleanup, { once: true });
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowRight") setMobileCertificateIndex((i) => Math.min(topLevelAchievements.length - 1, i + 1));
+                    if (event.key === "ArrowLeft") setMobileCertificateIndex((i) => Math.max(0, i - 1));
+                  }}
+                  className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm"
+                  style={{
+                    left: `calc(6px + (100% - 12px) * ${mobileCertificateIndex / Math.max(1, topLevelAchievements.length - 1)})`,
+                    transform: "translate(-50%, -50%)",
+                    background: "var(--portfolio-text)",
+                    touchAction: "none",
+                    cursor: "ew-resize",
+                  }}
+                />
+              </div>
             </div>
           )}
 

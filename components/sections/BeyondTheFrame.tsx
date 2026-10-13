@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type WheelEvent as ReactWheelEvent,
+  type TouchEvent as ReactTouchEvent,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Expo, gsap, Power1, Quint } from "gsap";
@@ -92,6 +93,11 @@ function ImageTrail({
       const rect = contentRef.current?.getBoundingClientRect();
       if (rect) mousePos.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      const rect = contentRef.current?.getBoundingClientRect();
+      if (touch && rect) mousePos.current = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+    };
     const lerp = (a: number, b: number, n: number) => (1 - n) * a + n * b;
     const getMouseDistance = () => Math.hypot(
       mousePos.current.x - lastMousePos.current.x,
@@ -138,12 +144,14 @@ function ImageTrail({
     calcParentSize();
     if (!imagesRef.current.length) return;
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("resize", calcParentSize);
     raf = requestAnimationFrame(renderImages);
     return () => {
       running = false;
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("resize", calcParentSize);
       imagesRef.current.forEach((img) => gsap.killTweensOf(img));
     };
@@ -173,6 +181,7 @@ export default function BeyondTheFrame() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const posterViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollLockRef = useRef<{ scrollY: number; bodyPosition: string; bodyTop: string; bodyWidth: string; htmlOverflow: string } | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const [posters, setPosters] = useState<ScreenCulturePoster[]>([]);
   const [category, setCategory] = useState<ScreenCultureCategory>("movies-series");
   const [enteredGallery, setEnteredGallery] = useState(false);
@@ -278,6 +287,28 @@ export default function BeyondTheFrame() {
     setActiveIndex((current) => (current + direction + activePosters.length) % activePosters.length);
   }, [enteredGallery, activePosters.length]);
 
+  // A swipe is the mobile equivalent of the desktop wheel gesture.
+  const handleTouchStart = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    if (!enteredGallery || !activePosters.length) return;
+    const touch = event.changedTouches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }, [enteredGallery, activePosters.length]);
+
+  const handleTouchEnd = useCallback((event: ReactTouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!enteredGallery || !activePosters.length || !start) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    const delta = Math.abs(dy) >= Math.abs(dx) ? dy : dx;
+    if (Math.abs(delta) < 28) return;
+    event.preventDefault();
+    setHasBrowsed(true);
+    const direction = delta < 0 ? 1 : -1;
+    setActiveIndex((current) => (current + direction + activePosters.length) % activePosters.length);
+  }, [enteredGallery, activePosters.length]);
+
   // Up/Down arrows browse the active collection while the gallery is open.
   useEffect(() => {
     if (!enteredGallery || !activePosters.length) return;
@@ -335,6 +366,8 @@ export default function BeyondTheFrame() {
       <div
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
         onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         onDoubleClick={returnToCategories}
         style={{ background: "transparent", isolation: "isolate" }}
       >
@@ -377,7 +410,7 @@ export default function BeyondTheFrame() {
             )}
             {!!activePosters.length && (
               <div className="pointer-events-none absolute bottom-6 right-3 z-[100] rounded-full border px-4 py-2 font-mono text-[8px] uppercase tracking-[.18em] backdrop-blur-md" style={{ color: "var(--portfolio-text)", borderColor: "var(--portfolio-border)", background: "color-mix(in srgb, var(--portfolio-background) 72%, transparent)" }}>
-                Move cursor · Scroll to browse · Double-click to return
+                Move / swipe · Scroll to browse · Categories to return
               </div>
             )}
           </div>
@@ -458,7 +491,7 @@ export default function BeyondTheFrame() {
                       className="mx-auto mt-5 max-w-md text-sm leading-6 md:text-base"
                       style={{ color: "var(--portfolio-muted)" }}
                     >
-                      Move your cursor anywhere to reveal the poster trail. Scroll to browse titles; double-click anywhere to return to categories.
+                      Move or swipe to reveal the poster trail. Scroll or swipe to browse titles; use Categories to return.
                     </motion.p>
                   ) : (
                     <motion.a

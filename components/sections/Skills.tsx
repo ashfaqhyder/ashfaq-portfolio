@@ -806,7 +806,7 @@ export default function Skills() {
               "opacity 650ms cubic-bezier(.16,1,.3,1), transform 900ms cubic-bezier(.16,1,.3,1)",
           }}
         >
-          <div className="mx-auto flex h-full max-w-[1500px] items-start px-4 pt-24 sm:items-center sm:px-6 md:px-10 lg:px-16 lg:pt-24">
+          <div className="mx-auto flex h-full max-w-[1500px] items-start px-4 pt-[30vh] sm:items-center sm:px-6 sm:pt-24 md:px-10 lg:px-16 lg:pt-24">
             <div className="grid w-full grid-cols-1 items-start gap-2 sm:gap-3 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-8">
               {/* ACTIVE DETAIL CARD */}
               <div
@@ -893,7 +893,7 @@ export default function Skills() {
 
               {/* WHEEL */}
               <div
-                className="relative mx-auto mt-1 h-[5.5rem] w-full max-w-[21rem] select-none overflow-visible touch-none bg-transparent sm:mt-2 sm:h-[8rem] md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-64 md:left-auto lg:-ml-64 lg:h-[31rem]"
+                className="relative mx-auto mt-1 h-[4.5rem] w-full max-w-[21rem] select-none overflow-hidden touch-none bg-transparent sm:mt-2 sm:h-[8rem] md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-64 md:left-auto lg:-ml-64 lg:h-[31rem]"
                 style={{
                   touchAction: "none",
                   cursor: dragging ? "grabbing" : "grab",
@@ -1065,7 +1065,7 @@ export default function Skills() {
                           </span>
 
                           <span
-                            className="font-[Manrope,sans-serif] text-[clamp(1rem,2.3vw,1.55rem)] font-medium tracking-[-0.02em]"
+                            className="hidden font-[Manrope,sans-serif] text-[clamp(1rem,2.3vw,1.55rem)] font-medium tracking-[-0.02em] md:inline"
                             style={{
                               color: selected
                                 ? "var(--portfolio-text)"

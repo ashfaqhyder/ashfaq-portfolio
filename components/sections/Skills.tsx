@@ -759,7 +759,7 @@ export default function Skills() {
             INTRO / HEADING
         ================================================= */}
         <div
-          className="absolute inset-x-0 top-0 z-30 pointer-events-none px-6 pt-20 md:px-10 lg:px-16 lg:pt-24"
+          className="absolute inset-x-0 top-0 z-30 pointer-events-none px-6 pt-32 md:px-10 lg:px-16 lg:pt-24"
           style={{
             opacity: 1,
             transform: `translate3d(0, ${

@@ -611,7 +611,7 @@ function RecognitionCard({
       onBlur={() =>
         onHover(false)
       }
-      className="absolute left-1/2 top-1/2 h-[270px] w-[180px] sm:h-[300px] sm:w-[200px] md:h-[325px] md:w-[215px]"
+      className="absolute left-1/2 top-1/2 h-[min(56svh,460px)] w-[min(78vw,340px)] sm:h-[300px] sm:w-[200px] md:h-[325px] md:w-[215px]"
       style={{
         zIndex,
         opacity: visible
@@ -1506,11 +1506,10 @@ export default function Achievements() {
                                 : null
                             )
                           }
-                          onClick={() =>
-                            handleAchievementClick(
-                              achievement
-                            )
-                          }
+                          onClick={() => {
+                            setMobileCertificateIndex(index);
+                            handleAchievementClick(achievement);
+                          }}
                         />
                       );
                     }
@@ -1618,12 +1617,12 @@ export default function Achievements() {
           </div>
 
           {cardsVisible && topLevelAchievements.length > 1 && (
-            <div className="absolute bottom-[4.25rem] left-1/2 z-[60] w-[min(64vw,220px)] -translate-x-1/2 md:hidden">
+            <div className="absolute bottom-[4.4rem] left-1/2 z-[60] w-[min(72vw,260px)] -translate-x-1/2 md:hidden">
               <div className="mb-2 flex items-center justify-between font-mono text-[7px] uppercase tracking-[0.18em]" style={{ color: "var(--portfolio-muted)" }}>
                 <span>Certificates</span>
                 <span>{String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}</span>
               </div>
-              <div ref={mobileCertificateTrackRef} className="relative h-4 w-full touch-pan-x rounded-full border" style={{ borderColor: "var(--portfolio-text)", background: "color-mix(in srgb, var(--portfolio-text) 5%, transparent)" }}>
+              <div ref={mobileCertificateTrackRef} className="relative h-3 w-full touch-pan-x rounded-full border" style={{ borderColor: "var(--portfolio-text)", background: "color-mix(in srgb, var(--portfolio-text) 5%, transparent)", clipPath: "inset(0 round 999px)" }}>
                 <div className="pointer-events-none absolute inset-x-2 top-1/2 h-px -translate-y-1/2 rounded-full" style={{ background: "color-mix(in srgb, var(--portfolio-text) 24%, transparent)" }} />
                 <div
                   ref={mobileCertificateThumbRef}

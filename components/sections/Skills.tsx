@@ -247,7 +247,7 @@ function SkillDetailCard({
 
   return (
     <article
-      className="relative min-h-[17rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border p-4 sm:min-h-[21rem] sm:p-5 md:min-h-[22rem] md:p-6"
+      className="relative min-h-[15rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border p-4 sm:min-h-[21rem] sm:p-5 md:min-h-[22rem] md:p-6"
       style={{
         background: "var(--portfolio-background)",
         color: "var(--portfolio-text)",
@@ -306,7 +306,7 @@ function SkillDetailCard({
         </a>
       </div>
 
-      <div className="relative mt-6 flex min-h-[5rem] flex-1 flex-col justify-center sm:mt-12 sm:min-h-[8rem]">
+      <div className="relative mt-4 flex min-h-[4rem] flex-1 flex-col justify-center sm:mt-12 sm:min-h-[8rem]">
         <p
           className="mb-3 font-mono text-[8px] uppercase tracking-[0.24em]"
           style={{ color: "var(--portfolio-muted)" }}
@@ -772,9 +772,10 @@ export default function Skills() {
         >
           <div className="mx-auto flex max-w-[1650px] justify-start md:justify-end">
             <div className="w-full max-w-full md:max-w-[48%] md:pl-8 lg:max-w-[44%] lg:pl-6">
-              <SectionHeading
-                progress={headingProgress}
-              />
+              <div className="mb-3 font-[Syne,sans-serif] text-3xl font-medium tracking-[-0.06em] md:hidden">Skills<span style={{ color: "var(--portfolio-accent)" }}>.</span></div>
+              <div className="hidden md:block">
+                <SectionHeading progress={headingProgress} />
+              </div>
 
               <p
                 className="mt-3 hidden max-w-md font-[Manrope,sans-serif] text-sm leading-7 md:mt-7 md:block"
@@ -805,8 +806,8 @@ export default function Skills() {
               "opacity 650ms cubic-bezier(.16,1,.3,1), transform 900ms cubic-bezier(.16,1,.3,1)",
           }}
         >
-          <div className="mx-auto flex h-full max-w-[1500px] items-center px-6 pt-20 md:px-10 lg:px-16 lg:pt-24">
-            <div className="grid w-full items-center gap-2 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8">
+          <div className="mx-auto flex h-full max-w-[1500px] items-start px-4 pt-24 sm:items-center sm:px-6 md:px-10 lg:px-16 lg:pt-24">
+            <div className="grid w-full grid-cols-1 items-start gap-2 sm:gap-3 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-8">
               {/* ACTIVE DETAIL CARD */}
               <div
                 className="relative z-50 flex w-full justify-start lg:justify-start lg:pr-6"
@@ -892,7 +893,7 @@ export default function Skills() {
 
               {/* WHEEL */}
               <div
-                className="relative -ml-64 h-[25rem] w-full max-w-[29rem] select-none overflow-visible touch-none bg-transparent md:-ml-72 md:h-[29rem] lg:-ml-80 lg:h-[31rem]"
+                className="relative mx-auto mt-1 h-[5.5rem] w-full max-w-[21rem] select-none overflow-visible touch-none bg-transparent sm:mt-2 sm:h-[8rem] md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-72 lg:-ml-80 lg:h-[31rem]"
                 style={{
                   touchAction: "none",
                   cursor: dragging ? "grabbing" : "grab",
@@ -967,18 +968,16 @@ export default function Skills() {
                      * x bends inward, y follows a curved vertical path,
                      * and rotation follows the wheel tangent.
                      */
-                    const radius = 365;
-                    const spacing = 14;
+                    const isMobileWheel = typeof window !== "undefined" && window.innerWidth < 768;
+                    const radius = isMobileWheel ? 0 : 365;
+                    const spacing = isMobileWheel ? 0 : 14;
                     const angle =
                       offset * spacing;
                     const radians =
                       (angle * Math.PI) / 180;
 
-                    const x =
-                      -radius *
-                      (1 - Math.cos(radians));
-                    const y =
-                      radius * Math.sin(radians);
+                    const x = isMobileWheel ? offset * Math.min(94, window.innerWidth * 0.24) : -radius * (1 - Math.cos(radians));
+                    const y = isMobileWheel ? 0 : radius * Math.sin(radians);
 
                     const distance = Math.min(
                       Math.abs(offset) / 2.5,
@@ -1020,7 +1019,7 @@ export default function Skills() {
                           // causing a second navigation/selection.
                           event.preventDefault();
                         }}
-                        className="absolute left-[15%] top-1/2 origin-left whitespace-nowrap text-left outline-none"
+                        className="absolute left-1/2 top-1/2 origin-left whitespace-nowrap text-left outline-none"
                         style={{
                           color: selected
                             ? "var(--portfolio-text)"

@@ -950,6 +950,8 @@ export default function Achievements() {
     null
   );
 
+  const [mobileCertificateIndex, setMobileCertificateIndex] = useState(0);
+
   useEffect(() => {
     let mounted = true;
 
@@ -1400,10 +1402,14 @@ export default function Achievements() {
                 No published recognition
               </p>
             ) : (
-              <div className="relative h-[610px] w-full max-w-[1250px]">
+              <div className="relative h-[min(500px,55svh)] w-full max-w-[1250px] sm:h-[610px]">
                 <div
                   className="absolute inset-0"
                   style={{
+                    transform: typeof window !== "undefined" && window.innerWidth < 640
+                      ? `translateX(${-mobileCertificateIndex * 62}px) scale(0.62)`
+                      : undefined,
+                    transformOrigin: "center center",
                     opacity:
                       masterFocusMode
                         ? 0
@@ -1594,6 +1600,26 @@ export default function Achievements() {
               </div>
             )}
           </div>
+
+          {!masterFocusMode && cardsVisible && topLevelAchievements.length > 1 && (
+            <div className="absolute bottom-14 left-1/2 z-[60] w-[min(78vw,320px)] -translate-x-1/2 md:hidden">
+              <div className="mb-2 flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.18em]" style={{ color: "var(--portfolio-muted)" }}>
+                <span>Certificates</span>
+                <span>{String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={Math.max(0, topLevelAchievements.length - 1)}
+                step={1}
+                value={Math.min(mobileCertificateIndex, Math.max(0, topLevelAchievements.length - 1))}
+                onChange={(event) => setMobileCertificateIndex(Number(event.target.value))}
+                aria-label="Browse certificates"
+                className="h-8 w-full cursor-ew-resize appearance-none rounded-full border px-2"
+                style={{ borderColor: "var(--portfolio-border)", accentColor: "var(--portfolio-accent)", background: "color-mix(in srgb, var(--portfolio-text) 7%, transparent)", touchAction: "pan-x" }}
+              />
+            </div>
+          )}
 
           {!masterFocusMode &&
             cardsVisible &&

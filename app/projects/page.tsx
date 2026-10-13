@@ -772,9 +772,6 @@ export default function ProjectsPage() {
           </div>
         </footer>
 
-        <div className="pb-8 pt-2 sm:hidden">
-          <BackToPortfolio />
-        </div>
       </div>
     </main>
   );

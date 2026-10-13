@@ -1083,6 +1083,9 @@ export default function Skills() {
                 {/* EDGE FADES REMOVED — keep the wheel completely transparent
                     over the heading area. */}
               </div>
+              <div className="mt-2 text-center font-[Manrope,sans-serif] text-xs font-medium md:hidden" style={{ color: "var(--portfolio-text)" }}>
+                {activeSkill?.name ?? "Select a skill"}
+              </div>
             </div>
           </div>
         </div>

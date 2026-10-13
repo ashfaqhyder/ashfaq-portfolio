@@ -173,7 +173,7 @@ function SectionHeading({
   return (
     <h2
       aria-label={text}
-      className="max-w-[1000px] font-[Syne,sans-serif] text-[clamp(2.6rem,6vw,6.8rem)] font-medium leading-[0.9] tracking-[-0.065em]"
+      className="max-w-[1000px] font-[Syne,sans-serif] text-[clamp(2rem,8vw,3.4rem)] font-medium leading-[0.92] tracking-[-0.065em] sm:text-[clamp(2.6rem,6vw,6.8rem)]"
     >
       {Array.from(text).map((character, index) => {
         const count = text.length;
@@ -247,7 +247,7 @@ function SkillDetailCard({
 
   return (
     <article
-      className="relative min-h-[21rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border p-5 md:min-h-[22rem] md:p-6"
+      className="relative min-h-[17rem] w-full max-w-[21rem] overflow-hidden rounded-[1.45rem] border p-4 sm:min-h-[21rem] sm:p-5 md:min-h-[22rem] md:p-6"
       style={{
         background: "var(--portfolio-background)",
         color: "var(--portfolio-text)",
@@ -306,7 +306,7 @@ function SkillDetailCard({
         </a>
       </div>
 
-      <div className="relative mt-12 flex min-h-[8rem] flex-1 flex-col justify-center">
+      <div className="relative mt-6 flex min-h-[5rem] flex-1 flex-col justify-center sm:mt-12 sm:min-h-[8rem]">
         <p
           className="mb-3 font-mono text-[8px] uppercase tracking-[0.24em]"
           style={{ color: "var(--portfolio-muted)" }}
@@ -770,14 +770,14 @@ export default function Skills() {
               "transform 800ms cubic-bezier(.16,1,.3,1)",
           }}
         >
-          <div className="mx-auto flex max-w-[1650px] justify-end">
-            <div className="w-full max-w-[50%] pl-8 md:max-w-[48%] lg:max-w-[44%] lg:pl-6">
+          <div className="mx-auto flex max-w-[1650px] justify-start md:justify-end">
+            <div className="w-full max-w-full md:max-w-[48%] md:pl-8 lg:max-w-[44%] lg:pl-6">
               <SectionHeading
                 progress={headingProgress}
               />
 
               <p
-                className="mt-7 max-w-md font-[Manrope,sans-serif] text-sm leading-7"
+                className="mt-3 hidden max-w-md font-[Manrope,sans-serif] text-sm leading-7 md:mt-7 md:block"
                 style={{
                   color: "var(--portfolio-muted)",
                   opacity: easeOut(

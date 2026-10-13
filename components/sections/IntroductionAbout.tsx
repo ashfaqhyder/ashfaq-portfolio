@@ -1087,7 +1087,7 @@ export default function IntroductionAbout() {
               ================================================= */}
 
               <div
-                className="relative mx-auto w-full max-w-[132px] md:mx-0 md:max-w-[300px]"
+                className="relative mx-auto w-full max-w-[min(42vw,170px)] md:mx-0 md:max-w-[300px]"
                 style={{
                   opacity:
                     portraitOpacity,
@@ -1316,7 +1316,7 @@ export default function IntroductionAbout() {
                 ================================================= */}
 
                 <div
-                  className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between md:mt-8 md:gap-6"
+                  className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mt-8 md:gap-6"
                   style={{
                     opacity:
                       aboutDetails,
@@ -1383,7 +1383,7 @@ export default function IntroductionAbout() {
                   {/* SOCIAL */}
 
                   <div
-                    className="flex items-center gap-3"
+                    className="flex flex-wrap items-center gap-3"
                     style={{
                       opacity:
                         aboutSocials,

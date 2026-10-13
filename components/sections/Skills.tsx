@@ -893,7 +893,7 @@ export default function Skills() {
 
               {/* WHEEL */}
               <div
-                className="relative mx-auto mt-1 h-[5.5rem] w-full max-w-[21rem] select-none overflow-visible touch-none bg-transparent sm:mt-2 sm:h-[8rem] md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-72 lg:-ml-80 lg:h-[31rem]"
+                className="relative mx-auto mt-1 h-[5.5rem] w-full max-w-[21rem] select-none overflow-visible touch-none bg-transparent sm:mt-2 sm:h-[8rem] md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-64 md:left-auto lg:-ml-64 lg:h-[31rem]"
                 style={{
                   touchAction: "none",
                   cursor: dragging ? "grabbing" : "grab",
@@ -1019,13 +1019,13 @@ export default function Skills() {
                           // causing a second navigation/selection.
                           event.preventDefault();
                         }}
-                        className="absolute left-1/2 top-1/2 origin-left whitespace-nowrap text-left outline-none"
+                        className="absolute left-1/2 top-1/2 origin-left whitespace-nowrap text-left outline-none md:left-[15%]"
                         style={{
                           color: selected
                             ? "var(--portfolio-text)"
                             : "var(--portfolio-muted)",
                           opacity,
-                          transform: `translate(${x}px, ${y}px) translateY(-50%) rotate(${angle}deg) scale(${scale})`,
+                          transform: `translate(${isMobileWheel ? "-50%" : "0"}, ${y}px) translate(${x}px, -50%) rotate(${isMobileWheel ? 0 : angle}deg) scale(${isMobileWheel ? 0.78 : scale})`,
                           zIndex:
                             100 -
                             Math.round(

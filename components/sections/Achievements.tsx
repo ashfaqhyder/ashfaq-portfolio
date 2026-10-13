@@ -1615,13 +1615,13 @@ export default function Achievements() {
             )}
           </div>
 
-          {!masterFocusMode && cardsVisible && topLevelAchievements.length > 1 && (
-            <div className="absolute bottom-[4.5rem] left-1/2 z-[60] w-[min(76vw,260px)] -translate-x-1/2 md:hidden">
+          {cardsVisible && topLevelAchievements.length > 1 && (
+            <div className="absolute bottom-[4.25rem] left-1/2 z-[60] w-[min(64vw,220px)] -translate-x-1/2 md:hidden">
               <div className="mb-2 flex items-center justify-between font-mono text-[7px] uppercase tracking-[0.18em]" style={{ color: "var(--portfolio-muted)" }}>
                 <span>Certificates</span>
                 <span>{String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}</span>
               </div>
-              <div ref={mobileCertificateTrackRef} className="relative h-5 w-full touch-pan-x rounded-full border" style={{ borderColor: "var(--portfolio-text)", background: "color-mix(in srgb, var(--portfolio-text) 5%, transparent)" }}>
+              <div ref={mobileCertificateTrackRef} className="relative h-4 w-full touch-pan-x rounded-full border" style={{ borderColor: "var(--portfolio-text)", background: "color-mix(in srgb, var(--portfolio-text) 5%, transparent)" }}>
                 <div className="pointer-events-none absolute inset-x-2 top-1/2 h-px -translate-y-1/2 rounded-full" style={{ background: "color-mix(in srgb, var(--portfolio-text) 24%, transparent)" }} />
                 <div
                   ref={mobileCertificateThumbRef}
@@ -1655,7 +1655,7 @@ export default function Achievements() {
                     if (event.key === "ArrowRight") setMobileCertificateIndex((i) => Math.min(topLevelAchievements.length - 1, i + 1));
                     if (event.key === "ArrowLeft") setMobileCertificateIndex((i) => Math.max(0, i - 1));
                   }}
-                  className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm"
+                  className="absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full shadow-sm"
                   style={{
                     left: `calc(6px + (100% - 12px) * ${mobileCertificateIndex / Math.max(1, topLevelAchievements.length - 1)})`,
                     transform: "translate(-50%, -50%)",

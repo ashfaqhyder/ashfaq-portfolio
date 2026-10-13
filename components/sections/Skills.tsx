@@ -806,7 +806,7 @@ export default function Skills() {
               "opacity 650ms cubic-bezier(.16,1,.3,1), transform 900ms cubic-bezier(.16,1,.3,1)",
           }}
         >
-          <div className="mx-auto flex h-full max-w-[1500px] items-start px-4 pt-[30vh] sm:items-center sm:px-6 sm:pt-24 md:px-10 lg:px-16 lg:pt-24">
+          <div className="mx-auto flex h-full max-w-[1500px] items-start px-4 pt-[22vh] sm:items-center sm:px-6 sm:pt-24 md:px-10 lg:px-16 lg:pt-24">
             <div className="grid w-full grid-cols-1 items-start gap-2 sm:gap-3 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-8">
               {/* ACTIVE DETAIL CARD */}
               <div

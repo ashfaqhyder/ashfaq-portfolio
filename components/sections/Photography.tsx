@@ -472,8 +472,43 @@ export default function Photography() {
       passive: false,
       capture: true,
     });
+
+    // Touchscreens do not emit wheel events. Use a finger drag to browse the
+    // same continuous spiral while leaving desktop wheel behaviour unchanged.
+    let pointerId: number | null = null;
+    let lastX = 0;
+    let lastY = 0;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!spiralActive || activePhoto !== null || event.pointerType === "mouse") return;
+      pointerId = event.pointerId;
+      lastX = event.clientX;
+      lastY = event.clientY;
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      if (pointerId !== event.pointerId || !spiralActive || activePhoto !== null) return;
+      event.preventDefault();
+      const dx = event.clientX - lastX;
+      const dy = event.clientY - lastY;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      const movement = Math.abs(dy) >= Math.abs(dx) ? -dy : -dx;
+      targetProgress.current += movement * 0.0032;
+    };
+    const onPointerEnd = (event: PointerEvent) => {
+      if (pointerId === event.pointerId) pointerId = null;
+    };
+
+    element.addEventListener("pointerdown", onPointerDown);
+    element.addEventListener("pointermove", onPointerMove, { passive: false });
+    element.addEventListener("pointerup", onPointerEnd);
+    element.addEventListener("pointercancel", onPointerEnd);
+
     return () => {
       element.removeEventListener("wheel", onWheel, true);
+      element.removeEventListener("pointerdown", onPointerDown);
+      element.removeEventListener("pointermove", onPointerMove);
+      element.removeEventListener("pointerup", onPointerEnd);
+      element.removeEventListener("pointercancel", onPointerEnd);
     };
   }, [spiralActive, activePhoto]);
   const handleSpiralWheel = (

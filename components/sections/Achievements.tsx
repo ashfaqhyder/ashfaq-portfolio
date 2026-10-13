@@ -563,11 +563,13 @@ function RecognitionCard({
       resting.rotate) *
       expansion;
 
+  const mobileScale =
+    typeof window !== "undefined" && window.innerWidth < 640 ? 0.62 : 1;
   const finalX =
-    x * (1 - outro);
+    x * (1 - outro) * mobileScale;
 
   const finalY =
-    y * (1 - outro);
+    y * (1 - outro) * mobileScale;
 
   const finalRotation =
     rotation * (1 - outro);

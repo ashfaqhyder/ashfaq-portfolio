@@ -1,181 +1,123 @@
 <div align="center">
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=rect&color=0:050505,45:171717,100:050505&height=180&section=header&text=ASHFAQ%20HYDER%20C%20S&fontSize=38&fontColor=F5F5F5&fontAlignY=42&desc=CODE%20%C3%97%20DESIGN%20%C3%97%20INTELLIGENCE&descSize=13&descAlignY=64&descColor=BDBDBD" alt="Ashfaq Hyder C S — Code × Design × Intelligence" />
+# ASHFAQ HYDER C S
 
-<br />
+**CODE × DESIGN × INTELLIGENCE**
 
-<img src="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&weight=400&size=14&duration=2600&pause=700&color=E6E6E6&center=true&vCenter=true&width=620&lines=CREATIVE+DEVELOPER;AI%2FML+ENTHUSIAST;BUILDING+DIGITAL+EXPERIENCES;MOTION.+SYSTEMS.+STORYTELLING." alt="Animated role introduction" />
+[![Portfolio](https://img.shields.io/badge/PORTFOLIO-ashfaqhydercs.vercel.app-white?style=for-the-badge&logo=vercel&logoColor=black)](https://ashfaqhydercs.vercel.app)
+[![GitHub](https://img.shields.io/badge/GITHUB-ashfaqhyder-black?style=for-the-badge&logo=github)](https://github.com/ashfaqhyder)
+[![LinkedIn](https://img.shields.io/badge/LINKEDIN-CONNECT-white?style=for-the-badge&logo=linkedin&logoColor=black)](https://www.linkedin.com/in/ashfaq-hyder-c-s/)
 
-<br /><br />
+<br/>
 
-<a href="https://ashfaqhydercs.vercel.app"><img src="https://img.shields.io/badge/↗_EXPLORE_PORTFOLIO-F2F2F2?style=for-the-badge&labelColor=111111&color=F2F2F2" alt="Explore portfolio" /></a>
-<a href="https://github.com/ashfaqhyder"><img src="https://img.shields.io/badge/GITHUB-111111?style=for-the-badge&logo=github&logoColor=F5F5F5" alt="GitHub" /></a>
-<a href="https://www.linkedin.com/in/ashfaq-hyder-c-s/"><img src="https://img.shields.io/badge/LINKEDIN-111111?style=for-the-badge&logo=linkedin&logoColor=F5F5F5" alt="LinkedIn" /></a>
-
-<br /><br />
-
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:050505,50:555555,100:050505&height=2" width="100%" alt="" />
+<a href="https://git.io/typing-svg">
+  <img src="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&weight=500&size=18&duration=2800&pause=800&color=FFFFFF&center=true&vCenter=true&width=600&lines=Creative+Developer;Building+useful+digital+experiences;Exploring+AI%2C+security+%26+the+web" alt="Animated introduction" />
+</a>
 
 </div>
 
-## `01` — THE PERSON BEHIND THE PIXELS
+---
 
-<table>
-<tr>
-<td width="58%" valign="middle">
+## / ABOUT
 
-### I build for the feeling *and* the function.
+I'm an MCA student and developer based in Bengaluru, India, interested in building thoughtful digital products that bring together **development, design, and intelligence**.
 
-I'm **Ashfaq Hyder C S**, an MCA student and developer from Bengaluru, India.
+I enjoy turning ideas into practical applications—from AI-powered tools and security-focused systems to interactive web experiences.
 
-I work across web development, AI/ML, security-focused projects, and interactive digital experiences. I’m drawn to clean systems, expressive interfaces, and motion that gives an experience a sense of depth.
+`CURRENT FOCUS` &nbsp; Web Development · AI/ML · Cybersecurity · Creative Technology
 
-**Current mindset:** make it useful, make it intentional, make it memorable.
+---
 
-</td>
-<td width="42%" align="center" valign="middle">
+## / SELECTED WORK
 
-<img src="https://skillicons.dev/icons?i=nextjs,react,ts,js,python,firebase&theme=dark&perline=3" alt="Core development technologies" />
+<details>
+<summary><strong>01 — Valorynn</strong> · Security assessment prototype</summary>
 
-<br /><br />
+A GUI-based security assessment tool designed to help users understand security findings and severity.
 
-<img src="https://img.shields.io/badge/BASED_IN-BENGALURU%2C_IN-111111?style=flat-square&labelColor=111111&color=777777" alt="Based in Bengaluru, India" />
+**Focus:** Python · FastAPI · TF-IDF · Security analysis
 
-</td>
-</tr>
-</table>
+[View repository](https://github.com/ashfaqhyder/Valorynn)
+</details>
+
+<details>
+<summary><strong>02 — AI Assistant</strong> · Generative AI application</summary>
+
+An AI assistant built with Flask and the Gemini API, combining prompt engineering with a simple web interface.
+
+**Focus:** Python · Flask · Gemini API
+
+[View repository](https://github.com/ashfaqhyder/AI-Assistant-)
+</details>
+
+<details>
+<summary><strong>03 — Smart Canteen Management System</strong> · Web application</summary>
+
+A canteen management project with a web interface, Firebase Realtime Database, and payment integration.
+
+**Focus:** HTML · CSS · JavaScript · Firebase · Razorpay
+
+[View repository](https://github.com/ashfaqhyder/canteen-management)
+</details>
+
+<details>
+<summary><strong>04 — AlgoTrust</strong> · Decentralised credentials</summary>
+
+A project exploring decentralised credential verification using the Algorand ecosystem.
+
+**Focus:** Blockchain · Algorand
+
+[Explore my GitHub](https://github.com/ashfaqhyder)
+</details>
+
+---
+
+## / TOOLKIT
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:050505,50:555555,100:050505&height=2" width="100%" alt="" />
+**LANGUAGES & CORE**
 
-### SELECTED WORK / A FEW THINGS I'VE BUILT
+<img src="https://skillicons.dev/icons?i=python,js,ts,html,css,c,java" alt="Programming languages" />
+
+**FRAMEWORKS & PLATFORMS**
+
+<img src="https://skillicons.dev/icons?i=react,nextjs,nodejs,flask,tailwind,firebase,git,github,vscode" alt="Frameworks and tools" />
+
+**AREAS I'M EXPLORING**
+
+`Generative AI` &nbsp; `Cybersecurity` &nbsp; `Blockchain` &nbsp; `Motion Design`
 
 </div>
 
-<table>
-<tr>
-<td width="50%" valign="top">
+---
 
-<a href="https://github.com/ashfaqhyder/Valorynn">
-<img width="100%" src="https://placehold.co/720x380/101010/EAEAEA?text=VALORYNN%0ASECURITY+ASSESSMENT" alt="Valorynn security assessment project preview" />
-</a>
-
-### 01 / VALORYNN
-
-**Security Assessment Platform**
-
-A GUI-oriented prototype designed to make security findings and severity easier to understand.
-
-`PYTHON` `SECURITY` `SCORING`
-
-[VIEW PROJECT ↗](https://github.com/ashfaqhyder/Valorynn)
-
-</td>
-<td width="50%" valign="top">
-
-<a href="https://github.com/ashfaqhyder/AI-Assistant-">
-<img width="100%" src="https://placehold.co/720x380/101010/EAEAEA?text=AI+ASSISTANT%0ACONVERSATIONAL+SYSTEMS" alt="AI Assistant project preview" />
-</a>
-
-### 02 / AI ASSISTANT
-
-**Conversational AI Prototype**
-
-A Flask-based assistant exploring prompt engineering and integration with Google's Gemini API.
-
-`PYTHON` `FLASK` `GEMINI API`
-
-[VIEW PROJECT ↗](https://github.com/ashfaqhyder/AI-Assistant-)
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<a href="https://github.com/ashfaqhyder/canteen-management">
-<img width="100%" src="https://placehold.co/720x380/101010/EAEAEA?text=SMART+CANTEEN%0AWEB+APPLICATION" alt="Smart Canteen Management System preview" />
-</a>
-
-### 03 / SMART CANTEEN
-
-**Canteen Management System**
-
-A web application built around canteen workflows and Firebase-backed data.
-
-`HTML` `CSS` `JAVASCRIPT` `FIREBASE`
-
-[VIEW PROJECT ↗](https://github.com/ashfaqhyder/canteen-management)
-
-</td>
-<td width="50%" valign="top">
-
-<a href="https://github.com/ashfaqhyder">
-<img width="100%" src="https://placehold.co/720x380/101010/EAEAEA?text=ALGORITHMS%0ADECENTRALISED+SYSTEMS" alt="Algorithms and decentralised systems project preview" />
-</a>
-
-### 04 / ALGOTRUST
-
-**Decentralised Credential Verification**
-
-An exploration of verifiable credentials using the Algorand ecosystem.
-
-`ALGORAND` `BLOCKCHAIN` `VERIFICATION`
-
-[EXPLORE ON GITHUB ↗](https://github.com/ashfaqhyder)
-
-</td>
-</tr>
-</table>
+## / GITHUB ACTIVITY
 
 <div align="center">
 
-<a href="https://ashfaqhydercs.vercel.app"><img src="https://img.shields.io/badge/SEE_ALL_WORK-OPEN_THE_PORTFOLIO-F2F2F2?style=for-the-badge&labelColor=111111" alt="See all portfolio work" /></a>
+<img height="165" src="https://github-readme-stats.vercel.app/api?username=ashfaqhyder&show_icons=true&hide_border=true&theme=transparent&title_color=ffffff&text_color=aaaaaa&icon_color=ffffff" alt="GitHub statistics" />
 
-<br /><br />
+<img height="165" src="https://streak-stats.demolab.com?user=ashfaqhyder&hide_border=true&background=00000000&ring=ffffff&fire=ffffff&currStreakLabel=ffffff&sideLabels=aaaaaa&dates=777777" alt="GitHub streak" />
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:050505,50:555555,100:050505&height=2" width="100%" alt="" />
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=ashfaqhyder&bg_color=00000000&color=aaaaaa&line=ffffff&point=ffffff&hide_border=true&area=true" alt="Contribution activity graph" />
 
-### THE TOOLKIT / TOOLS ARE PART OF THE PROCESS
+</div>
 
-<img src="https://skillicons.dev/icons?i=ts,js,react,nextjs,tailwind,html,css,python,flask,firebase,git,github,figma,threejs&theme=dark&perline=7" alt="Technology toolkit" />
+---
 
-<br />
+## / LET'S CONNECT
 
-<img src="https://img.shields.io/badge/INTERACTION-GSAP-111111?style=flat-square&labelColor=111111&color=777777" alt="GSAP" />
-<img src="https://img.shields.io/badge/MOTION-FRAMER_MOTION-111111?style=flat-square&labelColor=111111&color=777777" alt="Framer Motion" />
-<img src="https://img.shields.io/badge/3D-THREE.JS-111111?style=flat-square&labelColor=111111&color=777777" alt="Three.js" />
-<img src="https://img.shields.io/badge/SCROLL-LENIS-111111?style=flat-square&labelColor=111111&color=777777" alt="Lenis" />
+Have an interesting idea or want to collaborate on a project? Feel free to reach out.
 
-<br /><br />
+<div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:050505,50:555555,100:050505&height=2" width="100%" alt="" />
+[**PORTFOLIO ↗**](https://ashfaqhydercs.vercel.app) &nbsp; · &nbsp;
+[**LINKEDIN ↗**](https://www.linkedin.com/in/ashfaq-hyder-c-s/) &nbsp; · &nbsp;
+[**GITHUB ↗**](https://github.com/ashfaqhyder)
 
-### GITHUB / BUILDING IN PUBLIC
+<br/>
 
-<a href="https://github.com/ashfaqhyder">
-<img height="165" src="https://github-readme-stats.vercel.app/api?username=ashfaqhyder&show_icons=true&hide_border=true&bg_color=090909&title_color=F2F2F2&text_color=A8A8A8&icon_color=E6E6E6" alt="GitHub statistics" />
-</a>
-<a href="https://github.com/ashfaqhyder">
-<img height="165" src="https://streak-stats.demolab.com?user=ashfaqhyder&hide_border=true&background=090909&ring=E6E6E6&fire=E6E6E6&currStreakLabel=E6E6E6&sideLabels=A8A8A8&currStreakNum=F2F2F2&sideNums=F2F2F2&dates=777777" alt="GitHub streak statistics" />
-</a>
-
-<br /><br />
-
-<img width="96%" src="https://github-readme-activity-graph.vercel.app/graph?username=ashfaqhyder&bg_color=090909&color=A8A8A8&line=E6E6E6&point=FFFFFF&area=true&hide_border=true" alt="GitHub contribution graph" />
-
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:050505,50:555555,100:050505&height=2" width="100%" alt="" />
-
-### LET'S MAKE SOMETHING MEANINGFUL.
-
-*Good engineering. Considered design. A little bit of the unexpected.*
-
-<a href="https://ashfaqhydercs.vercel.app"><img src="https://img.shields.io/badge/PORTFOLIO-↗-F2F2F2?style=for-the-badge&labelColor=111111" alt="Portfolio" /></a>
-<a href="https://www.linkedin.com/in/ashfaq-hyder-c-s/"><img src="https://img.shields.io/badge/CONNECT-LINKEDIN-111111?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
-<a href="https://github.com/ashfaqhyder"><img src="https://img.shields.io/badge/FOLLOW-GITHUB-111111?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
-
-<br />
-
-<sub>ASHFAQ HYDER C S · BENGALURU, INDIA · CODE × DESIGN × INTELLIGENCE</sub>
+<sub>Designed around curiosity, built with intention.</sub>
 
 </div>

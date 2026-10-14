@@ -389,7 +389,7 @@ export default function BeyondTheFrame() {
         onWheel={handleWheel}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onDoubleClick={returnToCategories}
+        onDoubleClick={() => returnToCategories()}
         style={{ background: "transparent", isolation: "isolate" }}
       >
 
@@ -533,7 +533,7 @@ export default function BeyondTheFrame() {
         {enteredGallery && (
           <button
             type="button"
-            onClick={returnToCategories}
+            onClick={() => returnToCategories()}
             className="absolute right-6 top-7 z-[100] inline-flex items-center gap-2 border px-4 py-3 font-mono text-[9px] uppercase tracking-[.18em] backdrop-blur-md transition-colors hover:bg-white/10 md:right-10 lg:right-16"
             style={{ color: "var(--portfolio-text)", borderColor: "var(--portfolio-border)", background: "color-mix(in srgb, var(--portfolio-background) 70%, transparent)" }}
           >

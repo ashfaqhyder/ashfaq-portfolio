@@ -448,6 +448,7 @@ export default function AdminLayout({
             : `linear-gradient(color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px)`
           : "none";
     body.style.backgroundSize = appearance.backgroundMode === "texture" ? "28px 28px, 28px 28px" : "cover";
+    body.style.backgroundAttachment = "fixed";
     body.style.color = appearance.textColor;
     root.style.backgroundColor = appearance.backgroundColor;
     root.style.color = appearance.textColor;
@@ -460,6 +461,9 @@ export default function AdminLayout({
       delete root.dataset.adminAnimations;
       delete root.dataset.adminSmoothScroll;
       delete root.dataset.ditherBackground;
+      body.style.backgroundImage = "";
+      body.style.backgroundSize = "";
+      body.style.backgroundAttachment = "";
       root.style.scrollBehavior = "auto";
     };
   }, [appearance, isAdmin]);
@@ -717,6 +721,7 @@ export default function AdminLayout({
         [data-admin-theme] {
           --cms-bg: var(--portfolio-background);
           --cms-surface: var(--portfolio-surface);
+          --cms-surface-background: var(--portfolio-surface-background, var(--portfolio-surface));
           --cms-text: var(--portfolio-text);
           --cms-muted: var(--portfolio-muted);
           --cms-border: var(--portfolio-border);
@@ -739,7 +744,7 @@ export default function AdminLayout({
 
         [data-admin-theme] .bg-neutral-900,
         [data-admin-theme] .bg-neutral-800 {
-          background-color: var(--cms-surface) !important;
+          background: var(--cms-surface-background, var(--cms-surface)) !important;
         }
 
         [data-admin-theme] .text-white,

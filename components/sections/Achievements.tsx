@@ -1407,7 +1407,24 @@ export default function Achievements() {
                 No published recognition
               </p>
             ) : (
-              <div className="relative h-[min(500px,55svh)] w-full max-w-[1250px] sm:h-[610px]">
+              <div
+                className="relative h-[min(500px,55svh)] w-full max-w-[1250px] sm:h-[610px]"
+                onTouchStart={(event) => {
+                  const touch = event.changedTouches[0];
+                  certificateTouchStart.current = { x: touch.clientX, y: touch.clientY };
+                }}
+                onTouchEnd={(event) => {
+                  const start = certificateTouchStart.current;
+                  certificateTouchStart.current = null;
+                  if (!start || masterFocusMode) return;
+                  const touch = event.changedTouches[0];
+                  const dx = touch.clientX - start.x;
+                  const dy = touch.clientY - start.y;
+                  if (Math.abs(dx) < 36 || Math.abs(dx) < Math.abs(dy)) return;
+                  setMobileCertificateIndex((i) => (i + (dx < 0 ? 1 : -1) + topLevelAchievements.length) % topLevelAchievements.length);
+                }}
+                style={{ touchAction: "pan-y" }}
+              >
                 <div
                   className="absolute inset-0"
                   style={{

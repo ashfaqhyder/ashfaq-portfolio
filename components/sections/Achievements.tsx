@@ -732,6 +732,17 @@ function SubCardStack({
     stackHovered,
     setStackHovered,
   ] = useState(false);
+  const [mobileSubcardIndex, setMobileSubcardIndex] = useState(0);
+  const subcardTouchStart = useRef<{ x: number; y: number } | null>(null);
+  const [isMobileSubcardView, setIsMobileSubcardView] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobileSubcardView(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     if (!masterFlipped) {
@@ -760,7 +771,23 @@ function SubCardStack({
       onMouseLeave={() =>
         setStackHovered(false)
       }
+      onTouchStart={(event) => {
+        const touch = event.changedTouches[0];
+        subcardTouchStart.current = { x: touch.clientX, y: touch.clientY };
+      }}
+      onTouchEnd={(event) => {
+        const start = subcardTouchStart.current;
+        subcardTouchStart.current = null;
+        if (!start || !isMobileSubcardView || achievements.length < 2) return;
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - start.x;
+        const dy = touch.clientY - start.y;
+        if (Math.abs(dx) < 32 || Math.abs(dx) < Math.abs(dy)) return;
+        setMobileSubcardIndex((index) => (index + (dx < 0 ? 1 : -1) + achievements.length) % achievements.length);
+        setFlippedId(null);
+      }}
       style={{
+        touchAction: isMobileSubcardView ? "pan-y" : undefined,
         pointerEvents:
           visible &&
           masterFlipped
@@ -815,6 +842,7 @@ function SubCardStack({
 
           const finalRotate =
             position.rotate;
+          const mobileActive = index === mobileSubcardIndex;
 
           return (
             <button
@@ -868,19 +896,12 @@ function SubCardStack({
                     : "none",
                 perspective:
                   "1800px",
-                transform: `translate3d(calc(-50% + ${finalX}px),calc(-50% + ${finalY}px),${
-                  flipped
-                    ? 34
-                    : hovered
-                      ? 22
-                      : 0
-                }px) rotate(${finalRotate}deg) scale(${
-                  flipped
-                    ? 1.08
-                    : hovered
-                      ? 1.045
-                      : 1
-                })`,
+                transform: isMobileSubcardView
+                  ? `translate3d(-50%, -50%, ${mobileActive ? 24 : -80}px) rotate(${mobileActive ? 0 : (index - mobileSubcardIndex) * 2}deg) scale(${mobileActive ? 1 : 0.84})`
+                  : `translate3d(calc(-50% + ${finalX}px),calc(-50% + ${finalY}px),${
+                      flipped ? 34 : hovered ? 22 : 0
+                    }px) rotate(${finalRotate}deg) scale(${flipped ? 1.08 : hovered ? 1.045 : 1})`,
+                visibility: isMobileSubcardView && !mobileActive ? "hidden" : "visible",
                 transformOrigin:
                   "center center",
                 transition:

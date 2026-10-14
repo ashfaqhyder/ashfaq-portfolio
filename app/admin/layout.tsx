@@ -692,7 +692,7 @@ export default function AdminLayout({
   return (
     <div
       data-admin-theme="true"
-      className="min-h-screen"
+      className="relative z-0 min-h-screen"
       style={{
         "--portfolio-background": appearance.backgroundColor,
         "--portfolio-surface": appearance.surfaceColor,
@@ -700,7 +700,7 @@ export default function AdminLayout({
         "--portfolio-muted": appearance.mutedColor,
         "--portfolio-border": appearance.borderColor,
         "--portfolio-accent": appearance.accentColor,
-        backgroundColor: appearance.backgroundColor,
+        backgroundColor: "transparent",
         color: appearance.textColor,
       } as React.CSSProperties}
     >
@@ -713,7 +713,7 @@ export default function AdminLayout({
           --cms-muted: var(--portfolio-muted);
           --cms-border: var(--portfolio-border);
           --cms-accent: var(--portfolio-accent);
-          background: var(--cms-bg);
+          background: transparent;
           color: var(--cms-text);
         }
 

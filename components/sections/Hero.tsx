@@ -232,23 +232,8 @@ export default function Hero() {
       </div>
 
       <style jsx>{`
-        /* Mobile fallback: keep hero content visible if an entrance animation
-           is throttled or skipped by a mobile browser. Desktop is unchanged. */
-        @media (max-width: 768px) {
-          .hero-silhouette-draw > div {
-            clip-path: none !important;
-            animation: none !important;
-          }
-
-          .hero-title-layer,
-          .hero-title-left,
-          .hero-title-right,
-          .hero-subtext {
-            opacity: 1 !important;
-            transform: none !important;
-            animation: none !important;
-          }
-        }
+        /* Keep the entrance sequence enabled on touch devices too.
+           The animation classes below provide their own visible final state. */
 
         /* Intro sequence: silhouette draws in, title halves glide together,
            then supporting copy and controls reveal. */

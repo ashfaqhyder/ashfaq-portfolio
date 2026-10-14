@@ -124,21 +124,19 @@ export default function PortfolioDitherBackground() {
     );
 
     const readTheme = () => {
-      const rootStyles = getComputedStyle(
-        document.documentElement,
+      // AppearanceProvider owns the public theme variables on its wrapper
+      // on some viewports. Read that source first, then fall back to html/body.
+      const publicTheme = document.querySelector<HTMLElement>(
+        '[data-portfolio-public="true"]',
       );
-
-      const bodyStyles = getComputedStyle(
-        document.body,
-      );
+      const themeStyles = publicTheme ? getComputedStyle(publicTheme) : null;
+      const rootStyles = getComputedStyle(document.documentElement);
+      const bodyStyles = getComputedStyle(document.body);
 
       textColor =
-        rootStyles
-          .getPropertyValue("--portfolio-text")
-          .trim() ||
-        bodyStyles
-          .getPropertyValue("--portfolio-text")
-          .trim() ||
+        themeStyles?.getPropertyValue("--portfolio-text").trim() ||
+        rootStyles.getPropertyValue("--portfolio-text").trim() ||
+        bodyStyles.getPropertyValue("--portfolio-text").trim() ||
         "#ffffff";
     };
 
@@ -482,6 +480,16 @@ export default function PortfolioDitherBackground() {
         attributeFilter: ["style", "class"],
       },
     );
+
+    const publicTheme = document.querySelector<HTMLElement>(
+      '[data-portfolio-public="true"]',
+    );
+    if (publicTheme) {
+      appearanceObserver.observe(publicTheme, {
+        attributes: true,
+        attributeFilter: ["style", "class"],
+      });
+    }
 
     readTheme();
     resize();

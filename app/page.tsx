@@ -43,6 +43,27 @@ export default function Home() {
     setIntroStateResolved(true);
   }, []);
 
+  // Mobile browser Back: first return to the hero, second leave the portfolio.
+  // Gallery-specific history is handled inside BeyondTheFrame.
+  useEffect(() => {
+    if (typeof window === "undefined" || window.matchMedia("(min-width: 768px)").matches) return;
+    const marker = { portfolioBackEntry: true };
+    window.history.pushState(marker, "");
+    window.history.pushState({ ...marker, portfolioBackExit: true }, "");
+    let atHero = false;
+    const onPopState = (event: PopStateEvent) => {
+      if (event.state?.screenCultureGallery) return;
+      if (!atHero) {
+        atHero = true;
+        document.getElementById("top")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      // Do not intercept the second Back; let the browser leave the page.
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   function handleIntroComplete() {
     sessionStorage.setItem(INTRO_KEY, "true");
     setIntroComplete(true);

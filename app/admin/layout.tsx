@@ -418,10 +418,8 @@ export default function AdminLayout({
       "--portfolio-background",
       appearance.backgroundColor
     );
-    root.style.setProperty(
-      "--portfolio-surface",
-      appearance.surfaceColor
-    );
+    root.style.setProperty("--portfolio-surface", appearance.surfaceColor);
+    root.style.setProperty("--portfolio-surface-background", appearance.surfaceMode === "linear-gradient" ? `linear-gradient(135deg, ${appearance.surfaceGradientStart}, ${appearance.surfaceGradientEnd})` : appearance.surfaceColor);
     root.style.setProperty(
       "--portfolio-text",
       appearance.textColor
@@ -440,6 +438,16 @@ export default function AdminLayout({
     );
 
     body.style.backgroundColor = appearance.backgroundColor;
+    body.style.backgroundImage = appearance.backgroundMode === "linear-gradient"
+      ? `linear-gradient(${appearance.gradientAngle}deg, ${appearance.gradientStart}, ${appearance.gradientEnd})`
+      : appearance.backgroundMode === "radial-gradient"
+        ? `radial-gradient(ellipse at top, ${appearance.gradientStart}, ${appearance.gradientEnd})`
+        : appearance.backgroundMode === "texture"
+          ? appearance.textureStyle === "dots"
+            ? `radial-gradient(color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1.2px)`
+            : `linear-gradient(color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px)`
+          : "none";
+    body.style.backgroundSize = appearance.backgroundMode === "texture" ? "28px 28px, 28px 28px" : "cover";
     body.style.color = appearance.textColor;
     root.style.backgroundColor = appearance.backgroundColor;
     root.style.color = appearance.textColor;

@@ -46,7 +46,16 @@ export async function GET() {
       return NextResponse.json({
         settings: {
           backgroundColor: "#050505",
+          backgroundMode: "solid",
+          gradientStart: "#050505",
+          gradientEnd: "#182018",
+          gradientAngle: 135,
+          textureStyle: "grid",
+          textureOpacity: 0.12,
           surfaceColor: "#111111",
+          surfaceMode: "solid",
+          surfaceGradientStart: "#111111",
+          surfaceGradientEnd: "#202020",
           textColor: "#F5F5F5",
           mutedColor: "#8A8A8A",
           borderColor: "#252525",
@@ -65,8 +74,17 @@ export async function GET() {
         backgroundColor:
           data?.backgroundColor || "#050505",
 
+        backgroundMode: ["solid", "linear-gradient", "radial-gradient", "texture"].includes(data?.backgroundMode) ? data?.backgroundMode : "solid",
+        gradientStart: data?.gradientStart || "#050505",
+        gradientEnd: data?.gradientEnd || "#182018",
+        gradientAngle: typeof data?.gradientAngle === "number" && data.gradientAngle >= 0 && data.gradientAngle <= 360 ? data.gradientAngle : 135,
+        textureStyle: ["grid", "dots", "noise"].includes(data?.textureStyle) ? data?.textureStyle : "grid",
+        textureOpacity: typeof data?.textureOpacity === "number" && data.textureOpacity >= 0 && data.textureOpacity <= 0.35 ? data.textureOpacity : 0.12,
         surfaceColor:
           data?.surfaceColor || "#111111",
+        surfaceMode: ["solid", "linear-gradient"].includes(data?.surfaceMode) ? data?.surfaceMode : "solid",
+        surfaceGradientStart: data?.surfaceGradientStart || "#111111",
+        surfaceGradientEnd: data?.surfaceGradientEnd || "#202020",
 
         textColor:
           data?.textColor || "#F5F5F5",
@@ -172,8 +190,8 @@ export async function POST(
       await request.json();
 
     const {
-      backgroundColor,
-      surfaceColor,
+      backgroundColor, backgroundMode, gradientStart, gradientEnd, gradientAngle, textureStyle, textureOpacity,
+      surfaceColor, surfaceMode, surfaceGradientStart, surfaceGradientEnd,
       textColor,
       mutedColor,
       borderColor,
@@ -197,6 +215,17 @@ export async function POST(
       );
     }
 
+    if (
+      !["solid", "linear-gradient", "radial-gradient", "texture"].includes(backgroundMode) ||
+      !["solid", "linear-gradient"].includes(surfaceMode) ||
+      !["grid", "dots", "noise"].includes(textureStyle) ||
+      !isValidHex(gradientStart) || !isValidHex(gradientEnd) ||
+      !isValidHex(surfaceGradientStart) || !isValidHex(surfaceGradientEnd) ||
+      !Number.isInteger(gradientAngle) || gradientAngle < 0 || gradientAngle > 360 ||
+      typeof textureOpacity !== "number" || textureOpacity < 0 || textureOpacity > 0.35
+    ) {
+      return NextResponse.json({ error: "Invalid background style settings." }, { status: 400 });
+    }
     if (
       !isValidHex(surfaceColor)
     ) {
@@ -288,8 +317,8 @@ export async function POST(
 
     await appearanceDocument.set(
       {
-        backgroundColor,
-        surfaceColor,
+        backgroundColor, backgroundMode, gradientStart, gradientEnd, gradientAngle, textureStyle, textureOpacity,
+        surfaceColor, surfaceMode, surfaceGradientStart, surfaceGradientEnd,
         textColor,
         mutedColor,
         borderColor,

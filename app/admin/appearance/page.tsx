@@ -116,7 +116,16 @@ export default function AppearanceAdminPage() {
       name,
       settings: {
         backgroundColor: settings.backgroundColor,
+        backgroundMode: settings.backgroundMode,
+        gradientStart: settings.gradientStart,
+        gradientEnd: settings.gradientEnd,
+        gradientAngle: settings.gradientAngle,
+        textureStyle: settings.textureStyle,
+        textureOpacity: settings.textureOpacity,
         surfaceColor: settings.surfaceColor,
+        surfaceMode: settings.surfaceMode,
+        surfaceGradientStart: settings.surfaceGradientStart,
+        surfaceGradientEnd: settings.surfaceGradientEnd,
         textColor: settings.textColor,
         mutedColor: settings.mutedColor,
         borderColor: settings.borderColor,
@@ -182,10 +191,17 @@ export default function AppearanceAdminPage() {
 
     try {
       await saveAppearanceSettings({
-        backgroundColor:
-          settings.backgroundColor,
-        surfaceColor:
-          settings.surfaceColor,
+        backgroundColor: settings.backgroundColor,
+        backgroundMode: settings.backgroundMode,
+        gradientStart: settings.gradientStart,
+        gradientEnd: settings.gradientEnd,
+        gradientAngle: settings.gradientAngle,
+        textureStyle: settings.textureStyle,
+        textureOpacity: settings.textureOpacity,
+        surfaceColor: settings.surfaceColor,
+        surfaceMode: settings.surfaceMode,
+        surfaceGradientStart: settings.surfaceGradientStart,
+        surfaceGradientEnd: settings.surfaceGradientEnd,
         textColor:
           settings.textColor,
         mutedColor:
@@ -417,6 +433,21 @@ export default function AppearanceAdminPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
 
+              <StyleSelect label="Background style" value={settings.backgroundMode} options={[
+                { label: "Solid", value: "solid" }, { label: "Linear gradient", value: "linear-gradient" },
+                { label: "Radial gradient", value: "radial-gradient" }, { label: "Texture", value: "texture" },
+              ]} onChange={(value) => updateField("backgroundMode", value as AppearanceSettings["backgroundMode"])} />
+              {settings.backgroundMode === "linear-gradient" || settings.backgroundMode === "radial-gradient" ? <>
+                <ColorField label="Gradient start" value={settings.gradientStart} onChange={(value) => updateField("gradientStart", value)} description="First gradient color." />
+                <ColorField label="Gradient end" value={settings.gradientEnd} onChange={(value) => updateField("gradientEnd", value)} description="Second gradient color." />
+                {settings.backgroundMode === "linear-gradient" && <NumberField label="Gradient angle" value={settings.gradientAngle} min={0} max={360} onChange={(value) => updateField("gradientAngle", value)} suffix="°" />}
+              </> : null}
+              {settings.backgroundMode === "texture" ? <>
+                <StyleSelect label="Texture" value={settings.textureStyle} options={[
+                  { label: "Grid", value: "grid" }, { label: "Dots", value: "dots" }, { label: "Noise lines", value: "noise" },
+                ]} onChange={(value) => updateField("textureStyle", value as AppearanceSettings["textureStyle"])} />
+                <NumberField label="Texture opacity" value={Math.round(settings.textureOpacity * 100)} min={0} max={35} onChange={(value) => updateField("textureOpacity", value / 100)} suffix="%" />
+              </> : null}
               <ColorField
                 label="Background"
                 value={
@@ -445,6 +476,13 @@ export default function AppearanceAdminPage() {
                 description="Cards, panels and elevated surfaces."
               />
 
+              <StyleSelect label="Surface style" value={settings.surfaceMode} options={[
+                { label: "Solid", value: "solid" }, { label: "Linear gradient", value: "linear-gradient" },
+              ]} onChange={(value) => updateField("surfaceMode", value as AppearanceSettings["surfaceMode"])} />
+              {settings.surfaceMode === "linear-gradient" ? <>
+                <ColorField label="Surface gradient start" value={settings.surfaceGradientStart} onChange={(value) => updateField("surfaceGradientStart", value)} description="First surface gradient color." />
+                <ColorField label="Surface gradient end" value={settings.surfaceGradientEnd} onChange={(value) => updateField("surfaceGradientEnd", value)} description="Second surface gradient color." />
+              </> : null}
               <ColorField
                 label="Primary Text"
                 value={
@@ -508,8 +546,17 @@ export default function AppearanceAdminPage() {
               <div
                 className="p-6"
                 style={{
-                  backgroundColor:
-                    settings.backgroundColor,
+                  backgroundColor: settings.backgroundColor,
+                  backgroundImage: settings.backgroundMode === "linear-gradient"
+                    ? `linear-gradient(${settings.gradientAngle}deg, ${settings.gradientStart}, ${settings.gradientEnd})`
+                    : settings.backgroundMode === "radial-gradient"
+                      ? `radial-gradient(ellipse at top, ${settings.gradientStart}, ${settings.gradientEnd})`
+                      : settings.backgroundMode === "texture"
+                        ? settings.textureStyle === "dots"
+                          ? `radial-gradient(color-mix(in srgb, ${settings.textColor} ${settings.textureOpacity * 100}%, transparent) 1px, transparent 1.2px)`
+                          : `linear-gradient(color-mix(in srgb, ${settings.textColor} ${settings.textureOpacity * 100}%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${settings.textColor} ${settings.textureOpacity * 100}%, transparent) 1px, transparent 1px)`
+                        : "none",
+                  backgroundSize: settings.backgroundMode === "texture" ? "28px 28px, 28px 28px" : "cover",
                   color:
                     settings.textColor,
                 }}
@@ -519,8 +566,7 @@ export default function AppearanceAdminPage() {
                   <span
                     className="rounded-full px-4 py-2 text-xs"
                     style={{
-                      backgroundColor:
-                        settings.surfaceColor,
+                      background: settings.surfaceMode === "linear-gradient" ? `linear-gradient(135deg, ${settings.surfaceGradientStart}, ${settings.surfaceGradientEnd})` : settings.surfaceColor,
                       border: `1px solid ${settings.borderColor}`,
                       color:
                         settings.mutedColor,
@@ -666,12 +712,9 @@ export default function AppearanceAdminPage() {
                 }
               />
 
-              <ValueRow
-                label="Surface"
-                value={
-                  settings.surfaceColor
-                }
-              />
+              <ValueRow label="Background style" value={settings.backgroundMode} />
+              <ValueRow label="Texture" value={settings.backgroundMode === "texture" ? `${settings.textureStyle} · ${Math.round(settings.textureOpacity * 100)}%` : "—"} />
+              <ValueRow label="Surface" value={settings.surfaceMode === "linear-gradient" ? `Gradient · ${settings.surfaceGradientStart} → ${settings.surfaceGradientEnd}` : settings.surfaceColor} />
 
               <ValueRow
                 label="Text"
@@ -785,6 +828,18 @@ export default function AppearanceAdminPage() {
   );
 }
 
+
+function StyleSelect({ label, value, options, onChange }: { label: string; value: string; options: { label: string; value: string }[]; onChange: (value: string) => void }) {
+  return <label className="block space-y-2"><span className="block text-sm font-medium text-neutral-300">{label}</span>
+    <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-lg border border-neutral-800 bg-black px-4 py-3 text-sm text-white outline-none focus:border-neutral-500">
+      {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+    </select></label>;
+}
+function NumberField({ label, value, min, max, suffix, onChange }: { label: string; value: number; min: number; max: number; suffix: string; onChange: (value: number) => void }) {
+  return <label className="block space-y-2"><span className="block text-sm font-medium text-neutral-300">{label}</span>
+    <div className="flex items-center gap-3"><input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full accent-lime-400" />
+      <span className="w-12 text-right font-mono text-xs text-neutral-400">{value}{suffix}</span></div></label>;
+}
 
 /* ========================================================= */
 /* COLOR FIELD                                               */

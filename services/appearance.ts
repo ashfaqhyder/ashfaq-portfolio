@@ -2,7 +2,16 @@ import { auth } from "@/lib/firebase/auth";
 
 export interface AppearanceSettings {
   backgroundColor: string;
+  backgroundMode: "solid" | "linear-gradient" | "radial-gradient" | "texture";
+  gradientStart: string;
+  gradientEnd: string;
+  gradientAngle: number;
+  textureStyle: "grid" | "dots" | "noise";
+  textureOpacity: number;
   surfaceColor: string;
+  surfaceMode: "solid" | "linear-gradient";
+  surfaceGradientStart: string;
+  surfaceGradientEnd: string;
   textColor: string;
   mutedColor: string;
   borderColor: string;
@@ -15,7 +24,16 @@ export interface AppearanceSettings {
 
 export const defaultAppearanceSettings: AppearanceSettings = {
   backgroundColor: "#050505",
+  backgroundMode: "solid",
+  gradientStart: "#050505",
+  gradientEnd: "#182018",
+  gradientAngle: 135,
+  textureStyle: "grid",
+  textureOpacity: 0.12,
   surfaceColor: "#111111",
+  surfaceMode: "solid",
+  surfaceGradientStart: "#111111",
+  surfaceGradientEnd: "#202020",
   textColor: "#F5F5F5",
   mutedColor: "#8A8A8A",
   borderColor: "#252525",

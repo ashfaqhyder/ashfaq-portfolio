@@ -12,6 +12,24 @@ import {
   defaultAppearanceSettings,
 } from "@/services/appearance";
 
+function getBackgroundImage(settings: AppearanceSettings) {
+  const opacity = Math.max(0, Math.min(0.35, settings.textureOpacity));
+  const texture = settings.textureStyle === "dots"
+    ? `radial-gradient(color-mix(in srgb, var(--portfolio-text) ${opacity * 100}%, transparent) 1px, transparent 1.2px)`
+    : settings.textureStyle === "noise"
+      ? `repeating-radial-gradient(circle at 0 0, color-mix(in srgb, var(--portfolio-text) ${opacity * 100}%, transparent) 0, transparent 1px, transparent 3px)`
+      : `linear-gradient(color-mix(in srgb, var(--portfolio-text) ${opacity * 100}%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--portfolio-text) ${opacity * 100}%, transparent) 1px, transparent 1px)`;
+  if (settings.backgroundMode === "linear-gradient") return `linear-gradient(${settings.gradientAngle}deg, ${settings.gradientStart}, ${settings.gradientEnd})`;
+  if (settings.backgroundMode === "radial-gradient") return `radial-gradient(ellipse at top, ${settings.gradientStart}, ${settings.gradientEnd})`;
+  if (settings.backgroundMode === "texture") return texture;
+  return "none";
+}
+function getSurfaceBackground(settings: AppearanceSettings) {
+  return settings.surfaceMode === "linear-gradient"
+    ? `linear-gradient(135deg, ${settings.surfaceGradientStart}, ${settings.surfaceGradientEnd})`
+    : settings.surfaceColor;
+}
+
 export default function AppearanceProvider({
   children,
 }: {
@@ -121,10 +139,8 @@ export default function AppearanceProvider({
       settings.backgroundColor
     );
 
-    applyVariable(
-      "--portfolio-surface",
-      settings.surfaceColor
-    );
+    applyVariable("--portfolio-surface", settings.surfaceColor);
+    applyVariable("--portfolio-surface-background", getSurfaceBackground(settings));
 
     applyVariable(
       "--portfolio-text",
@@ -164,8 +180,9 @@ export default function AppearanceProvider({
     body.dataset.portfolioPublic =
       "true";
 
-    body.style.backgroundColor =
-      settings.backgroundColor;
+    body.style.backgroundColor = settings.backgroundColor;
+    body.style.backgroundImage = getBackgroundImage(settings);
+    body.style.backgroundSize = settings.backgroundMode === "texture" ? (settings.textureStyle === "dots" ? "14px 14px" : "28px 28px, 28px 28px") : "cover";
 
     body.style.color =
       settings.textColor;
@@ -189,6 +206,8 @@ export default function AppearanceProvider({
       delete root.dataset.ditherBackground;
 
       delete body.dataset.portfolioPublic;
+      body.style.backgroundImage = "";
+      body.style.backgroundSize = "";
     };
   }, [settings, isAdmin]);
 
@@ -201,8 +220,8 @@ export default function AppearanceProvider({
           "--portfolio-background":
             settings.backgroundColor,
 
-          "--portfolio-surface":
-            settings.surfaceColor,
+          "--portfolio-surface": settings.surfaceColor,
+          "--portfolio-surface-background": getSurfaceBackground(settings),
 
           "--portfolio-text":
             settings.textColor,

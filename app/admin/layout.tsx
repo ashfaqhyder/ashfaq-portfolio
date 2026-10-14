@@ -692,7 +692,7 @@ export default function AdminLayout({
   return (
     <div
       data-admin-theme="true"
-      className="relative z-0 min-h-screen"
+      className="relative z-10 min-h-screen"
       style={{
         "--portfolio-background": appearance.backgroundColor,
         "--portfolio-surface": appearance.surfaceColor,

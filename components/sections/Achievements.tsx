@@ -1416,7 +1416,7 @@ export default function Achievements() {
                 onTouchEnd={(event) => {
                   const start = certificateTouchStart.current;
                   certificateTouchStart.current = null;
-                  if (!start || masterFocusMode) return;
+                  if (!start) return;
                   const touch = event.changedTouches[0];
                   const dx = touch.clientX - start.x;
                   const dy = touch.clientY - start.y;
@@ -1622,14 +1622,10 @@ export default function Achievements() {
           </div>
 
           {cardsVisible && topLevelAchievements.length > 1 && (
-            <div className="absolute bottom-[4.5rem] left-1/2 z-[60] -translate-x-1/2 md:hidden" aria-live="polite">
-              <div className="flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.2em]" style={{ color: "var(--portfolio-muted)" }}>
-                <button type="button" aria-label="Previous certificate" onClick={() => setMobileCertificateIndex((i) => (i - 1 + topLevelAchievements.length) % topLevelAchievements.length)} className="flex h-9 w-9 items-center justify-center rounded-full border" style={{ borderColor: "var(--portfolio-border)", color: "var(--portfolio-text)" }}>←</button>
-                <span>{String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}</span>
-                <button type="button" aria-label="Next certificate" onClick={() => setMobileCertificateIndex((i) => (i + 1) % topLevelAchievements.length)} className="flex h-9 w-9 items-center justify-center rounded-full border" style={{ borderColor: "var(--portfolio-border)", color: "var(--portfolio-text)" }}>→</button>
-              </div>
+            <div className="pointer-events-none absolute bottom-[4.5rem] left-1/2 z-[60] -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.2em] md:hidden" aria-live="polite" style={{ color: "var(--portfolio-muted)" }}>
+              Swipe to explore · {String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}
             </div>
-          )}
+          )}}
 
           {!masterFocusMode &&
             cardsVisible &&

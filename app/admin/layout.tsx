@@ -403,6 +403,10 @@ export default function AdminLayout({
       ? "enabled"
       : "disabled";
 
+    root.dataset.ditherBackground = appearance.ditherBackgroundEnabled
+      ? "enabled"
+      : "disabled";
+
     /*
      * Keep the CMS Appearance values available globally.
      *
@@ -447,6 +451,7 @@ export default function AdminLayout({
     return () => {
       delete root.dataset.adminAnimations;
       delete root.dataset.adminSmoothScroll;
+      delete root.dataset.ditherBackground;
       root.style.scrollBehavior = "auto";
     };
   }, [appearance, isAdmin]);

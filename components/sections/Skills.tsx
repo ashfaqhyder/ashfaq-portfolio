@@ -806,7 +806,7 @@ export default function Skills() {
               "opacity 650ms cubic-bezier(.16,1,.3,1), transform 900ms cubic-bezier(.16,1,.3,1)",
           }}
         >
-          <div className="relative mx-auto flex h-full max-w-[1500px] items-start px-4 pt-[15vh] sm:items-center sm:px-6 sm:pt-24 md:px-10 lg:px-16 lg:pt-24">
+          <div className="relative mx-auto flex h-full max-w-[1500px] items-start px-4 pt-[25vh] sm:items-center sm:px-6 sm:pt-24 md:px-10 lg:px-16 lg:pt-24">
             <div className="relative grid w-full grid-cols-1 items-start gap-2 sm:gap-3 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:gap-8">
               {/* ACTIVE DETAIL CARD */}
               <div
@@ -846,7 +846,7 @@ export default function Skills() {
                 ) : activeSkill ? (
                   <div
                     key={activeSkill.id ?? activeSkill.name}
-                    className="w-full max-w-[21rem] md:max-w-[21rem]"
+                    className="w-full max-w-[21rem] min-h-[21rem] md:max-w-[21rem] md:min-h-0"
                     style={{
                       animation:
                         "skills-card-in 600ms cubic-bezier(.16,1,.3,1)",

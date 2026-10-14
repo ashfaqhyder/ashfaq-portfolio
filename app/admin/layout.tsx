@@ -403,6 +403,10 @@ export default function AdminLayout({
       ? "enabled"
       : "disabled";
 
+    root.dataset.ditherBackground = appearance.ditherBackgroundEnabled
+      ? "enabled"
+      : "disabled";
+
     /*
      * Keep the CMS Appearance values available globally.
      *
@@ -447,6 +451,7 @@ export default function AdminLayout({
     return () => {
       delete root.dataset.adminAnimations;
       delete root.dataset.adminSmoothScroll;
+      delete root.dataset.ditherBackground;
       root.style.scrollBehavior = "auto";
     };
   }, [appearance, isAdmin]);
@@ -687,7 +692,7 @@ export default function AdminLayout({
   return (
     <div
       data-admin-theme="true"
-      className="min-h-screen"
+      className="relative z-10 min-h-screen"
       style={{
         "--portfolio-background": appearance.backgroundColor,
         "--portfolio-surface": appearance.surfaceColor,
@@ -695,7 +700,7 @@ export default function AdminLayout({
         "--portfolio-muted": appearance.mutedColor,
         "--portfolio-border": appearance.borderColor,
         "--portfolio-accent": appearance.accentColor,
-        backgroundColor: appearance.backgroundColor,
+        backgroundColor: "transparent",
         color: appearance.textColor,
       } as React.CSSProperties}
     >
@@ -708,7 +713,7 @@ export default function AdminLayout({
           --cms-muted: var(--portfolio-muted);
           --cms-border: var(--portfolio-border);
           --cms-accent: var(--portfolio-accent);
-          background: var(--cms-bg);
+          background: transparent;
           color: var(--cms-text);
         }
 

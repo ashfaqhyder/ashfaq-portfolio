@@ -123,6 +123,7 @@ export default function AppearanceAdminPage() {
         accentColor: settings.accentColor,
         animationsEnabled: settings.animationsEnabled,
         smoothScrollEnabled: settings.smoothScrollEnabled,
+        ditherBackgroundEnabled: settings.ditherBackgroundEnabled,
       },
     };
 
@@ -197,7 +198,15 @@ export default function AppearanceAdminPage() {
           settings.animationsEnabled,
         smoothScrollEnabled:
           settings.smoothScrollEnabled,
+        ditherBackgroundEnabled:
+          settings.ditherBackgroundEnabled,
       });
+
+      window.dispatchEvent(
+        new CustomEvent("portfolio-appearance-updated", {
+          detail: settings,
+        })
+      );
 
       setMessage(
         "Appearance settings saved successfully."
@@ -588,6 +597,18 @@ export default function AppearanceAdminPage() {
             <div className="space-y-4">
 
               <ToggleField
+                label="Dithered Background"
+                description="Show or hide the interactive particle background across the portfolio and admin sections."
+                checked={settings.ditherBackgroundEnabled}
+                onChange={(value) =>
+                  updateField(
+                    "ditherBackgroundEnabled",
+                    value
+                  )
+                }
+              />
+
+              <ToggleField
                 label="Animations"
                 description="Enable motion and transition effects throughout the public portfolio."
                 checked={
@@ -693,6 +714,15 @@ export default function AppearanceAdminPage() {
                 label="Smooth Scroll"
                 value={
                   settings.smoothScrollEnabled
+                    ? "Enabled"
+                    : "Disabled"
+                }
+              />
+
+              <ValueRow
+                label="Dithered Background"
+                value={
+                  settings.ditherBackgroundEnabled
                     ? "Enabled"
                     : "Disabled"
                 }

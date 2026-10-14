@@ -53,6 +53,7 @@ export async function GET() {
           accentColor: "#B6FF3B",
           animationsEnabled: true,
           smoothScrollEnabled: true,
+          ditherBackgroundEnabled: true,
         },
       });
     }
@@ -89,6 +90,12 @@ export async function GET() {
           typeof data?.smoothScrollEnabled ===
           "boolean"
             ? data.smoothScrollEnabled
+            : true,
+
+        ditherBackgroundEnabled:
+          typeof data?.ditherBackgroundEnabled ===
+          "boolean"
+            ? data.ditherBackgroundEnabled
             : true,
       },
     });
@@ -173,6 +180,7 @@ export async function POST(
       accentColor,
       animationsEnabled,
       smoothScrollEnabled,
+      ditherBackgroundEnabled,
     } = body;
 
     if (
@@ -263,6 +271,8 @@ export async function POST(
       typeof animationsEnabled !==
         "boolean" ||
       typeof smoothScrollEnabled !==
+        "boolean" ||
+      typeof ditherBackgroundEnabled !==
         "boolean"
     ) {
       return NextResponse.json(
@@ -286,6 +296,7 @@ export async function POST(
         accentColor,
         animationsEnabled,
         smoothScrollEnabled,
+        ditherBackgroundEnabled,
         updatedAt:
           FieldValue.serverTimestamp(),
       },

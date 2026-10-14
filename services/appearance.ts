@@ -9,6 +9,7 @@ export interface AppearanceSettings {
   accentColor: string;
   animationsEnabled: boolean;
   smoothScrollEnabled: boolean;
+  ditherBackgroundEnabled: boolean;
   updatedAt?: unknown;
 }
 
@@ -21,6 +22,7 @@ export const defaultAppearanceSettings: AppearanceSettings = {
   accentColor: "#B6FF3B",
   animationsEnabled: true,
   smoothScrollEnabled: true,
+  ditherBackgroundEnabled: true,
   updatedAt: undefined,
 };
 

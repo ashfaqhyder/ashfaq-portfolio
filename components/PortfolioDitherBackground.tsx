@@ -563,7 +563,7 @@ export default function PortfolioDitherBackground() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[1] h-screen w-screen"
+      className="pointer-events-none fixed inset-0 z-0 h-screen w-screen"
       style={{
         display: "block",
         background: "transparent",

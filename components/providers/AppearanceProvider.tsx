@@ -151,6 +151,11 @@ export default function AppearanceProvider({
         ? "enabled"
         : "disabled";
 
+    root.dataset.ditherBackground =
+      settings.ditherBackgroundEnabled
+        ? "enabled"
+        : "disabled";
+
     root.dataset.smoothScroll =
       settings.smoothScrollEnabled
         ? "enabled"
@@ -181,6 +186,7 @@ export default function AppearanceProvider({
 
       delete root.dataset.animations;
       delete root.dataset.smoothScroll;
+      delete root.dataset.ditherBackground;
 
       delete body.dataset.portfolioPublic;
     };

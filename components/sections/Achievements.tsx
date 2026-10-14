@@ -1625,7 +1625,7 @@ export default function Achievements() {
             <div className="pointer-events-none absolute bottom-[4.5rem] left-1/2 z-[60] -translate-x-1/2 font-mono text-[8px] uppercase tracking-[0.2em] md:hidden" aria-live="polite" style={{ color: "var(--portfolio-muted)" }}>
               Swipe to explore · {String(mobileCertificateIndex + 1).padStart(2, "0")} / {String(topLevelAchievements.length).padStart(2, "0")}
             </div>
-          )}}
+          )}
 
           {!masterFocusMode &&
             cardsVisible &&

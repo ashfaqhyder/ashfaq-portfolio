@@ -846,7 +846,7 @@ export default function Skills() {
                 ) : activeSkill ? (
                   <div
                     key={activeSkill.id ?? activeSkill.name}
-                    className="w-full max-w-[21rem] min-h-[21rem] md:max-w-[21rem] md:min-h-0"
+                    className="h-[21rem] w-full max-w-[21rem] md:h-auto md:max-w-[21rem]"
                     style={{
                       animation:
                         "skills-card-in 600ms cubic-bezier(.16,1,.3,1)",
@@ -858,7 +858,7 @@ export default function Skills() {
                       total={orderedSkills.length}
                     />
 
-                    <div className="mt-5 flex items-center gap-3">
+                    <div className="mt-5 hidden items-center gap-3 md:flex">
                       <span
                         className="font-mono text-[8px] uppercase tracking-[0.2em]"
                         style={{
@@ -893,7 +893,7 @@ export default function Skills() {
 
               {/* WHEEL */}
               <div
-                className="absolute bottom-[max(5.5rem,env(safe-area-inset-bottom))] left-1/2 z-[60] mx-auto h-[4.5rem] w-full max-w-[21rem] -translate-x-1/2 select-none overflow-hidden touch-none bg-transparent sm:static sm:mt-2 sm:h-[8rem] sm:max-w-[21rem] sm:translate-x-0 md:relative md:bottom-auto md:left-auto md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-64 lg:-ml-64 lg:h-[31rem]"
+                className="relative order-last z-[60] mx-auto mt-5 h-[4.5rem] w-full max-w-[21rem] select-none overflow-hidden touch-none bg-transparent sm:mt-2 sm:h-[8rem] sm:max-w-[21rem] md:relative md:order-none md:bottom-auto md:left-auto md:mx-0 md:mt-0 md:h-[25rem] md:max-w-[29rem] md:-ml-64 lg:-ml-64 lg:h-[31rem]"
                 style={{
                   touchAction: "none",
                   cursor: dragging ? "grabbing" : "grab",

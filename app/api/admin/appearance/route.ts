@@ -74,15 +74,15 @@ export async function GET() {
         backgroundColor:
           data?.backgroundColor || "#050505",
 
-        backgroundMode: ["solid", "linear-gradient", "radial-gradient", "texture"].includes(data?.backgroundMode) ? data.backgroundMode : "solid",
+        backgroundMode: ["solid", "linear-gradient", "radial-gradient", "texture"].includes(data?.backgroundMode) ? data?.backgroundMode : "solid",
         gradientStart: data?.gradientStart || "#050505",
         gradientEnd: data?.gradientEnd || "#182018",
         gradientAngle: typeof data?.gradientAngle === "number" && data.gradientAngle >= 0 && data.gradientAngle <= 360 ? data.gradientAngle : 135,
-        textureStyle: ["grid", "dots", "noise"].includes(data?.textureStyle) ? data.textureStyle : "grid",
+        textureStyle: ["grid", "dots", "noise"].includes(data?.textureStyle) ? data?.textureStyle : "grid",
         textureOpacity: typeof data?.textureOpacity === "number" && data.textureOpacity >= 0 && data.textureOpacity <= 0.35 ? data.textureOpacity : 0.12,
         surfaceColor:
           data?.surfaceColor || "#111111",
-        surfaceMode: ["solid", "linear-gradient"].includes(data?.surfaceMode) ? data.surfaceMode : "solid",
+        surfaceMode: ["solid", "linear-gradient"].includes(data?.surfaceMode) ? data?.surfaceMode : "solid",
         surfaceGradientStart: data?.surfaceGradientStart || "#111111",
         surfaceGradientEnd: data?.surfaceGradientEnd || "#202020",
 

@@ -794,3 +794,17 @@ body > div[data-portfolio-public="true"] main#top {
 [data-portfolio-public] .bg-neutral-900 {
   background: var(--portfolio-surface-background, var(--portfolio-surface)) !important;
 }
+
+
+/* Appearance CMS: keep selected gradients fixed while scrolling. */
+html,
+body {
+  background-attachment: fixed;
+}
+
+/* Keep the admin shell above decorative canvas layers. */
+[data-admin-theme] {
+  position: relative;
+  z-index: 10;
+  isolation: isolate;
+}

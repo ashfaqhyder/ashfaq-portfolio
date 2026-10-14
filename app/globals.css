@@ -6,6 +6,7 @@
 
   --portfolio-background: #050505;
   --portfolio-surface: #111111;
+  --portfolio-surface-background: #111111;
   --portfolio-text: #f5f5f5;
   --portfolio-muted: #8a8a8a;
   --portfolio-border: #252525;
@@ -170,7 +171,7 @@ body {
 }
 
 [data-portfolio-public] .bg-neutral-900 {
-  background-color: var(--portfolio-surface) !important;
+  background: var(--portfolio-surface-background, var(--portfolio-surface)) !important;
 }
 
 /* =========================================================
@@ -785,4 +786,11 @@ body > div[data-portfolio-public="true"] main#top {
   position: relative;
   z-index: 1;
   background: transparent !important;
+}
+
+
+/* Appearance CMS gradient surface support. */
+[data-admin-theme] .bg-neutral-900,
+[data-portfolio-public] .bg-neutral-900 {
+  background: var(--portfolio-surface-background, var(--portfolio-surface)) !important;
 }

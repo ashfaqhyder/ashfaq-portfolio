@@ -183,6 +183,7 @@ export default function AppearanceProvider({
     body.style.backgroundColor = settings.backgroundColor;
     body.style.backgroundImage = getBackgroundImage(settings);
     body.style.backgroundSize = settings.backgroundMode === "texture" ? (settings.textureStyle === "dots" ? "14px 14px" : "28px 28px, 28px 28px") : "cover";
+    body.style.backgroundAttachment = "fixed";
 
     body.style.color =
       settings.textColor;
@@ -208,6 +209,7 @@ export default function AppearanceProvider({
       delete body.dataset.portfolioPublic;
       body.style.backgroundImage = "";
       body.style.backgroundSize = "";
+      body.style.backgroundAttachment = "";
     };
   }, [settings, isAdmin]);
 

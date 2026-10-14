@@ -794,3 +794,25 @@ body > div[data-portfolio-public="true"] main#top {
 [data-portfolio-public] .bg-neutral-900 {
   background: var(--portfolio-surface-background, var(--portfolio-surface)) !important;
 }
+
+
+/* Keep CMS background gradients anchored to the viewport while content scrolls. */
+html,
+body {
+  background-attachment: fixed;
+}
+
+/* Appearance CMS quick navigation and sticky save controls should remain readable
+   above the animated decorative background. */
+[data-admin-theme] {
+  position: relative;
+  isolation: isolate;
+}
+[data-admin-theme] main,
+[data-admin-theme] aside,
+[data-admin-theme] nav,
+[data-admin-theme] button,
+[data-admin-theme] input,
+[data-admin-theme] select {
+  position: relative;
+}

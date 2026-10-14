@@ -273,6 +273,19 @@ export default function AppearanceAdminPage() {
           </p>
         </div>
 
+        <nav aria-label="Appearance settings sections" className="sticky top-3 z-20 mb-8 flex gap-2 overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950/95 p-2 shadow-xl backdrop-blur">
+          {[
+            ["theme-presets", "Presets"],
+            ["color-system", "Colors & background"],
+            ["motion-settings", "Motion"],
+            ["current-configuration", "Summary"],
+          ].map(([href, label]) => (
+            <a key={href} href={`#${href}`} className="shrink-0 rounded-lg px-4 py-2.5 text-xs font-medium text-neutral-400 transition-colors hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-500">
+              {label}
+            </a>
+          ))}
+        </nav>
+
         <form
           onSubmit={handleSubmit}
           className="space-y-10"
@@ -282,7 +295,7 @@ export default function AppearanceAdminPage() {
           {/* THEME PRESETS                                      */}
           {/* ================================================= */}
 
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+          <section id="theme-presets" className="scroll-mt-24 rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
             <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
@@ -414,7 +427,7 @@ export default function AppearanceAdminPage() {
           {/* COLORS                                            */}
           {/* ================================================= */}
 
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+          <section id="color-system" className="scroll-mt-24 rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
 
             <div className="mb-8">
               <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
@@ -623,7 +636,7 @@ export default function AppearanceAdminPage() {
           {/* MOTION                                             */}
           {/* ================================================= */}
 
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+          <section id="motion-settings" className="scroll-mt-24 rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
 
             <div className="mb-8">
               <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
@@ -691,7 +704,7 @@ export default function AppearanceAdminPage() {
           {/* CURRENT VALUES                                     */}
           {/* ================================================= */}
 
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
+          <section id="current-configuration" className="scroll-mt-24 rounded-2xl border border-neutral-800 bg-neutral-950 p-6 md:p-8">
 
             <div className="mb-6">
               <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
@@ -780,7 +793,7 @@ export default function AppearanceAdminPage() {
           {/* SAVE                                               */}
           {/* ================================================= */}
 
-          <div className="flex flex-col gap-4 border-t border-neutral-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="sticky bottom-3 z-20 flex flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
 
             <div>
               {message && (

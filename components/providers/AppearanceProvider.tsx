@@ -194,6 +194,7 @@ export default function AppearanceProvider({
 
   return (
     <div
+      className="relative z-10"
       data-portfolio-public="true"
       style={
         {

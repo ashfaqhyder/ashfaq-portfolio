@@ -263,6 +263,13 @@ export default function PortfolioDitherBackground() {
         height,
       );
 
+      if (
+        document.documentElement.dataset.ditherBackground === "disabled"
+      ) {
+        animationFrame = requestAnimationFrame(draw);
+        return;
+      }
+
       ctx.fillStyle = textColor;
 
       const visibleCount = Math.floor(

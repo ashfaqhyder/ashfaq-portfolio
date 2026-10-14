@@ -185,6 +185,7 @@ export default function BeyondTheFrame() {
   const [posters, setPosters] = useState<ScreenCulturePoster[]>([]);
   const [category, setCategory] = useState<ScreenCultureCategory>("movies-series");
   const [enteredGallery, setEnteredGallery] = useState(false);
+  const galleryBackStateRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasBrowsed, setHasBrowsed] = useState(false);
   const [sectionProgress, setSectionProgress] = useState(0);
@@ -333,14 +334,34 @@ export default function BeyondTheFrame() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [enteredGallery, activePosters.length]);
 
-  const returnToCategories = useCallback(() => {
+  const returnToCategories = useCallback((fromHistory = false) => {
     if (!enteredGallery) return;
     // Exit the gallery without changing the document scroll position. The
     // scroll-lock cleanup restores the exact position captured on entry.
     setEnteredGallery(false);
     setHasBrowsed(false);
     setActiveIndex(0);
+    galleryBackStateRef.current = false;
+    if (!fromHistory && typeof window !== "undefined" && window.history.state?.screenCultureGallery) {
+      window.history.back();
+    }
   }, [enteredGallery]);
+
+  // Give the browser a gallery history entry so Back exits the collection first.
+  useEffect(() => {
+    if (!enteredGallery || typeof window === "undefined") return;
+    const previousState = window.history.state ?? {};
+    window.history.pushState({ ...previousState, screenCultureGallery: true }, "");
+    galleryBackStateRef.current = true;
+    const onPopState = () => {
+      if (galleryBackStateRef.current) returnToCategories(true);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      galleryBackStateRef.current = false;
+    };
+  }, [enteredGallery, returnToCategories]);
 
   const headingProgress = easeOut(range(sectionProgress, 0.025, 0.27));
   const categoryReveal = easeOut(range(sectionProgress, 0.32, 0.62));
@@ -371,11 +392,6 @@ export default function BeyondTheFrame() {
         onDoubleClick={returnToCategories}
         style={{ background: "transparent", isolation: "isolate" }}
       >
-        <div className={`absolute left-6 top-20 z-[70] md:left-10 lg:left-16 lg:top-24 transition-opacity duration-500 ${enteredGallery ? "opacity-0 pointer-events-none" : "opacity-100"}`} style={{ opacity: 1 - outro }}>
-          <p className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: "var(--portfolio-accent)" }}>
-            09 / Beyond the Frame
-          </p>
-        </div>
 
         <div
           ref={posterViewportRef}

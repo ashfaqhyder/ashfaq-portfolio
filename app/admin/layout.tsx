@@ -755,6 +755,11 @@ export default function AdminLayout({
           background: var(--cms-surface-background, var(--cms-surface)) !important;
         }
 
+        /* Keep admin editing surfaces opaque; gradients belong on intended surfaces only. */
+        [data-admin-theme] #color-system > div.rounded-xl {
+          background-color: #0b0b0b !important;
+        }
+
         [data-admin-theme] .text-white,
         [data-admin-theme] .text-neutral-100,
         [data-admin-theme] .text-neutral-200 {

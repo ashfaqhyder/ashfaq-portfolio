@@ -829,3 +829,33 @@ body[data-portfolio-public="true"] {
     background-size: 100% 100%;
   }
 }
+
+
+/* Admin CMS contrast guard: decorative dither must never wash out controls. */
+body:not([data-portfolio-public="true"]) > canvas[aria-hidden="true"] {
+  z-index: -1 !important;
+  opacity: 0.12 !important;
+  pointer-events: none !important;
+}
+[data-admin-theme] {
+  color: var(--portfolio-text, #f5f5f5);
+}
+[data-admin-theme] #color-system > div.rounded-xl {
+  background-color: #0b0b0b !important;
+  color: var(--portfolio-text, #f5f5f5);
+}
+[data-admin-theme] nav[aria-label="Appearance settings sections"] {
+  background-color: #080808 !important;
+  border-color: var(--portfolio-border, #333) !important;
+}
+[data-admin-theme] nav[aria-label="Appearance settings sections"] a {
+  color: #d4d4d4 !important;
+}
+[data-admin-theme] nav[aria-label="Appearance settings sections"] a:hover {
+  color: #ffffff !important;
+  background-color: #262626 !important;
+}
+[data-admin-theme] form > div.sticky {
+  background-color: #080808 !important;
+  border-color: var(--portfolio-border, #333) !important;
+}

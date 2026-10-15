@@ -1339,29 +1339,7 @@ export default function Achievements() {
             />
           </div>
 
-          <div
-            className="absolute inset-0 z-[10]"
-            style={{
-              backgroundColor:
-                "var(--portfolio-background)",
-              opacity:
-                masterFocusMode
-                  ? 0.68
-                  : 0,
-              backdropFilter:
-                masterFocusMode
-                  ? "blur(18px)"
-                  : "blur(0px)",
-              WebkitBackdropFilter:
-                masterFocusMode
-                  ? "blur(18px)"
-                  : "blur(0px)",
-              transition:
-                "opacity 1100ms cubic-bezier(0.16,1,0.3,1), backdrop-filter 1100ms cubic-bezier(0.16,1,0.3,1)",
-              pointerEvents:
-                "none",
-            }}
-          />
+
 
           <div
             className="absolute inset-0 z-[20] flex items-center justify-center px-4 pt-[125px] sm:px-8 md:px-12 md:pt-[140px] lg:px-20"

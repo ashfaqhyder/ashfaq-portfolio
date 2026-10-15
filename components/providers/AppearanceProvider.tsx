@@ -180,10 +180,17 @@ export default function AppearanceProvider({
     body.dataset.portfolioPublic =
       "true";
 
-    body.style.backgroundColor = settings.backgroundColor;
-    body.style.backgroundImage = getBackgroundImage(settings);
-    body.style.backgroundSize = settings.backgroundMode === "texture" ? (settings.textureStyle === "dots" ? "14px 14px" : "28px 28px, 28px 28px") : "cover";
-    body.style.backgroundAttachment = "fixed";
+    const backgroundImage = getBackgroundImage(settings);
+    const backgroundSize = settings.backgroundMode === "texture"
+      ? (settings.textureStyle === "dots" ? "14px 14px" : "28px 28px, 28px 28px")
+      : "cover";
+    for (const element of [root, body]) {
+      element.style.backgroundColor = settings.backgroundColor;
+      element.style.backgroundImage = backgroundImage;
+      element.style.backgroundSize = backgroundSize;
+      element.style.backgroundPosition = "center top";
+      element.style.backgroundAttachment = "fixed";
+    }
 
     body.style.color =
       settings.textColor;
@@ -207,9 +214,12 @@ export default function AppearanceProvider({
       delete root.dataset.ditherBackground;
 
       delete body.dataset.portfolioPublic;
-      body.style.backgroundImage = "";
-      body.style.backgroundSize = "";
-      body.style.backgroundAttachment = "";
+      for (const element of [root, body]) {
+        element.style.backgroundImage = "";
+        element.style.backgroundSize = "";
+        element.style.backgroundPosition = "";
+        element.style.backgroundAttachment = "";
+      }
     };
   }, [settings, isAdmin]);
 

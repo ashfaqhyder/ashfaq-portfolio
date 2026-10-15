@@ -444,114 +444,64 @@ export default function AppearanceAdminPage() {
               </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-6">
+              <div className="rounded-xl border border-neutral-800 bg-black/40 p-5 md:p-6">
+                <div className="mb-5">
+                  <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">01 / Page background</p>
+                  <h3 className="mt-2 text-lg font-medium text-neutral-100">Background appearance</h3>
+                  <p className="mt-1 text-sm leading-6 text-neutral-500">Controls the page-wide background. These gradient colors do not affect cards or panels.</p>
+                </div>
+                <div className="grid gap-5 md:grid-cols-2">
+                  <StyleSelect label="Background style" value={settings.backgroundMode} options={[
+                    { label: "Solid color", value: "solid" }, { label: "Linear gradient", value: "linear-gradient" },
+                    { label: "Radial gradient", value: "radial-gradient" }, { label: "Texture", value: "texture" },
+                  ]} onChange={(value) => updateField("backgroundMode", value as AppearanceSettings["backgroundMode"])} />
+                  <ColorField label="Base background color" value={settings.backgroundColor} onChange={(value) => updateField("backgroundColor", value)} description="Fallback color and the solid background option." />
+                  {settings.backgroundMode === "linear-gradient" || settings.backgroundMode === "radial-gradient" ? <>
+                    <ColorField label="Background gradient · start" value={settings.gradientStart} onChange={(value) => updateField("gradientStart", value)} description="First color of the page background gradient." />
+                    <ColorField label="Background gradient · end" value={settings.gradientEnd} onChange={(value) => updateField("gradientEnd", value)} description="Second color of the page background gradient." />
+                    {settings.backgroundMode === "linear-gradient" && <NumberField label="Background gradient angle" value={settings.gradientAngle} min={0} max={360} onChange={(value) => updateField("gradientAngle", value)} suffix="°" />}
+                  </> : null}
+                  {settings.backgroundMode === "texture" ? <>
+                    <StyleSelect label="Background texture" value={settings.textureStyle} options={[
+                      { label: "Grid", value: "grid" }, { label: "Dots", value: "dots" }, { label: "Noise lines", value: "noise" },
+                    ]} onChange={(value) => updateField("textureStyle", value as AppearanceSettings["textureStyle"])} />
+                    <NumberField label="Texture opacity" value={Math.round(settings.textureOpacity * 100)} min={0} max={35} onChange={(value) => updateField("textureOpacity", value / 100)} suffix="%" />
+                  </> : null}
+                </div>
+              </div>
 
-              <StyleSelect label="Background style" value={settings.backgroundMode} options={[
-                { label: "Solid", value: "solid" }, { label: "Linear gradient", value: "linear-gradient" },
-                { label: "Radial gradient", value: "radial-gradient" }, { label: "Texture", value: "texture" },
-              ]} onChange={(value) => updateField("backgroundMode", value as AppearanceSettings["backgroundMode"])} />
-              {settings.backgroundMode === "linear-gradient" || settings.backgroundMode === "radial-gradient" ? <>
-                <ColorField label="Gradient start" value={settings.gradientStart} onChange={(value) => updateField("gradientStart", value)} description="First gradient color." />
-                <ColorField label="Gradient end" value={settings.gradientEnd} onChange={(value) => updateField("gradientEnd", value)} description="Second gradient color." />
-                {settings.backgroundMode === "linear-gradient" && <NumberField label="Gradient angle" value={settings.gradientAngle} min={0} max={360} onChange={(value) => updateField("gradientAngle", value)} suffix="°" />}
-              </> : null}
-              {settings.backgroundMode === "texture" ? <>
-                <StyleSelect label="Texture" value={settings.textureStyle} options={[
-                  { label: "Grid", value: "grid" }, { label: "Dots", value: "dots" }, { label: "Noise lines", value: "noise" },
-                ]} onChange={(value) => updateField("textureStyle", value as AppearanceSettings["textureStyle"])} />
-                <NumberField label="Texture opacity" value={Math.round(settings.textureOpacity * 100)} min={0} max={35} onChange={(value) => updateField("textureOpacity", value / 100)} suffix="%" />
-              </> : null}
-              <ColorField
-                label="Background"
-                value={
-                  settings.backgroundColor
-                }
-                onChange={(value) =>
-                  updateField(
-                    "backgroundColor",
-                    value
-                  )
-                }
-                description="Main page background."
-              />
+              <div className="rounded-xl border border-neutral-800 bg-black/40 p-5 md:p-6">
+                <div className="mb-5">
+                  <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">02 / Cards & panels</p>
+                  <h3 className="mt-2 text-lg font-medium text-neutral-100">Surface appearance</h3>
+                  <p className="mt-1 text-sm leading-6 text-neutral-500">Controls cards, panels and elevated surfaces independently from the page background.</p>
+                </div>
+                <div className="grid gap-5 md:grid-cols-2">
+                  <StyleSelect label="Surface style" value={settings.surfaceMode} options={[
+                    { label: "Solid color", value: "solid" }, { label: "Linear gradient", value: "linear-gradient" },
+                  ]} onChange={(value) => updateField("surfaceMode", value as AppearanceSettings["surfaceMode"])} />
+                  <ColorField label="Base surface color" value={settings.surfaceColor} onChange={(value) => updateField("surfaceColor", value)} description="Fallback color and the solid surface option." />
+                  {settings.surfaceMode === "linear-gradient" ? <>
+                    <ColorField label="Surface gradient · start" value={settings.surfaceGradientStart} onChange={(value) => updateField("surfaceGradientStart", value)} description="First color used by card and panel gradients." />
+                    <ColorField label="Surface gradient · end" value={settings.surfaceGradientEnd} onChange={(value) => updateField("surfaceGradientEnd", value)} description="Second color used by card and panel gradients." />
+                  </> : null}
+                </div>
+              </div>
 
-              <ColorField
-                label="Surface"
-                value={
-                  settings.surfaceColor
-                }
-                onChange={(value) =>
-                  updateField(
-                    "surfaceColor",
-                    value
-                  )
-                }
-                description="Cards, panels and elevated surfaces."
-              />
-
-              <StyleSelect label="Surface style" value={settings.surfaceMode} options={[
-                { label: "Solid", value: "solid" }, { label: "Linear gradient", value: "linear-gradient" },
-              ]} onChange={(value) => updateField("surfaceMode", value as AppearanceSettings["surfaceMode"])} />
-              {settings.surfaceMode === "linear-gradient" ? <>
-                <ColorField label="Surface gradient start" value={settings.surfaceGradientStart} onChange={(value) => updateField("surfaceGradientStart", value)} description="First surface gradient color." />
-                <ColorField label="Surface gradient end" value={settings.surfaceGradientEnd} onChange={(value) => updateField("surfaceGradientEnd", value)} description="Second surface gradient color." />
-              </> : null}
-              <ColorField
-                label="Primary Text"
-                value={
-                  settings.textColor
-                }
-                onChange={(value) =>
-                  updateField(
-                    "textColor",
-                    value
-                  )
-                }
-                description="Main typography."
-              />
-
-              <ColorField
-                label="Muted Text"
-                value={
-                  settings.mutedColor
-                }
-                onChange={(value) =>
-                  updateField(
-                    "mutedColor",
-                    value
-                  )
-                }
-                description="Secondary and supporting text."
-              />
-
-              <ColorField
-                label="Border"
-                value={
-                  settings.borderColor
-                }
-                onChange={(value) =>
-                  updateField(
-                    "borderColor",
-                    value
-                  )
-                }
-                description="Dividers, outlines and subtle borders."
-              />
-
-              <ColorField
-                label="Accent"
-                value={
-                  settings.accentColor
-                }
-                onChange={(value) =>
-                  updateField(
-                    "accentColor",
-                    value
-                  )
-                }
-                description="Primary interactive accent."
-              />
-
+              <div className="rounded-xl border border-neutral-800 bg-black/40 p-5 md:p-6">
+                <div className="mb-5">
+                  <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">03 / Palette</p>
+                  <h3 className="mt-2 text-lg font-medium text-neutral-100">Text & interface colors</h3>
+                  <p className="mt-1 text-sm leading-6 text-neutral-500">These colors are separate from both gradient editors.</p>
+                </div>
+                <div className="grid gap-5 md:grid-cols-2">
+                  <ColorField label="Primary text" value={settings.textColor} onChange={(value) => updateField("textColor", value)} description="Main typography." />
+                  <ColorField label="Muted text" value={settings.mutedColor} onChange={(value) => updateField("mutedColor", value)} description="Secondary and supporting text." />
+                  <ColorField label="Border" value={settings.borderColor} onChange={(value) => updateField("borderColor", value)} description="Dividers, outlines and subtle borders." />
+                  <ColorField label="Accent" value={settings.accentColor} onChange={(value) => updateField("accentColor", value)} description="Primary interactive accent." />
+                </div>
+              </div>
             </div>
 
             {/* Preview */}

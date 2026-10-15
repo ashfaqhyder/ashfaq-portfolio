@@ -273,14 +273,14 @@ export default function AppearanceAdminPage() {
           </p>
         </div>
 
-        <nav aria-label="Appearance settings sections" className="sticky top-3 z-20 mb-8 flex gap-2 overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950/95 p-2 shadow-xl backdrop-blur">
+        <nav aria-label="Appearance settings sections" className="sticky top-3 z-20 mb-8 flex gap-2 overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950 p-2 shadow-xl">
           {[
             ["theme-presets", "Presets"],
             ["color-system", "Colors & background"],
             ["motion-settings", "Motion"],
             ["current-configuration", "Summary"],
           ].map(([href, label]) => (
-            <a key={href} href={`#${href}`} className="shrink-0 rounded-lg px-4 py-2.5 text-xs font-medium text-neutral-400 transition-colors hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-500">
+            <a key={href} href={`#${href}`} className="shrink-0 rounded-lg px-4 py-2.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-500">
               {label}
             </a>
           ))}
@@ -445,7 +445,7 @@ export default function AppearanceAdminPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-xl border border-neutral-800 bg-black/40 p-5 md:p-6">
+              <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-5 md:p-6">
                 <div className="mb-5">
                   <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">01 / Page background</p>
                   <h3 className="mt-2 text-lg font-medium text-neutral-100">Background appearance</h3>
@@ -743,7 +743,7 @@ export default function AppearanceAdminPage() {
           {/* SAVE                                               */}
           {/* ================================================= */}
 
-          <div className="sticky bottom-3 z-20 flex flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+          <div className="sticky bottom-3 z-20 flex flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-950 p-4 shadow-2xl sm:flex-row sm:items-center sm:justify-between">
 
             <div>
               {message && (

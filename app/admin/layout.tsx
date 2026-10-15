@@ -437,8 +437,7 @@ export default function AdminLayout({
       appearance.accentColor
     );
 
-    body.style.backgroundColor = appearance.backgroundColor;
-    body.style.backgroundImage = appearance.backgroundMode === "linear-gradient"
+    const backgroundImage = appearance.backgroundMode === "linear-gradient"
       ? `linear-gradient(${appearance.gradientAngle}deg, ${appearance.gradientStart}, ${appearance.gradientEnd})`
       : appearance.backgroundMode === "radial-gradient"
         ? `radial-gradient(ellipse at top, ${appearance.gradientStart}, ${appearance.gradientEnd})`
@@ -447,8 +446,14 @@ export default function AdminLayout({
             ? `radial-gradient(color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1.2px)`
             : `linear-gradient(color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px)`
           : "none";
-    body.style.backgroundSize = appearance.backgroundMode === "texture" ? "28px 28px, 28px 28px" : "cover";
-    body.style.backgroundAttachment = "fixed";
+    const backgroundSize = appearance.backgroundMode === "texture" ? "28px 28px, 28px 28px" : "cover";
+    for (const element of [root, body]) {
+      element.style.backgroundColor = appearance.backgroundColor;
+      element.style.backgroundImage = backgroundImage;
+      element.style.backgroundSize = backgroundSize;
+      element.style.backgroundPosition = "center top";
+      element.style.backgroundAttachment = "fixed";
+    }
     body.style.color = appearance.textColor;
     root.style.backgroundColor = appearance.backgroundColor;
     root.style.color = appearance.textColor;
@@ -461,9 +466,12 @@ export default function AdminLayout({
       delete root.dataset.adminAnimations;
       delete root.dataset.adminSmoothScroll;
       delete root.dataset.ditherBackground;
-      body.style.backgroundImage = "";
-      body.style.backgroundSize = "";
-      body.style.backgroundAttachment = "";
+      for (const element of [root, body]) {
+        element.style.backgroundImage = "";
+        element.style.backgroundSize = "";
+        element.style.backgroundPosition = "";
+        element.style.backgroundAttachment = "";
+      }
       root.style.scrollBehavior = "auto";
     };
   }, [appearance, isAdmin]);

@@ -808,3 +808,24 @@ body {
   z-index: 10;
   isolation: isolate;
 }
+
+
+/* Mobile browsers can paint the body background differently from desktop.
+   Mirror the CMS-selected background onto the root viewport as well. */
+html {
+  background-color: var(--portfolio-background, #050505);
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+body[data-portfolio-public="true"] {
+  min-height: 100%;
+  background-repeat: no-repeat;
+}
+@media (max-width: 767px) {
+  html,
+  body {
+    background-attachment: scroll;
+    background-size: 100% 100%;
+  }
+}

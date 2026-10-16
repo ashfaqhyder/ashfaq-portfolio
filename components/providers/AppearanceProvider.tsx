@@ -187,18 +187,22 @@ export default function AppearanceProvider({
     const backgroundRepeat = settings.backgroundMode === "texture" ? "repeat" : "no-repeat";
     const backgroundPosition = "center center";
     const backgroundAttachment = window.matchMedia("(max-width: 767px)").matches ? "scroll" : "fixed";
-    for (const element of [root, body]) {
-      element.style.setProperty("--portfolio-background-image", backgroundImage);
-      element.style.setProperty("--portfolio-background-size", backgroundSize);
-      element.style.setProperty("--portfolio-background-position", backgroundPosition);
-      element.style.setProperty("--portfolio-background-repeat", backgroundRepeat);
-      element.style.backgroundColor = settings.backgroundColor;
-      element.style.backgroundImage = backgroundImage;
-      element.style.backgroundSize = backgroundSize;
-      element.style.backgroundPosition = backgroundPosition;
-      element.style.backgroundRepeat = backgroundRepeat;
-      element.style.backgroundAttachment = backgroundAttachment;
-    }
+    root.style.setProperty("--portfolio-background-image", backgroundImage);
+    root.style.setProperty("--portfolio-background-size", backgroundSize);
+    root.style.setProperty("--portfolio-background-position", backgroundPosition);
+    root.style.setProperty("--portfolio-background-repeat", backgroundRepeat);
+    root.style.backgroundColor = settings.backgroundColor;
+    root.style.backgroundImage = backgroundImage;
+    root.style.backgroundSize = backgroundSize;
+    root.style.backgroundPosition = backgroundPosition;
+    root.style.backgroundRepeat = backgroundRepeat;
+    root.style.backgroundAttachment = backgroundAttachment;
+
+    /* The body must stay transparent; painting the same gradient on both root
+       and body makes it look doubled and drift while the document scrolls. */
+    body.style.backgroundColor = "transparent";
+    body.style.backgroundImage = "none";
+    body.style.backgroundAttachment = "scroll";
 
     body.style.color =
       settings.textColor;
@@ -232,6 +236,7 @@ export default function AppearanceProvider({
         element.style.backgroundPosition = "";
         element.style.backgroundRepeat = "";
         element.style.backgroundAttachment = "";
+        element.style.backgroundColor = "";
       }
     };
   }, [settings, isAdmin]);

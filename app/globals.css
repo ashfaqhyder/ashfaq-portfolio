@@ -1003,3 +1003,53 @@ body[data-portfolio-public="true"] { background: transparent !important; }
     background-position: center center !important;
   }
 }
+
+
+/* Admin appearance propagation — page backgrounds and reusable panels.
+   Keep route-level wrappers transparent so the viewport gradient can show
+   through every admin page; use a translucent CMS surface for actual panels. */
+[data-admin-theme="true"] {
+  background: transparent !important;
+  color: var(--portfolio-text, #f5f5f5);
+}
+
+/* Tailwind arbitrary-color selectors need CSS-escaped brackets/hash. */
+[data-admin-theme="true"] .bg-\\[\\#050505\\],
+[data-admin-theme="true"] .bg-\\[\\#080808\\],
+[data-admin-theme="true"] .bg-\\[\\#090909\\] {
+  background: transparent !important;
+}
+
+/* Common admin panel utilities should follow the Appearance surface setting. */
+[data-admin-theme="true"] .bg-neutral-950,
+[data-admin-theme="true"] .bg-neutral-900,
+[data-admin-theme="true"] .bg-neutral-800 {
+  background: color-mix(in srgb, var(--portfolio-surface, #111111) 72%, transparent) !important;
+  background-image: var(--portfolio-surface-background, none) !important;
+}
+
+/* Explicit transparent utility stays transparent rather than receiving a
+   fallback black fill from older admin CSS. */
+[data-admin-theme="true"] .bg-transparent {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Keep page background visible on mobile; do not paint a second body layer. */
+@media (max-width: 767px) {
+  html {
+    background-color: var(--portfolio-background, #050505) !important;
+    background-image: var(--portfolio-background-image, none) !important;
+    background-size: var(--portfolio-background-size, cover) !important;
+    background-repeat: var(--portfolio-background-repeat, no-repeat) !important;
+    background-position: center center !important;
+  }
+  body:not([data-portfolio-public="true"]) {
+    background: transparent !important;
+  }
+  [data-admin-theme="true"] .bg-neutral-950,
+  [data-admin-theme="true"] .bg-neutral-900,
+  [data-admin-theme="true"] .bg-neutral-800 {
+    background-color: color-mix(in srgb, var(--portfolio-surface, #111111) 72%, transparent) !important;
+  }
+}

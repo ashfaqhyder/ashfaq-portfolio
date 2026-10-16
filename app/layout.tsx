@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import AppearanceProvider from "@/components/providers/AppearanceProvider";
-import PortfolioDitherBackground from "@/components/PortfolioDitherBackground";
 import { getServerSeoSettings } from "@/services/seo-server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -48,8 +47,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        {/* Fixed background canvas sits behind the transparent public wrapper. */}
-        <PortfolioDitherBackground />
         <AppearanceProvider>
           {children}
         </AppearanceProvider>

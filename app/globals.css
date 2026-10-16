@@ -946,3 +946,35 @@ html { background-attachment: fixed !important; background-position: center cent
 body[data-portfolio-public="true"] { background: transparent !important; }
 [data-portfolio-public="true"] > canvas[aria-hidden="true"] { position: fixed !important; inset: 0 !important; z-index: 0 !important; display: block !important; pointer-events: none !important; background: transparent !important; }
 @media (max-width: 767px) { html { background-attachment: fixed !important; background-position: center center !important; } }
+
+
+/* Admin CMS mobile: use the selected appearance variables and keep dither
+   inside the admin shell stacking context. */
+[data-admin-theme="true"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+[data-admin-theme="true"] > canvas[aria-hidden="true"] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+[data-admin-theme="true"] > :not(canvas) {
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 767px) {
+  html {
+    background-attachment: fixed !important;
+    background-position: center center !important;
+  }
+  body:not([data-portfolio-public="true"]) {
+    background-color: var(--portfolio-background, #050505) !important;
+    background-image: none !important;
+  }
+  [data-admin-theme="true"] {
+    min-height: 100dvh;
+  }
+}

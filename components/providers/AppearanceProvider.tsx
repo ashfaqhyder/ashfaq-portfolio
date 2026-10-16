@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 
+import PortfolioDitherBackground from "@/components/PortfolioDitherBackground";
+
 import { usePathname } from "next/navigation";
 
 import {

@@ -1053,3 +1053,100 @@ body[data-portfolio-public="true"] { background: transparent !important; }
     background-color: color-mix(in srgb, var(--portfolio-surface, #111111) 72%, transparent) !important;
   }
 }
+
+
+/* GLOBAL CMS APPEARANCE CONTRACT
+   One viewport background, a separate dither layer, and shared tokens for
+   all admin pages and controls. */
+html {
+  background-color: var(--portfolio-background, #050505) !important;
+  background-image: var(--portfolio-background-image, none) !important;
+  background-size: var(--portfolio-background-size, cover) !important;
+  background-position: var(--portfolio-background-position, center center) !important;
+  background-repeat: var(--portfolio-background-repeat, no-repeat) !important;
+}
+body {
+  background: transparent !important;
+  color: var(--portfolio-text, #f5f5f5);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--portfolio-background, #050505);
+  background-image: var(--portfolio-background-image, none);
+  background-size: var(--portfolio-background-size, cover);
+  background-position: var(--portfolio-background-position, center center);
+  background-repeat: var(--portfolio-background-repeat, no-repeat);
+}
+[data-admin-theme="true"] {
+  background: transparent !important;
+  color: var(--portfolio-text, #f5f5f5) !important;
+  min-height: 100vh;
+}
+[data-admin-content] {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: transparent !important;
+  color: var(--portfolio-text, #f5f5f5);
+}
+[data-admin-theme="true"] .bg-neutral-950,
+[data-admin-theme="true"] .bg-neutral-900,
+[data-admin-theme="true"] .bg-neutral-800,
+[data-admin-theme="true"] .bg-black\/40,
+[data-admin-theme="true"] .bg-black\/50,
+[data-admin-theme="true"] .bg-black\/60 {
+  background-color: color-mix(in srgb, var(--portfolio-surface, #111111) 76%, transparent) !important;
+  background-image: var(--portfolio-surface-background, none) !important;
+}
+[data-admin-theme="true"] .bg-transparent {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+[data-admin-theme="true"] .text-white,
+[data-admin-theme="true"] .text-neutral-50,
+[data-admin-theme="true"] .text-neutral-100,
+[data-admin-theme="true"] .text-neutral-200 {
+  color: var(--portfolio-text, #f5f5f5) !important;
+}
+[data-admin-theme="true"] .text-neutral-300,
+[data-admin-theme="true"] .text-neutral-400,
+[data-admin-theme="true"] .text-neutral-500,
+[data-admin-theme="true"] .text-neutral-600,
+[data-admin-theme="true"] .text-neutral-700 {
+  color: var(--portfolio-muted, #8a8a8a) !important;
+}
+[data-admin-theme="true"] .border-neutral-900,
+[data-admin-theme="true"] .border-neutral-800,
+[data-admin-theme="true"] .border-neutral-700,
+[data-admin-theme="true"] .border-neutral-600 {
+  border-color: var(--portfolio-border, #252525) !important;
+}
+[data-admin-theme="true"] input,
+[data-admin-theme="true"] textarea,
+[data-admin-theme="true"] select {
+  color: var(--portfolio-text, #f5f5f5);
+  background-color: color-mix(in srgb, var(--portfolio-surface, #111111) 85%, transparent);
+  border-color: var(--portfolio-border, #252525);
+}
+[data-admin-theme="true"] input::placeholder,
+[data-admin-theme="true"] textarea::placeholder {
+  color: var(--portfolio-muted, #8a8a8a);
+}
+[data-admin-theme="true"] :focus-visible {
+  outline-color: var(--portfolio-accent, #b6ff3b);
+}
+[data-admin-theme="true"] .bg-\\[\\#050505\\],
+[data-admin-theme="true"] .bg-\\[\\#080808\\],
+[data-admin-theme="true"] .bg-\\[\\#090909\\] {
+  background-color: color-mix(in srgb, var(--portfolio-surface, #111111) 76%, transparent) !important;
+  background-image: var(--portfolio-surface-background, none) !important;
+}
+@media (max-width: 767px) {
+  html, body { background-attachment: scroll !important; }
+  body::before { position: fixed; height: 100dvh; }
+  [data-admin-theme="true"], [data-admin-content] { min-height: 100dvh; }
+}

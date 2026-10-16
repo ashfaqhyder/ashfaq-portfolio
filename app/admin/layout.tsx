@@ -741,6 +741,8 @@ export default function AdminLayout({
       } as React.CSSProperties}
     >
 
+      {appearance.ditherBackgroundEnabled && <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0"><PortfolioDitherBackground /></div>}
+      <div data-admin-content className="relative z-10 min-h-screen">
       <style jsx global>{`
         [data-admin-theme] {
           --cms-bg: var(--portfolio-background);
@@ -907,7 +909,6 @@ export default function AdminLayout({
         }}
       >
 
-      {appearance.ditherBackgroundEnabled && <PortfolioDitherBackground />}
 
         {/* =================================================
             SIDEBAR HEADER
@@ -1169,6 +1170,7 @@ export default function AdminLayout({
         </button>
 
         {children}
+      </div>
       </div>
     </div>
   );

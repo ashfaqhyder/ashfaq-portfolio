@@ -184,12 +184,20 @@ export default function AppearanceProvider({
     const backgroundSize = settings.backgroundMode === "texture"
       ? (settings.textureStyle === "dots" ? "14px 14px" : "28px 28px, 28px 28px")
       : "cover";
+    const backgroundRepeat = settings.backgroundMode === "texture" ? "repeat" : "no-repeat";
+    const backgroundPosition = "center center";
+    const backgroundAttachment = window.matchMedia("(max-width: 767px)").matches ? "scroll" : "fixed";
     for (const element of [root, body]) {
+      element.style.setProperty("--portfolio-background-image", backgroundImage);
+      element.style.setProperty("--portfolio-background-size", backgroundSize);
+      element.style.setProperty("--portfolio-background-position", backgroundPosition);
+      element.style.setProperty("--portfolio-background-repeat", backgroundRepeat);
       element.style.backgroundColor = settings.backgroundColor;
       element.style.backgroundImage = backgroundImage;
       element.style.backgroundSize = backgroundSize;
-      element.style.backgroundPosition = "center top";
-      element.style.backgroundAttachment = "fixed";
+      element.style.backgroundPosition = backgroundPosition;
+      element.style.backgroundRepeat = backgroundRepeat;
+      element.style.backgroundAttachment = backgroundAttachment;
     }
 
     body.style.color =
@@ -215,13 +223,32 @@ export default function AppearanceProvider({
 
       delete body.dataset.portfolioPublic;
       for (const element of [root, body]) {
+        element.style.removeProperty("--portfolio-background-image");
+        element.style.removeProperty("--portfolio-background-size");
+        element.style.removeProperty("--portfolio-background-position");
+        element.style.removeProperty("--portfolio-background-repeat");
         element.style.backgroundImage = "";
         element.style.backgroundSize = "";
         element.style.backgroundPosition = "";
+        element.style.backgroundRepeat = "";
         element.style.backgroundAttachment = "";
       }
     };
   }, [settings, isAdmin]);
+
+  useEffect(() => {
+    if (isAdmin) return;
+    const root = document.documentElement;
+    const body = document.body;
+    const syncBackgroundAttachment = () => {
+      const attachment = window.matchMedia("(max-width: 767px)").matches ? "scroll" : "fixed";
+      root.style.backgroundAttachment = attachment;
+      body.style.backgroundAttachment = attachment;
+    };
+    syncBackgroundAttachment();
+    window.addEventListener("resize", syncBackgroundAttachment, { passive: true });
+    return () => window.removeEventListener("resize", syncBackgroundAttachment);
+  }, [isAdmin]);
 
   return (
     <div

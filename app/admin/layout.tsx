@@ -754,10 +754,10 @@ export default function AdminLayout({
           color: var(--cms-text);
         }
 
-        [data-admin-theme] .bg-\[\#050505\],
-        [data-admin-theme] .bg-\[\#080808\],
-        [data-admin-theme] .bg-\[\#090909\] {
-          background-color: var(--cms-bg) !important;
+        [data-admin-theme] .bg-\\[\\#050505\\],
+        [data-admin-theme] .bg-\\[\\#080808\\],
+        [data-admin-theme] .bg-\\[\\#090909\\] {
+          background: transparent !important;
         }
 
         /* Keep explicitly transparent admin surfaces transparent so the

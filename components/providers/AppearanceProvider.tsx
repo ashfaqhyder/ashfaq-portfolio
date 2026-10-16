@@ -257,7 +257,7 @@ export default function AppearanceProvider({
 
   return (
     <div
-      className="relative z-10"
+      className="relative isolate min-h-screen"
       data-portfolio-public="true"
       style={
         {
@@ -281,7 +281,8 @@ export default function AppearanceProvider({
         } as React.CSSProperties
       }
     >
-      {children}
+      {!isAdmin && <PortfolioDitherBackground />}
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }

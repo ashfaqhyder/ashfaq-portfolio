@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 
 import { auth } from "@/lib/firebase/auth";
+import PortfolioDitherBackground from "@/components/PortfolioDitherBackground";
 import {
   defaultAppearanceSettings,
   type AppearanceSettings,
@@ -727,7 +728,7 @@ export default function AdminLayout({
   return (
     <div
       data-admin-theme="true"
-      className="relative z-10 min-h-screen"
+      className="relative z-10 min-h-screen isolate"
       style={{
         "--portfolio-background": appearance.backgroundColor,
         "--portfolio-surface": appearance.surfaceColor,
@@ -905,6 +906,8 @@ export default function AdminLayout({
           color: "var(--portfolio-text)",
         }}
       >
+
+      {appearance.ditherBackgroundEnabled && <PortfolioDitherBackground />}
 
         {/* =================================================
             SIDEBAR HEADER

@@ -772,6 +772,19 @@ body > canvas[aria-hidden="true"] {
   inset: 0 !important;
   z-index: 0 !important;
   pointer-events: none !important;
+  opacity: 0.18 !important;
+  mix-blend-mode: soft-light;
+  background: transparent !important;
+}
+@media (max-width: 767px) {
+  body > canvas[aria-hidden="true"] {
+    opacity: 0.10 !important;
+    mix-blend-mode: soft-light;
+  }
+}
+html[data-dither-background="disabled"] body > canvas[aria-hidden="true"],
+body[data-dither-background="disabled"] > canvas[aria-hidden="true"] {
+  opacity: 0 !important;
 }
 
 /* Keep the CMS wrapper transparent. */
@@ -876,5 +889,29 @@ body {
     background-attachment: scroll !important;
     background-size: var(--portfolio-background-size, cover);
     background-position: center center;
+  }
+}
+
+
+/* Gradient is the primary background; dither is a subtle decorative layer,
+   not an opaque veil. Keep the gradient anchored to the viewport on all sizes. */
+html,
+body {
+  background-color: var(--portfolio-background, #050505);
+  background-image: var(--portfolio-background-image, none);
+  background-size: var(--portfolio-background-size, cover);
+  background-position: var(--portfolio-background-position, center center);
+  background-repeat: var(--portfolio-background-repeat, no-repeat);
+}
+@media (max-width: 767px) {
+  html,
+  body {
+    background-attachment: scroll !important;
+    background-position: center center;
+  }
+  body > canvas[aria-hidden="true"] {
+    width: 100vw !important;
+    height: 100dvh !important;
+    opacity: 0.08 !important;
   }
 }

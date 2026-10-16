@@ -939,3 +939,10 @@ body[data-portfolio-public="true"] {
     opacity: 1 !important;
   }
 }
+
+
+/* Keep viewport gradient stable and layer dither inside the public wrapper. */
+html { background-attachment: fixed !important; background-position: center center !important; }
+body[data-portfolio-public="true"] { background: transparent !important; }
+[data-portfolio-public="true"] > canvas[aria-hidden="true"] { position: fixed !important; inset: 0 !important; z-index: 0 !important; display: block !important; pointer-events: none !important; background: transparent !important; }
+@media (max-width: 767px) { html { background-attachment: fixed !important; background-position: center center !important; } }

@@ -825,8 +825,8 @@ body[data-portfolio-public="true"] {
 @media (max-width: 767px) {
   html,
   body {
-    background-attachment: scroll;
-    background-size: 100% 100%;
+    background-attachment: scroll !important;
+    background-position: center center;
   }
 }
 
@@ -858,4 +858,23 @@ body:not([data-portfolio-public="true"]) > canvas[aria-hidden="true"] {
 [data-admin-theme] form > div.sticky {
   background-color: #080808 !important;
   border-color: var(--portfolio-border, #333) !important;
+}
+
+
+/* Keep Appearance backgrounds synchronized across the root viewport and body. */
+html,
+body {
+  background-color: var(--portfolio-background, #050505);
+  background-image: var(--portfolio-background-image, none);
+  background-size: var(--portfolio-background-size, cover);
+  background-position: var(--portfolio-background-position, center center);
+  background-repeat: var(--portfolio-background-repeat, no-repeat);
+}
+@media (max-width: 767px) {
+  html,
+  body {
+    background-attachment: scroll !important;
+    background-size: var(--portfolio-background-size, cover);
+    background-position: center center;
+  }
 }

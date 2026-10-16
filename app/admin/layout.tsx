@@ -447,12 +447,20 @@ export default function AdminLayout({
             : `linear-gradient(color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, ${appearance.textColor} ${appearance.textureOpacity * 100}%, transparent) 1px, transparent 1px)`
           : "none";
     const backgroundSize = appearance.backgroundMode === "texture" ? "28px 28px, 28px 28px" : "cover";
+    const backgroundRepeat = appearance.backgroundMode === "texture" ? "repeat" : "no-repeat";
+    const backgroundPosition = "center center";
+    const backgroundAttachment = window.matchMedia("(max-width: 767px)").matches ? "scroll" : "fixed";
     for (const element of [root, body]) {
+      element.style.setProperty("--portfolio-background-image", backgroundImage);
+      element.style.setProperty("--portfolio-background-size", backgroundSize);
+      element.style.setProperty("--portfolio-background-position", backgroundPosition);
+      element.style.setProperty("--portfolio-background-repeat", backgroundRepeat);
       element.style.backgroundColor = appearance.backgroundColor;
       element.style.backgroundImage = backgroundImage;
       element.style.backgroundSize = backgroundSize;
-      element.style.backgroundPosition = "center top";
-      element.style.backgroundAttachment = "fixed";
+      element.style.backgroundPosition = backgroundPosition;
+      element.style.backgroundRepeat = backgroundRepeat;
+      element.style.backgroundAttachment = backgroundAttachment;
     }
     body.style.color = appearance.textColor;
     root.style.backgroundColor = appearance.backgroundColor;
@@ -467,9 +475,14 @@ export default function AdminLayout({
       delete root.dataset.adminSmoothScroll;
       delete root.dataset.ditherBackground;
       for (const element of [root, body]) {
+        element.style.removeProperty("--portfolio-background-image");
+        element.style.removeProperty("--portfolio-background-size");
+        element.style.removeProperty("--portfolio-background-position");
+        element.style.removeProperty("--portfolio-background-repeat");
         element.style.backgroundImage = "";
         element.style.backgroundSize = "";
         element.style.backgroundPosition = "";
+        element.style.backgroundRepeat = "";
         element.style.backgroundAttachment = "";
       }
       root.style.scrollBehavior = "auto";

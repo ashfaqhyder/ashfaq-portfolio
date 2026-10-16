@@ -912,6 +912,30 @@ body {
   body > canvas[aria-hidden="true"] {
     width: 100vw !important;
     height: 100dvh !important;
-    opacity: 0.08 !important;
+    opacity: 1 !important;
+  }
+}
+
+
+/* Single background owner: html paints the selected gradient/texture once.
+   Body stays transparent so scrolling content cannot create a second gradient. */
+html {
+  background-color: var(--portfolio-background, #050505) !important;
+  background-image: var(--portfolio-background-image, none) !important;
+  background-size: var(--portfolio-background-size, cover) !important;
+  background-position: var(--portfolio-background-position, center center) !important;
+  background-repeat: var(--portfolio-background-repeat, no-repeat) !important;
+}
+body[data-portfolio-public="true"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+@media (max-width: 767px) {
+  html {
+    background-attachment: scroll !important;
+    background-position: center top !important;
+  }
+  body > canvas[aria-hidden="true"] {
+    opacity: 1 !important;
   }
 }

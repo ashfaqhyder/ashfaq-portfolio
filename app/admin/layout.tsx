@@ -450,18 +450,19 @@ export default function AdminLayout({
     const backgroundRepeat = appearance.backgroundMode === "texture" ? "repeat" : "no-repeat";
     const backgroundPosition = "center center";
     const backgroundAttachment = window.matchMedia("(max-width: 767px)").matches ? "scroll" : "fixed";
-    for (const element of [root, body]) {
-      element.style.setProperty("--portfolio-background-image", backgroundImage);
-      element.style.setProperty("--portfolio-background-size", backgroundSize);
-      element.style.setProperty("--portfolio-background-position", backgroundPosition);
-      element.style.setProperty("--portfolio-background-repeat", backgroundRepeat);
-      element.style.backgroundColor = appearance.backgroundColor;
-      element.style.backgroundImage = backgroundImage;
-      element.style.backgroundSize = backgroundSize;
-      element.style.backgroundPosition = backgroundPosition;
-      element.style.backgroundRepeat = backgroundRepeat;
-      element.style.backgroundAttachment = backgroundAttachment;
-    }
+    root.style.setProperty("--portfolio-background-image", backgroundImage);
+    root.style.setProperty("--portfolio-background-size", backgroundSize);
+    root.style.setProperty("--portfolio-background-position", backgroundPosition);
+    root.style.setProperty("--portfolio-background-repeat", backgroundRepeat);
+    root.style.backgroundColor = appearance.backgroundColor;
+    root.style.backgroundImage = backgroundImage;
+    root.style.backgroundSize = backgroundSize;
+    root.style.backgroundPosition = backgroundPosition;
+    root.style.backgroundRepeat = backgroundRepeat;
+    root.style.backgroundAttachment = backgroundAttachment;
+    body.style.backgroundColor = "transparent";
+    body.style.backgroundImage = "none";
+    body.style.backgroundAttachment = "scroll";
     body.style.color = appearance.textColor;
     root.style.backgroundColor = appearance.backgroundColor;
     root.style.color = appearance.textColor;
@@ -484,6 +485,7 @@ export default function AdminLayout({
         element.style.backgroundPosition = "";
         element.style.backgroundRepeat = "";
         element.style.backgroundAttachment = "";
+        element.style.backgroundColor = "";
       }
       root.style.scrollBehavior = "auto";
     };

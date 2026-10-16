@@ -971,10 +971,35 @@ body[data-portfolio-public="true"] { background: transparent !important; }
     background-position: center center !important;
   }
   body:not([data-portfolio-public="true"]) {
-    background-color: var(--portfolio-background, #050505) !important;
+    background-color: transparent !important;
     background-image: none !important;
   }
   [data-admin-theme="true"] {
     min-height: 100dvh;
+  }
+}
+
+
+/* Admin page wrappers use legacy solid-black utility classes. Make those
+   page-level wrappers transparent so the CMS-selected gradient can show
+   through every admin route, not only routes that already use transparency. */
+[data-admin-theme="true"] .bg-\\[\\#050505\\],
+[data-admin-theme="true"] .bg-\\[\\#080808\\],
+[data-admin-theme="true"] .bg-\\[\\#090909\\] {
+  background: transparent !important;
+}
+[data-admin-theme="true"] {
+  background: transparent !important;
+}
+@media (max-width: 767px) {
+  body:not([data-portfolio-public="true"]) {
+    background: transparent !important;
+  }
+  html {
+    background-color: var(--portfolio-background, #050505) !important;
+    background-image: var(--portfolio-background-image, none) !important;
+    background-size: var(--portfolio-background-size, cover) !important;
+    background-repeat: var(--portfolio-background-repeat, no-repeat) !important;
+    background-position: center center !important;
   }
 }
